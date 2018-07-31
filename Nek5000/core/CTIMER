@@ -1,0 +1,61 @@
+!
+!     Timer variables
+!
+      real*8          tmxmf,tmxms,tdsum,taxhm,tcopy,tinvc,tinv3
+      common /ctimer/ tmxmf,tmxms,tdsum,taxhm,tcopy,tinvc,tinv3
+!
+      real*8          tsolv,tgsum,tdsnd,tdadd,tcdtp,tmltd,tprep
+      real*8          tpres,thmhz,tgop ,tgop1,tdott,tbsol,tbso2
+      real*8          tsett,tslvb,tusbc,tddsl,tcrsl,tdsmx,tdsmn
+      real*8          tgsmn,tgsmx,teslv,tbbbb,tcccc,tdddd,teeee
+      real*8          tvdss,tschw,tadvc,tspro,tgop_sync,tsyc
+      real*8          twal,tgp2,tcvf
+      common /ctime2/ tsolv,tgsum,tdsnd,tdadd,tcdtp,tmltd,tprep
+      common /ctime2/ tpres,thmhz,tgop ,tgop1,tdott,tbsol,tbso2
+      common /ctime2/ tsett,tslvb,tusbc,tddsl,tcrsl,tdsmx,tdsmn
+      common /ctime2/ tgsmn,tgsmx,teslv,tbbbb,tcccc,tdddd,teeee
+      common /ctime2/ tvdss,tschw,tadvc,tspro,tgop_sync,tsyc
+      common /ctime2/ twal,tgp2,tcvf
+!
+      integer nmxmf,nmxms,ndsum,naxhm,ncopy,ninvc,ninv3
+      common /itimer/ nmxmf,nmxms,ndsum,naxhm,ncopy,ninvc,ninv3
+!
+      integer         nsolv,ngsum,ndsnd,ndadd,ncdtp,nmltd,nprep
+      integer         npres,nhmhz,ngop ,ngop1,ndott,nbsol,nbso2
+      integer         nsett,nslvb,nusbc,nddsl,ncrsl,ndsmx,ndsmn
+      integer         ngsmn,ngsmx,neslv,nbbbb,ncccc,ndddd,neeee
+      integer         nvdss,nadvc,nspro,ngop_sync,nsyc,nwal,ngp2
+      integer         ncvf
+      common /itime2/ nsolv,ngsum,ndsnd,ndadd,ncdtp,nmltd,nprep
+      common /itime2/ npres,nhmhz,ngop ,ngop1,ndott,nbsol,nbso2
+      common /itime2/ nsett,nslvb,nusbc,nddsl,ncrsl,ndsmx,ndsmn
+      common /itime2/ ngsmn,ngsmx,neslv,nbbbb,ncccc,ndddd,neeee
+      common /itime2/ nvdss,nadvc,nspro,ngop_sync,nsyc,nwal,ngp2
+      common /itime2/ ncvf
+!   
+      real*8          pmxmf,pmxms,pdsum,paxhm,pcopy,pinvc,pinv3
+      real*8          psolv,pgsum,pdsnd,pdadd,pcdtp,pmltd,pprep
+      real*8          ppres,phmhz,pgop ,pgop1,pdott,pbsol,pbso2
+      real*8          psett,pslvb,pusbc,pddsl,pcrsl,pdsmx,pdsmn
+      real*8          pgsmn,pgsmx,peslv,pbbbb,pcccc,pdddd,peeee
+      real*8          pvdss,pspro,pgop_sync,psyc,pwal,pgp2
+      common /ptimer/ pmxmf,pmxms,pdsum,paxhm,pcopy,pinvc,pinv3
+      common /ptimer/ psolv,pgsum,pdsnd,pdadd,pcdtp,pmltd,pprep
+      common /ptimer/ ppres,phmhz,pgop ,pgop1,pdott,pbsol,pbso2
+      common /ptimer/ psett,pslvb,pusbc,pddsl,pcrsl,pdsmx,pdsmn
+      common /ptimer/ pgsmn,pgsmx,peslv,pbbbb,pcccc,pdddd,peeee
+      common /ptimer/ pvdss,pspro,pgop_sync,psyc,pwal,pgp2
+
+!
+      real*8 etime1,etime2,etime0,gtime1,tscrtch
+      real*8 dnekclock,dnekclock_sync
+!
+      real*8          etimes,ttotal,tttstp,etims0,ttime
+      common /ctime3/ etimes,ttotal,tttstp,etims0,ttime
+!
+      integer icalld
+      save    icalld
+      data    icalld /0/
+
+      logical         ifsync
+      common /ctimel/ ifsync

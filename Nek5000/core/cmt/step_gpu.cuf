@@ -1,0 +1,258 @@
+!C> @file step.f time stepping and mesh spacing routines
+      subroutine setdtcmt_gpu
+!--------------------------------------------------------------
+! JH072914 now summed instead of maximized for compressible flow
+! JH082015 why was I doing that again?
+!     someday compute new timestep based on CFL-condition. follow
+!     setdtc in nek/subs1.f very carefully.
+! JH091616 now with diffusion number for naively explicit visc
+! JH091616 consider migrating to compute_cfl
+! JH120116 Why aren't we including total again?
+!--------------------------------------------------------------
+      include 'SIZE'
+      include 'GEOM'
+      include 'MVGEOM'
+      include 'MASS'
+      include 'TSTEP'
+      include 'INPUT'
+      include 'SOLN'
+      include 'CMTDATA'
+
+!--------------------------------------------------------------
+! YOU REALLY PROBABLY WANT YOUR OWN SCRATCH SPACE FOR THIS
+      common /scrsf/ utmp(lx1,ly1,lz1,lelt) & ! mind if I borrow this?
+      ,             vtmp(lx1,ly1,lz1,lelt) & ! as long as the mesh
+      ,             wtmp(lx1,ly1,lz1,lelt) ! doesn't move
+! YOU REALLY PROBABLY WANT YOUR OWN SCRATCH SPACE FOR THAT
+!--------------------------------------------------------------
+      common /udxmax/ umax
+      real strof
+      data strof /1.0e-8/
+
+      NTOT   = lx1*ly1*lz1*NELV
+      do i=1,ntot
+         utmp(i,1,1,1) = abs(vx(i,1,1,1))+csound(i,1,1,1)
+         vtmp(i,1,1,1) = abs(vy(i,1,1,1))+csound(i,1,1,1)
+         wtmp(i,1,1,1) = abs(vz(i,1,1,1))+csound(i,1,1,1)
+      enddo
+      if (ctarg .gt.0.0) then
+         call compute_cfl (umax,utmp,vtmp,wtmp,1.0)
+         dt_cfl=ctarg/umax
+         call glsqinvcolmin(dt1,vdiff(1,1,1,1,imu ),gridh,ntot,ctarg)
+         call glsqinvcolmin(dt2,vdiff(1,1,1,1,iknd),gridh,ntot,ctarg)
+         call glsqinvcolmin(dt3,vdiff(1,1,1,1,inus),gridh,ntot,ctarg)
+         dt_cmt=min(dt_cfl,dt1,dt2,dt3)
+         dt_cmt=2 ! only for now remove later. adeesha
+         if (dt_cmt .gt. 10.0) then
+            if (nio.eq.0) write(6,*) 'dt huge. crashing ',istep,stage,&
+              dt_cmt
+            call exitt
+         endif
+      else
+         dt_cmt=dt
+      endif
+
+      ! particle cfl
+      rdt_part = 1. ! set large, so compute correct here
+      call set_dt_particles(rdt_part)
+      dt_cmt = min(dt_cmt,rdt_part)
+        
+      if (timeio .gt. 0.0) then ! adjust dt for timeio. 
+         zetime1=time_cmt
+         zetime2=time_cmt+dt_cmt
+         it1=zetime1/timeio
+         it2=zetime2/timeio
+         ita=it1
+         itb=ita+1
+         if (abs(zetime1-itb*timeio).le.strof) it1=itb
+         ita=it2
+         itb=ita+1
+         if (abs(zetime2-itb*timeio).le.strof) it2=itb
+         if (it2.gt.it1) then
+            ifoutfld=.true.
+            dt_cmt=(it2*timeio)-time_cmt
+         endif
+      endif
+      call compute_cfl (courno,utmp,vtmp,wtmp,dt_cmt) ! sanity?
+      dt=dt_cmt
+
+! diffusion number based on viscosity.
+
+!     call mindr(mdr,diffno2)
+      call glinvcol2max(diffno1,vdiff(1,1,1,1,imu), gridh,ntot,dt_cmt)
+      call glinvcol2max(diffno2,vdiff(1,1,1,1,iknd),gridh,ntot,dt_cmt)
+      call glinvcol2max(diffno3,vdiff(1,1,1,1,inus),gridh,ntot,dt_cmt)
+!     diffno=max(diffno1,diffno2,diffno3)
+      time_cmt=time_cmt+dt_cmt
+      if (nio.eq.0) WRITE(6,100)ISTEP,TIME_CMT,DT_CMT,COURNO,&
+        diffno1,diffno2,diffno3
+ 100  FORMAT('CMT ',I7,', t=',1pE14.7,', DT=',1pE14.7 &
+     ,', C=',1pE12.5,', Dmu,knd,art=',3(1pE11.4))
+
+      return
+      end
+
+      subroutine mindr_gpu(mdr,diffno)
+!c
+!c     Find minimum distance between grid points
+!c     and multiply it by viscosity to get diffusion number
+!c     Probably need to do this for energy equation too...
+! JH091616 migrate to getdr 3d ASAP. Again, follow compute_cfl
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CMTDATA'
+
+      real    mdr,dr1
+      real    x0,x1,x2,x3,x4,y0,y1,y2,y3,y4
+      integer e
+!c
+      mdr=1.e5
+      if(if3d) then
+        write(6,*)'TODO:: mindr for 3D. getdr'
+        call exitt
+      else
+        diffno=0.0
+        do e=1,nelt
+          do iy=2,ly1-1
+          do ix=2,lx1-1
+            dtmp=1.0e5
+            x0 = xm1(ix  ,iy  ,1,e)
+            x1 = xm1(ix  ,iy-1,1,e)
+            x2 = xm1(ix+1,iy  ,1,e)
+            x3 = xm1(ix  ,iy+1,1,e)
+            x4 = xm1(ix-1,iy  ,1,e)
+            y0 = ym1(ix  ,iy  ,1,e)
+            y1 = ym1(ix  ,iy-1,1,e)
+            y2 = ym1(ix+1,iy  ,1,e)
+            y3 = ym1(ix  ,iy+1,1,e)
+            y4 = ym1(ix-1,iy  ,1,e)
+            dr1 = dist2(x0,y0,x1,y1)
+            if(dr1.lt.mdr) mdr=dr1
+            if(dr1.lt.dtmp) dtmp=dr1
+            dr1 = dist2(x0,y0,x2,y2)
+            if(dr1.lt.mdr) mdr=dr1
+            if(dr1.lt.dtmp) dtmp=dr1
+            dr1 = dist2(x0,y0,x3,y3)
+            if(dr1.lt.mdr) mdr=dr1
+            if(dr1.lt.dtmp) dtmp=dr1
+            dr1 = dist2(x0,y0,x4,y4)
+            if(dr1.lt.mdr) mdr=dr1
+            if(dr1.lt.dtmp) dtmp=dr1
+            diffno=max(diffno,dt*vdiff(ix,iy,1,e,imu)/dtmp/dtmp)
+          enddo
+          enddo
+        enddo
+      endif
+      diffno=glmax(diffno,1)
+      mdr = glmin(mdr,1)
+      if(mdr.ge.1.e5) write(6,*) 'wrong mdr'
+
+      return
+      end
+
+      real function dist2_gpu(x1,y1,x2,y2)
+      real x1,y1,x2,y2,dx,dy
+!c
+      dx = x1-x2
+      dy = y1-y2
+      dist2 = sqrt(dx*dx+dy*dy)
+!c
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine compute_grid_h_gpu(h,x,y,z)
+! Richard Pasquetti SEM "grid spacing h." good parallelogram/piped stuff
+!      include 'SIZE'
+!      include 'INPUT'
+!      include 'GEOM'
+      use glbvariable_gpu
+
+!      real a(3), b(3), c(3), d(3)
+!      real h(lx1,ly1,lz1,nelt) ! intent(out)
+!      real x(lx1,ly1,lz1,nelt) ! intent(in)
+!      real y(lx1,ly1,lz1,nelt) ! intent(in)
+!      real z(lx1,ly1,lz1,nelt) ! intent(in)
+      common /elementload/ gfirst, inoassignd, resetFindpts, pload(lelg)
+      integer gfirst, inoassignd, resetFindpts, pload
+      integer e
+!      integer icalld     ! this is declared in CTIMER
+      icalld =0
+!      save icalld
+      
+      if (icalld .eq. 1 .and. resetFindpts .eq. 0) then
+         return
+      else
+         icalld=1
+      endif
+!      print *,"GPU:  compute_grid_h_gpu glbblockSize1 nelt lx1 ly1 lz1  if3d",glbblockSize1,nelt,lx1,ly1,lz1,if3dgpu
+      call compute_grid_h_gpu_wrapper(glbblockSize1,d_gridh,d_xm1,d_ym1,d_zm1,nelt,lx1,ly1,lz1,if3dgpu)
+! everything below is in the wrapper  function adeesha
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine glinvcol2max_gpu(col2m,a,b,n,s)
+      real col2m
+      real s
+      real a(*),b(*)
+      tmp=0.0
+      do i=1,n
+         tmp=max(tmp,abs(s*a(i)/b(i)/b(i)))
+      enddo
+      col2m=glamax(tmp,1)
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine glsqinvcolmin_gpu(col2m,a,b,n,s)
+      real col2m
+      real s
+      real a(*),b(*)
+      tmp=1.0e36
+      do i=1,n
+         if (a(i).gt.1.0e-36) tmp=min(tmp,abs(s*b(i)**2/a(i)))
+      enddo
+      col2m=glamin(tmp,1)
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine compute_mesh_h_gpu()
+! Zingan's DGFEM formula: h=minimum distance between vertices divided by
+!                         polynomial order
+      use glbvariable_gpu
+!      include 'SIZE'
+!      include 'INPUT'
+!      real h(nelt)             ! intent(out)
+!      real x(lx1,ly1,lz1,nelt) ! intent(in)
+!      real y(lx1,ly1,lz1,nelt) ! intent(in)
+!      real z(lx1,ly1,lz1,nelt) ! intent(in)
+!      real xcrn(8),ycrn(8),zcrn(8)
+      common /elementload/ gfirst, inoassignd, resetFindpts, pload(lelg)
+      integer gfirst, inoassignd, resetFindpts, pload !added by keke
+      integer e
+!      integer icalld  ! this is declared in CTIMER
+      icalld =0
+!      save icalld
+      
+      if (icalld .eq. 1 .and. resetFindpts .eq. 0) then
+         return
+      else
+         icalld=1
+      endif
+
+      ncrn=2**ldim
+      rp=1.0/((lx1-1))
+      
+
+      call compute_mesh_h_gpu_wrapper(glbblockSize2,d_meshh,d_xm1,d_ym1,d_zm1,nelt,lx1,ly1,lz1,if3dgpu,rp,ncrn)
+ 
+
+      return
+      end

@@ -1,0 +1,360 @@
+      subroutine fluxes_full_field_gpu
+      use cudafor
+      use glbvariable_gpu
+
+      integer lfq,heresize,hdsize
+      parameter (ldg=lxd**3)
+      parameter (lfq=lx1*lz1*2*ldim*lelt,&
+                        heresize=nqq*3*lfq,&! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ fatface(heresize),notyet(hdsize)
+      common /dgrad/ jgl(ldg),jgt(ldg)
+      real fatface,notyet
+      integer eq
+      character*32 cname
+      nfq=lx1*lz1*2*ldim*nelt
+      nstate = nqq
+! where different things live
+      iwm =1
+      iwp =iwm+nstate*lfq
+      iflx=iwp+nstate*lfq
+      i_cvars=(iu1-1)*lfq+1
+      ifield= 1
+      
+
+!     fat_face array has to be passed. But might be possible to combine all the functions in to one function and create fat_face inside wrapper  funtion and free  it later.
+
+!      print *,"surface_fluxes.cuf fluxes_full_field_gpu 1 values iwm,iwp",iwm,iwp
+
+      call fluxes_full_field_gpu_wrapper(glbblockSize2, d_fatface,d_vtrans,&
+        d_u,d_vx, d_vy, d_vz, d_pr, d_t, d_csound, d_phig, d_vdiff, irho,&
+        iux, iuy, iuz, ipr,ithm,isnd,iph,icvf, icpf, imuf, ikndf, ilamf,&
+        iwm,iwp,icv, icp,imu,iknd,ilam, d_iface_flux, nelt, lx1, ly1,lz1,&
+       ldim,lelt,i_cvars,toteq,nqq) 
+
+      !following code is for testing only. delete later.
+!      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 61", cudaGetErrorString(istate)
+
+!      print *,"$$$ fluxes_full_field.cuf f_f_f_gpu check", nid
+!      do i=1,10
+!           print *, 'fatface irho,iux, iuy,iuz,ipr,ithm,isnd,iph,icvf,icpf,imuf,ikndf,ilamf', i,&
+!           fatface(irho*lx1*lz1*2*ldim*lelt+i),fatface(iux*lx1*lz1*2*ldim*lelt+i),&
+!           fatface(iux*lx1*lz1*2*ldim*lelt+i),fatface(iuy*lx1*lz1*2*ldim*lelt+i),&
+!           fatface(iuz*lx1*lz1*2*ldim*lelt+i),fatface(ipr*lx1*lz1*2*ldim*lelt+i),&
+!           fatface(ithm*lx1*lz1*2*ldim*lelt+i),fatface(isnd*lx1*lz1*2*ldim*lelt+i),&
+!           fatface(iph*lx1*lz1*2*ldim*lelt+i),fatface(icvf*lx1*lz1*2*ldim*lelt+i),&
+!           fatface(icpf*lx1*lz1*2*ldim*lelt+i),fatface(imuf*lx1*lz1*2*ldim*lelt+i),&
+!           fatface(ikndf*lx1*lz1*2*ldim*lelt+i),fatface(ilamf*lx1*lz1*2*ldim*lelt+i)
+!    enddo
+
+
+!      print *,"surface_fluxes.cuf fluxes_full_field_gpu before face_state_commo_gpu", nid
+!      print *,"surface_fluxes.cuf fluxes_full_field_gpu values lx1,lz1,ldim,nelt,nqq,iwp,iwm,nfq,nstate",lx1,lz1,ldim,nelt,nqq, iwp,iwm,nfq,nstate
+
+      call face_state_commo_gpu(iwm,iwp,fatface(iwm),fatface(iwp),nfq,nstate&
+                         ,dg_hndl,fatface)
+      
+!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after face_state_commo_gpu", nid,ly1
+   
+      call get_int_ptr (i,lx1,lxd)
+!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
+
+      call inviscidbc_gpu_wrapper(glbblockSize2,d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,&
+       d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_pres,&
+       d_csound,d_unx,d_uny,d_unz,molarmass,iwm,iwp,irho,iux,iuy,iuz,iph,ipr,isnd,ithm,&
+       icpf,icvf,iu1,iu2,iu3,iu4,iu5,lx1,lz1,toteq,ldim,nelt,lelt,p0th,ifield,icv,icp,&
+       imu,ilam,molmass,npscal,if3dgpu,outflsub,pinfty,ly1)
+
+
+!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidBC_gpu", nid
+     
+      call inviscidflux_gpu_wrapper(glbblockSize2,jgl,jgt,d_unx,d_uny,d_unz,d_area,d_fatface,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq)
+ 
+
+
+!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidFlux_gpu", nid
+
+
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+!-----------------------------------------------------------------------
+
+      subroutine face_state_commo_gpu(iwm,iwp,mine,yours,nf,nstate,handle,fatface)
+     
+! JH060414 if we ever want to be more intelligent about who gets what,
+!          who gives what and who does what, this is the place where all
+!          that is done. At the very least, gs_op may need the transpose
+!          flag set to 1. Who knows. Everybody duplicates everything for
+!          now.
+! JH070714 figure out gs_op_fields, many, vec, whatever (and the
+!          corresponding setup) to get this done for the transposed
+!          ordering of state variables. I want variable innermost, not
+!          grid point.
+
+      use  glbvariable_gpu
+      use cudafor
+      integer handle,nf,nstate,iwm,iwp ! intent(in)
+      real yours(*),mine(*),fatface(*)
+
+      ntot=nf*nstate
+
+!     print *,"surface_fluxes.cuf face_state_commo_gpu values iwp,iwm,ntot,nf,nstate", iwp,iwm,ntot,nf,nstate
+      call double_copy_gpu_wrapper(glbblockSize2,d_fatface,iwp-1,d_fatface,iwm-1,ntot );
+
+
+
+!     for now copy fatface(iwp) to fatface(iwp+nf*nstate) to yours array to get gs_op_fielsds
+      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate state_commo", cudaGetErrorString(istate)
+
+      call gs_op_fields(handle,yours,nf,nstate,1,1,0)
+!     copy yours back to fatface(iwp)
+      istate = cudaMemcpy(d_fatface,fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate state_commo gpu back", cudaGetErrorString(istate)
+
+      call double_sub2_gpu_wrapper(glbblockSize2,d_fatface,iwp-1,d_fatface,iwm-1,ntot );
+
+       !following code is for testing only. delete later.
+!      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 61", cudaGetErrorString(istate)
+!       print *,"$$$ fluxes_full_field.cuf state_commo_gpu check", nid
+!      do i=1,10
+!           print *, 'fatface iwp', i,fatface(iwp+i)
+!    enddo
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+      subroutine InviscidFlux_gpu(wminus,wplus,flux,nstate,nflux)
+!-------------------------------------------------------------------------------
+! JH091514 A fading copy of RFLU_ModAUSM.F90 from RocFlu
+!-------------------------------------------------------------------------------
+
+!#ifdef SPEC
+!      USE ModSpecies, ONLY: t_spec_type
+!#endif
+!      include 'SIZE'
+!      include 'INPUT' ! do we need this?
+!      include 'GEOM' ! for unx
+!      include 'CMTDATA' ! do we need this without outflsub?
+!      include 'TSTEP' ! for ifield?
+!      include 'DG'
+      use glbvariable_gpu
+
+! ==============================================================================
+! Arguments
+! ==============================================================================
+      integer nstate,nflux
+      real wminus(lx1*lz1,2*ldim,nelt,nstate),&
+          wplus(lx1*lz1,2*ldim,nelt,nstate),&
+          flux(lx1*lz1,2*ldim,nelt,nflux)
+
+! ==============================================================================
+! Locals
+! ==============================================================================
+
+      integer e,f,fdim,i,k,nxz,nface
+      parameter (lfd=lxd*lzd)
+! JH111815 legacy rocflu names.
+!
+! nx,ny,nz : outward facing unit normal components
+! fs       : face speed. zero until we have moving grid
+! jaco_c   : fdim-D GLL grid Jacobian
+! nm       : jaco_c, fine grid
+!
+! State on the interior (-, "left") side of the face
+! rl       : density
+! ul,vl,wl : velocity
+! tl       : temperature
+! al       : sound speed
+! pl       : pressure, then phi
+! cpl      : rho*cp
+! State on the exterior (+, "right") side of the face
+! rr       : density
+! ur,vr,wr : velocity
+! tr       : temperature
+! ar       : sound speed
+! pr       : pressure
+! cpr      : rho*cp
+
+      COMMON /SCRNS/ nx(lfd), ny(lfd), nz(lfd), rl(lfd), ul(lfd),&
+                    vl(lfd), wl(lfd), pl(lfd), tl(lfd), al(lfd),&
+                    cpl(lfd),rr(lfd), ur(lfd), vr(lfd), wr(lfd),&
+                    p_r(lfd),tr(lfd), ar(lfd),cpr(lfd),phl(lfd),fs(lfd),&
+                    jaco_f(lfd),flx(lfd,toteq),jaco_c(lx1*lz1)
+      real nx, ny, nz, rl, ul, vl, wl, pl, tl, al, cpl, rr, ur, vr, wr,&
+                     p_r,tr, ar,cpr,phl,fs,jaco_f,flx,jaco_c
+
+!     REAL vf(3)
+      real nTol
+      character*132 deathmessage
+      common /nekcb/ cb
+      character*3 cb
+
+      nTol = 1.0E-14
+
+      fdim=ldim-1
+      nface = 2*ldim
+      nxz   = lx1*lz1
+      nxzd  = lxd*lzd
+      ifield= 1 ! You need to figure out the best way of dealing with
+                ! this variable
+
+!     if (outflsub)then
+!        call maxMachnumber
+!     endif
+      do e=1,nelt
+      do f=1,nface
+
+! JH021717 Finally corrected BC wrongheadedness. Riemann solver handles
+!          all fluxes with even the slightest Dirichlet interpretation,
+!          and BC fill wplus sanely for the Riemann solver to provide
+!          a good flux for weak BC.
+! JH111715 now with dealiased surface integrals. I am too lazy to write
+!          something better
+
+! diagnostic
+!        if (cbc(f,e,ifield).eq.'v  '.or.cbc(f,e,ifield).eq.'V  ')then
+!        if (istep .eq. 1000) then
+!           do i=1,nxz
+!              write(10+istep,'(2i3,a3,16e15.7)') e,f,cbc(f,e,ifield),
+!    .         wminus(i,f,e,irho),wplus(i,f,e,irho),
+!    .      wminus(i,f,e,iux), wplus(i,f,e,iux), wminus(i,f,e,iuy),
+!    .      wplus(i,f,e,iuy), wminus(i,f,e,ipr), wplus(i,f,e,ipr),
+!    .      wminus(i,f,e,ithm), wplus(i,f,e,ithm), wminus(i,f,e,isnd),
+!    .      wplus(i,f,e,isnd), wminus(i,f,e,icpf), wplus(i,f,e,icpf),
+!    .      wminus(i,f,e,iph), wplus(i,f,e,iph)
+!           enddo
+!        endif
+! diagnostic
+
+         if (lxd.gt.lx1) then
+            call map_faced(nx,unx(1,1,f,e),lx1,lxd,fdim,0)
+            call map_faced(ny,uny(1,1,f,e),lx1,lxd,fdim,0)
+            call map_faced(nz,unz(1,1,f,e),lx1,lxd,fdim,0)
+
+            call map_faced(rl,wminus(1,f,e,irho),lx1,lxd,fdim,0)
+            call map_faced(ul,wminus(1,f,e,iux),lx1,lxd,fdim,0)
+            call map_faced(vl,wminus(1,f,e,iuy),lx1,lxd,fdim,0)
+            call map_faced(wl,wminus(1,f,e,iuz),lx1,lxd,fdim,0)
+            call map_faced(pl,wminus(1,f,e,ipr),lx1,lxd,fdim,0)
+            call map_faced(tl,wminus(1,f,e,ithm),lx1,lxd,fdim,0)
+            call map_faced(al,wminus(1,f,e,isnd),lx1,lxd,fdim,0)
+            call map_faced(cpl,wminus(1,f,e,icpf),lx1,lxd,fdim,0)
+
+            call map_faced(rr,wplus(1,f,e,irho),lx1,lxd,fdim,0)
+            call map_faced(ur,wplus(1,f,e,iux),lx1,lxd,fdim,0)
+            call map_faced(vr,wplus(1,f,e,iuy),lx1,lxd,fdim,0)
+            call map_faced(wr,wplus(1,f,e,iuz),lx1,lxd,fdim,0)
+            call map_faced(pr,wplus(1,f,e,ipr),lx1,lxd,fdim,0)
+            call map_faced(tr,wplus(1,f,e,ithm),lx1,lxd,fdim,0)
+            call map_faced(ar,wplus(1,f,e,isnd),lx1,lxd,fdim,0)
+            call map_faced(cpr,wplus(1,f,e,icpf),lx1,lxd,fdim,0)
+
+            call map_faced(phl,wminus(1,f,e,iph),lx1,lxd,fdim,0)
+
+            call invcol3(jaco_c,area(1,1,f,e),wghtc,nxz)
+            call map_faced(jaco_f,jaco_c,lx1,lxd,fdim,0) 
+            call col2(jaco_f,wghtf,nxzd)
+         else
+
+            call copy(nx,unx(1,1,f,e),nxz)
+            call copy(ny,uny(1,1,f,e),nxz)
+            call copy(nz,unz(1,1,f,e),nxz)
+
+            call copy(rl,wminus(1,f,e,irho),nxz)
+            call copy(ul,wminus(1,f,e,iux),nxz)
+            call copy(vl,wminus(1,f,e,iuy),nxz)
+            call copy(wl,wminus(1,f,e,iuz),nxz)
+            call copy(pl,wminus(1,f,e,ipr),nxz)
+            call copy(tl,wminus(1,f,e,ithm),nxz)
+            call copy(al,wminus(1,f,e,isnd),nxz)
+            call copy(cpl,wminus(1,f,e,icpf),nxz)
+
+            call copy(rr,wplus(1,f,e,irho),nxz)
+            call copy(ur,wplus(1,f,e,iux),nxz)
+            call copy(vr,wplus(1,f,e,iuy),nxz)
+            call copy(wr,wplus(1,f,e,iuz),nxz)
+            call copy(pr,wplus(1,f,e,ipr),nxz)
+            call copy(tr,wplus(1,f,e,ithm),nxz)
+            call copy(ar,wplus(1,f,e,isnd),nxz)
+            call copy(cpr,wplus(1,f,e,icpf),nxz)
+
+            call copy(phl,wminus(1,f,e,iph),nxz)
+
+            call copy(jaco_f,area(1,1,f,e),nxz) 
+         endif
+         call rzero(fs,nxzd) ! moving grid stuff later
+
+         call AUSM_FluxFunction(nxzd,nx,ny,nz,jaco_f,fs,rl,ul,vl,wl,pl,&
+                               al,tl,rr,ur,vr,wr,pr,ar,tr,flx,cpl,cpr)
+
+         do j=1,toteq
+            call col2(flx(1,j),phl,nxzd)
+         enddo
+
+         if (lxd.gt.lx1) then
+            do j=1,toteq
+               call map_faced(flux(1,f,e,j),flx(1,j),lx1,lxd,fdim,1)
+            enddo
+         else
+            do j=1,toteq
+               call copy(flux(1,f,e,j),flx(1,j),nxz)
+            enddo
+         endif
+
+      enddo
+      enddo
+
+      end
+
+!-----------------------------------------------------------------------
+
+
+      subroutine igu_cmt_gpu(flxscr,gdudxk,wminus)
+! Hij^{d*}
+      use glbvariable_gpu
+      real flxscr(lx1*lz1*2*ldim*nelt,toteq)
+      real gdudxk(lx1*lz1*2*ldim,nelt,toteq)
+      real wminus(lx1*lz1,2*ldim,nelt,nqq)
+      real const
+      integer e,eq,f
+
+      nxz = lx1*lz1
+      nfaces=2*ldim
+      nxzf=nxz*nfaces
+      nfq =lx1*lz1*nfaces*nelt
+      ntot=nfq*toteq
+
+      call igu_cmt_gpu_wrapper1(glbblockSize2,d_flux,d_graduf,toteq,iwp,lx1,ly1,lz1,ldim,nelt,lelt)
+
+!      call copy (flxscr,gdudxk,ntot) ! save AgradU.n
+!      const = 0.5
+!      call cmult(gdudxk,const,ntot)
+!-----------------------------------------------------------------------
+!      copy relevant arrays back to cpu. adeesha.
+      call gs_op_fields(dg_hndl,gdudxk,nfq,toteq,1,1,0)
+!      copy the back to gpu. adeesha.
+!-----------------------------------------------------------------------
+
+      call igu_cmt_gpu_wrapper2(glbblockSize2,d_flux,d_graduf,d_cbc,d_unx,d_uny,d_unz,toteq,&
+       iwp,iwm,ldim,irho,icvf,ilamf,imuf,iux,iuy,iuz,iu5,if3dgpu,lx1,ly1,lz1,nelt,lelt)
+
+!      call sub2  (flxscr,gdudxk,ntot) ! overwrite flxscr with
+!      call igu_dirichlet(flxscr,gdudxk)
+! 2. (Fbc.n)- on Neumann boundaries
+!      call bcflux(flxscr,gdudxk,wminus)
+!      call chsign(flxscr,ntot) ! needs to change with sign changes
+
+      return
+      end
+
+!-----------------------------------------------------------------------

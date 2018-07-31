@@ -1,0 +1,41 @@
+      subroutine viscous_cmt_gpu(e,eq)
+!      include  'SIZE'
+!      include  'CMTDATA'
+!      include  'DG'
+!      include  'INPUT'
+      use glbvariable_gpu
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt,&
+                        heresize=nqq*3*lfq,&! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ fatface(heresize),graduf(hdsize)
+      real fatface,graduf
+
+      integer e,eq
+
+      if (eq .lt. toteq) then ! not energy
+         if (eq .gt. ldim+1) return ! not if3d
+      endif
+
+      nxyz=lx1*ly1*lz1
+      nfq=lx1*lz1*2*ldim*nelt
+      nstate = nqq
+! where different things live
+      iqm =1
+      iqp =iqm+nstate*nfq
+      iuj =iqp+nstate*nfq
+
+      call rzero(diffh,3*nxyz)
+
+      call agradu(diffh,gradu,e,eq)
+
+      call diffh2graduf(e,eq,graduf) ! on faces for QQ^T and igu_cmt
+
+! volume integral involving "DG-ish" stiffness operator K
+      call half_iku_cmt(res1(1,1,1,e,eq),diffh,e)
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------

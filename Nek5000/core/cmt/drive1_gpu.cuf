@@ -1,0 +1,351 @@
+!c-----------------------------------------------------------------------
+      subroutine nek_solve_gpu
+
+      include 'SIZE'
+      include 'TSTEP'
+      include 'INPUT'
+      include 'CTIMER'
+      include 'PARALLEL'
+
+
+      real*4 papi_mflops
+      integer*8 papi_flops
+      integer modstep
+      common /elementload/ gfirst, inoassignd, resetFindpts, pload(lelg)
+      integer gfirst, inoassignd, resetFindpts, pload
+      integer reinit_step  !added by keke
+      integer counter !added by keke
+      integer last_kstep !added by keke
+      real diff_time, diff_time2, reinit_interval
+      real timet 
+      integer adaptivelb, stepvalue, rebal
+!     real starttime
+
+
+      real, device :: d_xdrange(2,3)
+      real, device :: d_xerange(2,3,lelt)
+      real, device :: d_rpart(1,1)
+      integer, device :: d_ipart(1,1)
+
+      call nekgsync()
+      reinit_step=0
+      diff_time = 0.0
+      diff_time2 = 0.0
+      counter = 0
+      last_kstep = 0
+
+
+      if (instep.eq.0) then
+        if(nid.eq.0) write(6,'(/,A,/,A,/)') &
+          ' nsteps=0 -> skip time loop', &
+          ' running solver in post processing mode'
+      else
+        if(nio.eq.0) write(6,'(/,A,/)') 'Starting time loop ...'
+      endif
+
+      isyc  = 0
+      if(ifsync) isyc=1
+      itime = 0
+#ifdef TIMER
+      itime = 1
+#endif
+      call nek_comm_settings(isyc,itime)
+      call nek_comm_startstat()
+
+      istep  = 0
+      msteps = 1
+
+!c     Upon redistribution of elements, the following stages happen in sequence:
+!c     1) reinitialize is called
+!c     2) elements are moved to different processors to achieve load balancing based on current distribution of particles (particles have not been moved yet)
+!c     3) Fluid forces are updated in nek__multi_advance
+!c     4) CMT-bone: Particles are moved based on predefined forces
+!c     5) Particles are moved to new processors based on which element they are in.
+!c     To add support of particle movement in CMT-nek, we *must* move particles along
+!c     with the elements to different processors as part of the load balancing in step (2)
+!c     above. Then the particle locations are updated based on the new fluid force calculations done in step(3).
+      do kstep=1,nsteps,msteps
+         timet = DNEKCLOCK()
+!c        starttime = DNEKCLOCK()
+         call nek__multi_advance_gpu(kstep,msteps,d_xdrange,d_xerange,d_rpart,d_ipart)
+!c        if(nid.eq. 0) print *, 'nek__multi_advance',
+!c    $      DNEKCLOCK()-starttime 
+!c        starttime = DNEKCLOCK()
+         call check_ioinfo  
+!c        if(nid.eq. 0) print *, 'check_ioinfo',
+!c    $      DNEKCLOCK()-starttime 
+!c        starttime = DNEKCLOCK()
+
+         call set_outfld
+!c        if(nid.eq. 0) print *, 'set_outfld',
+!c    $      DNEKCLOCK()-starttime 
+!c        starttime = DNEKCLOCK()
+
+         call userchk
+!c        if(nid.eq. 0) print *, 'userchk',
+!c    $      DNEKCLOCK()-starttime 
+!c        starttime = DNEKCLOCK()
+
+         call prepost (ifoutfld,'his')
+!c        if(nid.eq. 0) print *, 'prepost',
+!c    $      DNEKCLOCK()-starttime 
+!c        starttime = DNEKCLOCK()
+
+         call in_situ_check()
+!c        if(nid.eq. 0) print *, 'in_situ_check()',
+!c    $      DNEKCLOCK()-starttime 
+!c        starttime = DNEKCLOCK()
+
+         resetFindpts = 0
+         if (lastep .eq. 1) goto 1001
+!c        if(kstep .eq. 50) then
+!c           call computeRatio
+!c           resetFindpts = 1
+!c           call reinitialize
+!c        endif 
+
+         adaptivelb = param(77)
+!c        if(nid .eq. 0) print *, 'adaptivelb', adaptivelb
+         if (adaptivelb .eq. 0) then
+             stepvalue = param(78)
+             modstep = mod(kstep, stepvalue)
+             if (modstep .eq. 0) then
+                resetFindpts = 1
+                call computeRatio
+                call reinitialize
+                !call printVerify
+             endif
+         else if(adaptivelb .eq. 1) then 
+!c           auto load balancing
+            if(nid .eq. 0) then
+               if(kstep .le. reinit_step+10) then !for the first 10 step after
+                                            !rebalance, pick the minimum
+                                            !one as the init_time
+                  if((INIT_TIME .gt. TTIME_STP) & 
+                                .and. (TTIME_STP .ne. 0)) then
+                      INIT_TIME = TTIME_STP
+                  endif
+               else if(kstep .gt. reinit_step+100) then
+                  diff_time = (TTIME_STP-INIT_TIME)/INIT_TIME
+                  if(nid .eq. 0) then
+                     print *, "nid:", nid, "ttime_stp:", TTIME_STP, & 
+                                     INIT_TIME, diff_time
+                  endif
+               endif
+            endif
+
+            call bcast(diff_time, 8)
+            if (diff_time .gt. 0.3) then
+               if (last_kstep .eq. 0) then
+                   counter = counter + 1
+               else if((counter .le. 2) .and. &
+                          (last_kstep .eq. kstep-1))then
+                   counter = counter + 1
+               else
+                   counter = 0
+               endif
+               last_kstep = kstep
+               if (counter .gt. 2) then
+                   !print *, "into the reinit, nid:", nid, "diff_time:", &
+                 !diff_time
+                   resetFindpts = 1
+                   call computeRatio
+                   call reinitialize
+                   !call printVerify
+                   reinit_step = kstep
+                   if(nid .eq. 0) then
+                      print *, "reintilize, reinit_step:", reinit_step
+                   endif
+                   diff_time = 0
+                   INIT_TIME = 100
+                   counter = 0
+               endif
+            endif
+         else if (adaptivelb .eq. 2) then !for the new adaptive lb algorithm
+            call adaptive_loadbalanceP2(kstep)
+         else if (adaptivelb .eq. 3) then
+            call adaptive_loadbalance(kstep) 
+         else if (adaptivelb .eq. 4) then
+            call adaptive_loadbalanceP4(kstep) 
+         endif 
+      enddo
+ 1001 lastep=1
+
+
+      call nek_comm_settings(isyc,0)
+
+      call comment
+
+
+!c     check for post-processing mode
+      if (instep.eq.0) then
+         nsteps=0
+         istep=0
+         if(nio.eq.0) write(6,*) 'call userchk'
+         call userchk
+         if(nio.eq.0) write(6,*) 'done :: userchk'
+         call prepost (.true.,'his')
+      else
+         if (nio.eq.0) write(6,'(/,A,/)') &
+           'end of time-step loop' 
+      endif
+
+
+      RETURN
+      END
+
+!c-----------------------------------------------------------------------
+      subroutine nek_advance_gpu(d_xdrange,d_xerange,d_rpart,d_ipart)
+
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CTIMER'
+      real timet
+      integer isGPU
+      common /cgeom/ igeom
+
+      
+      real, device :: d_xdrange(2,3)
+      real, device :: d_xerange(2,3,lelt)
+      real, device :: d_rpart(lr,lpart)
+      integer, device :: d_ipart(li,lpart)
+      
+      ntot = nx1*ny1*nz1*nelv
+
+      call nekgsync
+
+      call setup_convect(2) ! Save conv vel
+
+      if (iftran) call settime
+      if (ifmhd ) call cfl_check
+      call setsolv
+      call comment
+#ifdef CMTNEK
+      if(nid.eq.15) then
+     	 isGPU=1
+      else
+         isGPU=0
+      endif
+      if (nio.eq.0.and.istep.le.1) write(6,*) 'CMT branch active'
+      if(isGPU) then
+            print *,"drive1.f,nek_advance,inside isGPU",nid
+            call cmt_nek_advance_gpu(d_xerange,d_xerange,d_rpart,d_ipart)
+      else
+            print *,"drive1.f,nek_advance,else in  isGPU",nid
+	    call cmt_nek_advance
+      endif
+
+!c      call cmt_nek_advance
+      return
+#endif
+
+
+      if (ifsplit) then   ! PN/PN formulation
+
+
+         do igeom=1,ngeom
+
+
+         ! within cvode we use the lagged wx for 
+         ! extrapolation, that's why we have to call it before gengeom 
+         if (ifheat .and. ifcvode) call heat_cvode (igeom)   
+
+         if (ifgeom) then
+            call gengeom (igeom)
+            call geneig  (igeom)
+         endif
+
+
+         if (ifheat) call heat (igeom)
+
+         if (igeom.eq.2) then  
+            call setprop
+            call rzero(qtl,ntot)
+            if (iflomach) call qthermal
+         endif
+
+
+         if (ifflow)          call fluid    (igeom)
+         if (ifmvbd)          call meshv    (igeom)
+         if (param(103).gt.0) call q_filter (param(103))
+
+         enddo
+
+      else                ! PN-2/PN-2 formulation
+
+         call setprop
+         do igeom=1,ngeom
+
+            if (igeom.gt.2) call userchk_set_xfer
+
+            if (ifgeom) then
+               call gengeom (igeom)
+               call geneig  (igeom)
+            endif
+
+            if (ifneknekm.and.igeom.eq.2) call multimesh_create
+
+            if (ifmhd) then
+               if (ifheat)      call heat     (igeom)
+                                call induct   (igeom)
+            elseif (ifpert) then
+               if (ifbase.and.ifheat)  call heat          (igeom)
+               if (ifbase.and.ifflow)  call fluid         (igeom)
+               if (ifflow)             call fluidp        (igeom)
+               if (ifheat)             call heatp         (igeom)
+            else  ! std. nek case
+               if (ifheat)             call heat          (igeom)
+               if (ifflow)             call fluid         (igeom)
+               if (ifmvbd)             call meshv         (igeom)
+            endif
+
+            if (igeom.eq.ngeom.and.param(103).gt.0) & 
+               call q_filter(param(103))
+         enddo
+      endif
+
+      return
+      end
+
+!c-----------------------------------------------------------------------
+      subroutine nek__multi_advance_gpu(kstep,msteps,d_xdrange,&
+                            d_xerange,d_rpart,d_ipart)
+      include 'SIZE'
+      include 'TOTAL'
+      real timet
+
+      
+      real, device :: d_xdrange(2,3)
+      real, device :: d_xerange(2,3,lelt)
+      real, device :: d_rpart(lr,lpart)
+      integer, device :: d_ipart(li,lpart)
+      
+      do i=1,msteps
+         istep = istep+i
+         timet = DNEKCLOCK()
+         call nek_advance_gpu(d_xdrange,d_xerange,d_rpart,d_ipairt)
+!c        if(nid .eq . 0) print *, "nek_advance", &
+!c              DNEKCLOCK()-timet 
+!c        timet = DNEKCLOCK()
+
+         if (ifneknek) call userchk_set_xfer
+!c        if(nid .eq . 0) print *, "userchk_set_xfer",
+!c              DNEKCLOCK()-timet &
+!c        timet = DNEKCLOCK()
+
+         if (ifneknek) call bcopy
+!c        if(nid .eq . 0) print *,"bcopy", &
+!c              DNEKCLOCK()-timet
+!c        timet = DNEKCLOCK()
+
+         if (ifneknek) call chk_outflow
+!c        if(nid .eq . 0) print *, "chk_outflow", &
+!c              DNEKCLOCK()-timet
+!c        timet = DNEKCLOCK()
+
+
+      enddo
+
+      return
+      end
+!c-----------------------------------------------------------------------
