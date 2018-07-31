@@ -13,6 +13,7 @@ __global__ void nekadd2(double *a, double*b, int n){
 		a[id]+=b[id];
 
 }
+//comment to test git
 __global__ void neksub2(double *a, double*b, int n){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
