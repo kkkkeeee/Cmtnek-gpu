@@ -1,8 +1,8 @@
-### makefile automatically created by makenek 07/27/2018 14:48:50 ###
+### makefile automatically created by makenek 07/31/2018 16:37:39 ###
 BINNAME=nek5000
 LIBNAME=libnek5000.a
 CASENAME:=uniform
-CASEDIR:=/ccs/home/kekezhai/GPUCMTnek-072018/latestNek5000/NekExamples/CMT/uniform_flow
+CASEDIR:=/ccs/home/kekezhai/GPUCMTnek-072018/latestNek5000/CMT/uniform_flow
 S:=/ccs/home/kekezhai/GPUCMTnek-072018/latestNek5000/Nek5000/core
 SCMT:=/ccs/home/kekezhai/GPUCMTnek-072018/latestNek5000/Nek5000/core/cmt
 J:=/ccs/home/kekezhai/GPUCMTnek-072018/latestNek5000/Nek5000/jl
