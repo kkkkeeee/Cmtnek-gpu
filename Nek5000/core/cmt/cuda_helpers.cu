@@ -14,6 +14,7 @@ __global__ void nekadd2(double *a, double*b, int n){
 
 }
 //comment to test git
+//2nd comment to test git
 __global__ void neksub2(double *a, double*b, int n){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
