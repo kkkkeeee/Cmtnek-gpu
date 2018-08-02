@@ -77,8 +77,9 @@ __global__ void compute_grid_h_kernel( double *gridh, double *xm1, double *ym1, 
       			d3 = a1*b2 - a2*b1;
                         // vector dot product to get sum
                         double sum = c1*d1+c2*d2+c3*d3;
+			if(id<10){printf("c1 %lf c2 %lf c3 %lf d1 %lf d2 %lf d3 %lf sum is :%lf fact: %lf \n",c1,c2,c3,d1,d2,d3,sum,fact);}
 			gridh[e*lxyz+iz*lxy+iy*lx1+ix]=fact*sum;
-			gridh[e*lxyz+iz*lxy+iy*lx1+ix]=pow(fabs(gridh[e*lxyz+iz*lxy+iy*lx1+ix]),(1.0/3.0));
+			gridh[e*lxyz+iz*lxy+iy*lx1+ix]=pow(fabs(gridh[e*lxyz+iz*lxy+iy*lx1+ix]),(1.0/3.0))+1;
 		}
 		else{
 			fact=0.25;

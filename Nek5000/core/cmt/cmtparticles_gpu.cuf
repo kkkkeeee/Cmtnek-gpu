@@ -615,13 +615,15 @@
       tocpucopy_gas(48)=1
       tocpucopy_gas(49)=1
       tocpucopy_gas(50)=1
-!      tocpucopy_gas(51)=1
-!      call copytocpu_gpu()
-      print *,"$$$ cmtparu.cuf compute_rhs_and_dt_gpu mesh_h_gpu check", nid
-!      do i=1,10
+      tocpucopy_gas(51)=1
+      call copytocpu_gpu()
+     print *,"$$$ cmtparu.cuf compute_rhs_and_dt_gpu mesh_h_gpu check", nid
+      print *, 'meshh, xm1, ym1, zm1, nelt', 1, meshh(1),xm1(1),ym1(1),zm1(1),nelt,lx1,ly1,lz1
+      do i=1,nelt*lx1*ly1*lz1
 !           print *, 'meshh, xm1, ym1, zm1', i, meshh(i),xm1(i),ym1(i),zm1(i)
-!           print *, 'gridh, xm1, ym1, zm1', i, gridh(i),xm1(i),ym1(i),zm1(i)
-!      enddo 
+      write(6,*) 'gridh, xm1, ym1, zm1',i,gridh(i),xm1(i),ym1(i),zm1(i)
+      enddo 
+      stop
 
 
       if (lxd.gt.lx1) then
@@ -1838,7 +1840,7 @@
       endif 
       if(tocpucopy_gas(48).eq.1) then
            istate = cudaMemcpy(gridh,d_gridh,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
-!      print *,"istate 48", cudaGetErrorString(istate) 
+      print *,"istate 48", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(49).eq.1) then
            istate = cudaMemcpy(xm1,d_xm1,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
