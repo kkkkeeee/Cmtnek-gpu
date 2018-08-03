@@ -6,7 +6,7 @@
 // includes, project
 //#include "magma.h"
 #include "cuda_multi_gemm_unif.cu"
-//#define DEBUGPRINT 0
+#define DEBUGPRINT 0
 __global__ void fluxes_full_field_gpu_kernel_fillq(double *vtrans, double *vx, double *vy, double *vz, double *pr, double *t, double *csound, double *phig, double *vdiff, double *fatface,int irho, int iux, int iuy, int iuz, int ipr, int ithm, int isnd, int iph, int icvf, int icpf, int imuf, int ikndf, int ilamf, int iwm, int iwp, int icv, int icp, int imu, int iknd, int ilam,int *iface_flux, int nnel, int nxz2ldim, int lxyz,int lxz, int ivarcoef,int leltlxyz ){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;

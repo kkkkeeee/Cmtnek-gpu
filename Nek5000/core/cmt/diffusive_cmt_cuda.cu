@@ -1,5 +1,5 @@
 #include <stdio.h>
-//#define DEBUGPRINT 0
+#define DEBUGPRINT 0
 
 __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, double *vz, double *u, int nelt, int nxyz,int nnel,int irpu, int irpv, int irpw, int iret, int irg, int toteq,int if3d,double *vtrans, int irho, double *phig, int lx1, int ly1, int lz1, int *lglel, double *xm1, double *ym1, double *zm1, double *t,int ldimt, int npscal, double *pr, double p0th, double *sii, double *siii, double *vdiff, int ifield,char *cb, int icv, int icp, double *csound, int imu,int ilam, double cpgref, double cvgref, double gmaref, double rgasref, int *gllel, double *res2, int iknd, int inus, int lxy,int nlel ){
 
