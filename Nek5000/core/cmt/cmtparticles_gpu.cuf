@@ -611,19 +611,19 @@
       call compute_mesh_h_gpu()
       call compute_grid_h_gpu()
       !following code is for testing only. delete later.
-      tocpucopy_gas(47)=1
-      tocpucopy_gas(48)=1
-      tocpucopy_gas(49)=1
-      tocpucopy_gas(50)=1
-      tocpucopy_gas(51)=1
-      call copytocpu_gpu()
-     print *,"$$$ cmtparu.cuf compute_rhs_and_dt_gpu mesh_h_gpu check", nid
-      print *, 'meshh, xm1, ym1, zm1, nelt', 1, meshh(1),xm1(1),ym1(1),zm1(1),nelt,lx1,ly1,lz1
-      do i=1,nelt*lx1*ly1*lz1
+!      tocpucopy_gas(47)=1
+!      tocpucopy_gas(48)=1
+!      tocpucopy_gas(49)=1
+!      tocpucopy_gas(50)=1
+!      tocpucopy_gas(51)=1
+!      call copytocpu_gpu()
+!     print *,"$$$ cmtparu.cuf compute_rhs_and_dt_gpu mesh_h_gpu check", nid
+!      print *, 'meshh, xm1, ym1, zm1, nelt', 1, meshh(1),xm1(1),ym1(1),zm1(1),nelt,lx1,ly1,lz1
+!      do i=1,nelt*lx1*ly1*lz1
 !           print *, 'meshh, xm1, ym1, zm1', i, meshh(i),xm1(i),ym1(i),zm1(i)
-      write(6,*) 'gridh, xm1, ym1, zm1',i,gridh(i),xm1(i),ym1(i),zm1(i)
-      enddo 
-      stop
+!      write(6,*) 'gridh, xm1, ym1, zm1',i,gridh(i),xm1(i),ym1(i),zm1(i)
+!      enddo 
+!      stop
 
 
       if (lxd.gt.lx1) then
@@ -656,22 +656,22 @@
       call compute_primitive_vars_gpu
 
       !following code is for testing only. delete later.
-!      tocpucopy_gas(10)=1
-!      tocpucopy_gas(11)=1
-!      tocpucopy_gas(12)=1
-!      tocpucopy_gas(13)=1
-!      tocpucopy_gas(14)=1
-!      tocpucopy_gas(15)=1
-!      tocpucopy_gas(46)=1
-!      tocpucopy_gas(45)=1
-!      tocpucopy_gas(53)=1
-!      tocpucopy_gas(58)=1
-!      call copytocpu_gpu()
+      tocpucopy_gas(10)=1
+      tocpucopy_gas(11)=1
+      tocpucopy_gas(12)=1
+      tocpucopy_gas(13)=1
+      tocpucopy_gas(14)=1
+      tocpucopy_gas(15)=1
+      tocpucopy_gas(46)=1
+      tocpucopy_gas(45)=1
+      tocpucopy_gas(53)=1
+      tocpucopy_gas(58)=1
+      call copytocpu_gpu()
 
-!      print *,"$$$ cmtparu.cuf compute_primitive_vars_gpu check", nid
-!      do i=1,10
-!           print *, 'vx, vy, vz, vtrans,t,pr,csound,vxd,vyd,vzd', i, vx(i),vy(i),vz(i),vtrans(i),t(i),pr(i),csound(i),vxd(i),vyd(i),vzd(i)
-!      enddo
+      print *,"$$$ cmtparu.cuf compute_primitive_vars_gpu check", nid
+      do i=1,10
+           print *, 'vx, vy, vz, vtrans,t,pr,csound,vxd,vyd,vzd', i, vx(i),vy(i),vz(i),vtrans(i),t(i),pr(i),csound(i),vxd(i),vyd(i),vzd(i)
+      enddo
 
 
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_primitive_vars_gpu", nid

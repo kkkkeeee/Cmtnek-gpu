@@ -38,8 +38,8 @@ __global__ void compute_grid_h_kernel( double *gridh, double *xm1, double *ym1, 
 		int ixp=ip1;
 		if (ip1 > lx1-1) {ixp=ix;}
 		
-	//	if(id<12){printf("id is %d ix %d iy %d iz %d e %d \n",id, ix,iy,iz,e);}
-//		if(id==0){ for(int kk=0; kk<100;kk++){printf("id %d xm1 %lf ym1 %lf zm1 %lf \n",kk,xm1[kk],ym1[kk],zm1[kk]);}}
+		if(id<12){printf("id is %d ix %d iy %d iz %d e %d \n",id, ix,iy,iz,e);}
+		if(id==0){ for(int kk=0; kk<100;kk++){printf("id %d xm1 %lf ym1 %lf zm1 %lf \n",kk,xm1[kk],ym1[kk],zm1[kk]);}}
 		//if(id<10){printf("whole thing %d \n",e*lxyz+iz*lxy+iy*lx1+ixm);}
 		x1 = xm1[e*lxyz+iz*lxy+iy*lx1+ixm];// possible  optimizations for array reads . adeesha
 		x2 = xm1[e*lxyz+iz*lxy+iy*lx1+ixp];
@@ -70,7 +70,7 @@ __global__ void compute_grid_h_kernel( double *gridh, double *xm1, double *ym1, 
 		c3=z6-z5;
 
 
-//		if(id<12){printf("a1 %lf a2 %lf a3 %lf b1 %lf b2 %lf b3 %lf x1 %lf x2 %lf y1 %lf y2 %lf z1 %lf z2 %lf \n",a1,a2,a3,b1,b2,b3,x1,x2,y1,y2,z1,z2);}
+		if(id<12){printf("a1 %lf a2 %lf a3 %lf b1 %lf b2 %lf b3 %lf x1 %lf x2 %lf y1 %lf y2 %lf z1 %lf z2 %lf \n",a1,a2,a3,b1,b2,b3,x1,x2,y1,y2,z1,z2);}
 		double fact;
 		if (if3d) {
 			fact=0.125; // h doesn't reach into corners of neighboring elements
@@ -84,7 +84,7 @@ __global__ void compute_grid_h_kernel( double *gridh, double *xm1, double *ym1, 
       			d3 = a1*b2 - a2*b1;
                         // vector dot product to get sum
                         double sum = c1*d1+c2*d2+c3*d3;
-//			if(id<12){printf("c1 %lf c2 %lf c3 %lf d1 %lf d2 %lf d3 %lf sum is :%lf fact: %lf \n",c1,c2,c3,d1,d2,d3,sum,fact);}
+			if(id<12){printf("c1 %lf c2 %lf c3 %lf d1 %lf d2 %lf d3 %lf sum is :%lf fact: %lf \n",c1,c2,c3,d1,d2,d3,sum,fact);}
 			gridh[e*lxyz+iz*lxy+iy*lx1+ix]=fact*sum;
 			gridh[e*lxyz+iz*lxy+iy*lx1+ix]=pow(fabs(gridh[e*lxyz+iz*lxy+iy*lx1+ix]),(1.0/3.0));
 		}
