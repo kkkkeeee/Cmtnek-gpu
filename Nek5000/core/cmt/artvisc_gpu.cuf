@@ -78,11 +78,11 @@
 
 ! entropy at this and lorder prior steps
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before compute_entropy_gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before compute_entropy_gpu", nid
 
       call compute_entropy_gpu
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after compute_entropy_gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after compute_entropy_gpu", nid
 
 
 
@@ -91,10 +91,10 @@
       tocpucopy_gas(4)=1
       call copytocpu_gpu()
 
-!      print *,"$$$ artvisc.cuf compute_entropy_gpu check", nid
-!      do i=1,100
-!           print *, 'tlag bm1,volvm1', i,tlag(i),bm1(i),volvm1
-!      enddo
+      print *,"$$$ artvisc.cuf compute_entropy_gpu check", nid
+      do i=1,100
+           print *, 'tlag bm1,volvm1', i,tlag(i),bm1(i),volvm1
+      enddo
 
 !     OPEN(UNIT=9999,FILE='tlagbm1.txt',&
 !             FORM="FORMATTED", &
@@ -114,7 +114,7 @@
       maxdiff =     glamax(scrent,ntot)
 !       print *, '&&&&maxdiff', maxdiff,nid
       
-!     print *,"artvisc_gpu.cuf entropy_viscosity_gpu savg and maxdiff", savg,maxdiff,nid
+     print *,"artvisc_gpu.cuf entropy_viscosity_gpu savg and maxdiff", savg,maxdiff,nid
 !      if (maxdiff.le.0.0) then
 !         write(deathmessage,*) 'zero maxdiff usually means NAN$'
 !         call exittr(deathmessage,maxdiff,istep)
@@ -122,35 +122,45 @@
 !        if (nio .eq. 0) write (6,*) 'max(s-<s>)=',maxdiff, meshh(1)
 !      endif
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before entropy_residual_gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before entropy_residual_gpu", nid
      
       call entropy_residual_gpu ! fill res2
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after entropy_residual_gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after entropy_residual_gpu", nid
       
       call double_copy_gpu_wrapper(glbblockSize2,d_res2,lx1*ly1*lz1*lelt,d_res2,0,ntot)
+
+      !following code is for testing only. delete later.
+
+      tocpucopy_gas(20)=1
+      call copytocpu_gpu()
+      print *,"$$$ cmtparu.cuf gpu_copy res3 check", nid
+      do i=1,100
+           print *,'res2', res2(i),i
+      enddo
+
 
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before wavevisc_gpu", nid
 
       call wavevisc_gpu
  
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after wavevisc _gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after wavevisc _gpu", nid
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before resvisc_gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before resvisc_gpu", nid
 
       call resvisc_gpu ! overwrite res2
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after resvisc_gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after resvisc_gpu", nid
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before evmsmooth_gpu", nid
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before evmsmooth_gpu", nid
 
-      call evmsmooth_gpu(res2,t(1,1,1,1,3),.true.) ! endpoints=.false.
+      call evmsmooth_gpu(.true.) ! endpoints=.false.
                                                ! is intended to
                                                ! preserve face states,
                                                ! but this is easier to
                                                ! test 1D
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after evmsmooth_gpu", nid
-
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after evmsmooth_gpu", nid
+     
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before dsavg", nid
 !     copy res2 back to cpu to do dsavg
       tocpucopy_gas(20)=1
@@ -246,7 +256,7 @@
       call copytocpu_gpu()
 
       print *,"$$$ artvisc.cuf resvisc_gpu check", nid
-      do i=1,10
+      do i=1,100
            print *, 'res2', i, res2(i)
       enddo
 
@@ -255,12 +265,11 @@
 
 !-----------------------------------------------------------------------
 
-      subroutine evmsmooth_gpu(resvisc,wavevisc,endpoints)
+      subroutine evmsmooth_gpu(endpoints)
 !      include 'SIZE'
 !      include 'INPUT'
       use glbvariable_gpu
 
-      real resvisc(lx1,ly1,lz1,nelt),wavevisc(lx1,ly1,lz1,nelt)
       real rtmp
       common /ctmp1/ rtmp(lx1,ly1,lz1)
 ! are faces included in smoothing? if not (say they're fixed by dsavg) then
@@ -304,7 +313,7 @@
       call copytocpu_gpu()
 
       print *,"$$$ artvisc.cuf evm_smooth_gpu check", nid
-      do i=1,10
+      do i=1,100
            print *, 'res2', i, res2(i)
       enddo
 
@@ -333,13 +342,12 @@
       call copytocpu_gpu()
 
       print *,"$$$ artvisc.cuf wavevisc_gpu check", nid
-      do i=1,10
+      do i=1,100
            print *, 't(i,1,1,1,3)', i,t(i,1,1,1,3)
       enddo
 
 
       call max_to_trilin_gpu()
-
       return
       end
 
@@ -382,7 +390,7 @@
       call copytocpu_gpu()
 
       print *,"$$$ artvisc.cuf max_to_trilin_gpu check", nid
-      do i=1,10
+      do i=1,100
            print *, 't(i,1,1,1,3)', i,t(i,1,1,1,3)
       enddo
 

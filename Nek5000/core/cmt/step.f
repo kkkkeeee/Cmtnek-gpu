@@ -45,7 +45,7 @@ C> @file step.f time stepping and mesh spacing routines
          call glsqinvcolmin(dt3,vdiff(1,1,1,1,inus),gridh,ntot,ctarg)
          dt_cmt=min(dt_cfl,dt1,dt2,dt3)
       !print *,"setdtcmt before dt huge crashing ",nid
-         dt_cmt=2 !only for now remove later .adeesha.
+!         dt_cmt=2 !only for now remove later .adeesha.
          if (dt_cmt .gt. 10.0) then
             if (nio.eq.0) write(6,*) 'dt huge. crashing cpu',istep,stage,
      >         dt_cmt

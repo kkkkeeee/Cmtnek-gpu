@@ -72,7 +72,7 @@ __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, doubl
 
 		vdiff[(imu-1)*nlel +e*nxyz+k*lxy+j*lx1+newi]=mu; // vidff [  + id] is same as this. check later . adeesha
 		vdiff[(ilam-1)*nlel +e*nxyz+k*lxy+j*lx1+newi]=lambda;
-		vdiff[(iknd-1)*nlel +e*nxyz+k*lxy+j*lx1+newi]=iknd;
+		vdiff[(iknd-1)*nlel +e*nxyz+k*lxy+j*lx1+newi]=udiff;
 		vdiff[(inus-1)*nlel +e*nxyz+k*lxy+j*lx1+newi]=nu_s;
 
 

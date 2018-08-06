@@ -24,7 +24,7 @@
 
 !     fat_face array has to be passed. But might be possible to combine all the functions in to one function and create fat_face inside wrapper  funtion and free  it later.
 
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu 1 values iwm,iwp",iwm,iwp
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu 1 values iwm,iwp",iwm,iwp
 
       call fluxes_full_field_gpu_wrapper(glbblockSize2, d_fatface,d_vtrans,&
         d_u,d_vx, d_vy, d_vz, d_pr, d_t, d_csound, d_phig, d_vdiff, irho,&
@@ -33,24 +33,24 @@
        ldim,lelt,i_cvars,toteq,nqq) 
 
       !following code is for testing only. delete later.
-!      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!      print *,"istate 61", cudaGetErrorString(istate)
+      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      print *,"istate 61", cudaGetErrorString(istate)
 
-!      print *,"$$$ fluxes_full_field.cuf f_f_f_gpu check", nid
-!      do i=1,10
-!           print *, 'fatface irho,iux, iuy,iuz,ipr,ithm,isnd,iph,icvf,icpf,imuf,ikndf,ilamf', i,&
-!           fatface(irho*lx1*lz1*2*ldim*lelt+i),fatface(iux*lx1*lz1*2*ldim*lelt+i),&
-!           fatface(iux*lx1*lz1*2*ldim*lelt+i),fatface(iuy*lx1*lz1*2*ldim*lelt+i),&
-!           fatface(iuz*lx1*lz1*2*ldim*lelt+i),fatface(ipr*lx1*lz1*2*ldim*lelt+i),&
-!           fatface(ithm*lx1*lz1*2*ldim*lelt+i),fatface(isnd*lx1*lz1*2*ldim*lelt+i),&
-!           fatface(iph*lx1*lz1*2*ldim*lelt+i),fatface(icvf*lx1*lz1*2*ldim*lelt+i),&
-!           fatface(icpf*lx1*lz1*2*ldim*lelt+i),fatface(imuf*lx1*lz1*2*ldim*lelt+i),&
-!           fatface(ikndf*lx1*lz1*2*ldim*lelt+i),fatface(ilamf*lx1*lz1*2*ldim*lelt+i)
-!    enddo
+      print *,"$$$ fluxes_full_field.cuf f_f_f_gpu check", nid
+      do i=1,100
+           print *, 'fatface irho,iux, iuy,iuz,ipr,ithm,isnd,iph,icvf,icpf,imuf,ikndf,ilamf', i,&
+           fatface(irho*lx1*lz1*2*ldim*lelt+i),fatface(iux*lx1*lz1*2*ldim*lelt+i),&
+           fatface(iux*lx1*lz1*2*ldim*lelt+i),fatface(iuy*lx1*lz1*2*ldim*lelt+i),&
+           fatface(iuz*lx1*lz1*2*ldim*lelt+i),fatface(ipr*lx1*lz1*2*ldim*lelt+i),&
+           fatface(ithm*lx1*lz1*2*ldim*lelt+i),fatface(isnd*lx1*lz1*2*ldim*lelt+i),&
+           fatface(iph*lx1*lz1*2*ldim*lelt+i),fatface(icvf*lx1*lz1*2*ldim*lelt+i),&
+           fatface(icpf*lx1*lz1*2*ldim*lelt+i),fatface(imuf*lx1*lz1*2*ldim*lelt+i),&
+           fatface(ikndf*lx1*lz1*2*ldim*lelt+i),fatface(ilamf*lx1*lz1*2*ldim*lelt+i)
+    enddo
 
 
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu before face_state_commo_gpu", nid
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu values lx1,lz1,ldim,nelt,nqq,iwp,iwm,nfq,nstate",lx1,lz1,ldim,nelt,nqq, iwp,iwm,nfq,nstate
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu before face_state_commo_gpu", nid
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu values lx1,lz1,ldim,nelt,nqq,iwp,iwm,nfq,nstate",lx1,lz1,ldim,nelt,nqq, iwp,iwm,nfq,nstate
 
       call face_state_commo_gpu(iwm,iwp,fatface(iwm),fatface(iwp),nfq,nstate&
                          ,dg_hndl,fatface)

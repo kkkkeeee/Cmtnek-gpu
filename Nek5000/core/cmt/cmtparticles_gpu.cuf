@@ -668,11 +668,13 @@
       tocpucopy_gas(58)=1
       call copytocpu_gpu()
 
-      print *,"$$$ cmtparu.cuf compute_primitive_vars_gpu check", nid
-      do i=1,10
-           print *, 'vx, vy, vz, vtrans,t,pr,csound,vxd,vyd,vzd', i, vx(i),vy(i),vz(i),vtrans(i),t(i),pr(i),csound(i),vxd(i),vyd(i),vzd(i)
-      enddo
+!      print *,"$$$ cmtparu.cuf compute_primitive_vars_gpu check", nid
+!      do i=1,100
+!           print *, 'vx, vy, vz, vtrans,t,pr,csound,vxd,vyd,vzd', i, vx(i),vy(i),vz(i),vtrans(i),t(i),pr(i),csound(i),vxd(i),vyd(i),vzd(i)
+!      enddo
 
+!     call nekgsync()
+!     stop
 
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_primitive_vars_gpu", nid
 
@@ -717,7 +719,7 @@
       print *,"cmtparu.cuf compute_rhs_and_dt_gpu before fluxes_full_filed_gpu", nid
       call fluxes_full_field_gpu
       print *,"cmtparu.cuf compute_rhs_and_dt_gpu after fluxes_full_filed_gpu", nid
-
+      stop
       nstate=nqq
       nfq=lx1*lz1*2*ldim*nelt
       iwm =1
