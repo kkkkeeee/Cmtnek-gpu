@@ -118,7 +118,7 @@ __global__ void imqqtu_gpu_kernel(double *flux, int nf, int lf, int iuj, int ium
 		flux[(iuj-1)+id] =flux[(ium-1)+id] + flux[(iup-1)+id] ; //add3
 		flux[(iuj-1)+id] =flux[(iuj-1)+id] * -0.5; //cmult
 		flux[(iuj-1)+id] =  flux[(iuj-1)+id] + flux[(ium-1)+id] ;// add 2
-		//above 3 can be simplified iuj= (ium-ium) /2 check with Dr.Tania adeesha
+		//above 3 can be simplified iuj= (ium-iup) /2 check with Dr.Tania adeesha
 
 
 	}

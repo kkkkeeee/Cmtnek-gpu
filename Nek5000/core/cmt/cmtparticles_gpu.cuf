@@ -104,7 +104,7 @@
       real, device :: d_csound(lx1,ly1,lz1,lelt) !58
       integer, device:: d_gllel(lelg)  ! 59
       real, device :: d_flux(nqq*3*lx1*lz1*2*ldim*lelt) !60 only for now. remove this and put it in surfaces cuda functions and delete. change this later.
-      real, device :: d_fatface(nqq*3*lx1*lz1*2*ldim*lelt) !61 only for now. remove this and put it in surfaces cuda functions and delete. change this later.
+!      real, device :: d_fatface(nqq*3*lx1*lz1*2*ldim*lelt) !61 only for now. remove this and put it in surfaces cuda functions and delete. change this later.
       real, device :: d_wkd(2*lxd*lxd*lxd*lelt) !62  ! may be not needed. check and remove later. adeesha.
       real, device :: d_viscscr(lx1*ly1*lz1*lelt) !63  ! may be not needed. check and remove later. adeesha.
       real, device :: d_dg(lxd*lyd*lzd) !64  ! may be not needed. check and remove later. adeesha. also check why there is no lelt
@@ -173,6 +173,8 @@
       use glbvariable_gpu
 
       integer code
+      character cbc_new(3, 6, lelt, 0:ldimt1)
+      character*3 cb
 !     print *,"GPU: Start cmtparticles_gpu.cuf copytogpu_gpu ",nid
 
 !----- copy gas data
@@ -182,7 +184,7 @@
       endif
       if(togpucopy_gas(2).eq.1) then
            istate = cudaMemcpy(d_u,u, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
-!      print *,"istate 2", cudaGetErrorString(istate)
+!      priat *,"istate 2", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(3).eq.1) then
            istate = cudaMemcpy(d_res1, res1, lx1*ly1*lz1*lelt*toteq,cudaMemcpyHostToDevice)
@@ -334,9 +336,26 @@
       if(togpucopy_gas(40).eq.1) then
            istate = cudaMemcpy(d_unz, unz, lx1*lz1*6*lelt,cudaMemcpyHostToDevice)
 !      print *,"istate 40", cudaGetErrorString(istate)
-      endif 
+      endif
+
       if(togpucopy_gas(41).eq.1) then
-           istate = cudaMemcpy(d_cbc,cbc,3*6*lelt*(ldimt1+1),cudaMemcpyHostToDevice)
+!      do i = 1, 500
+!         write(6,*) 'gpu cbc: ', i, cbc(i,1,1)
+!      enddo
+      do c = 0, ldimt1
+      do b = 1, lelt
+      do a = 1, 6
+         cb=cbc(a, b, c)
+         cbc_new(1, a, b, c) = (cb(1:2))
+         cbc_new(2, a, b, c) = (cb(2:3))
+         cbc_new(3, a, b, c) = (cb(3:4))
+         write(6,*) 'cbc_new:', a, b, c, cbc_new(1, a, b, c), '1', cbc_new(2, a, b, c), '2', cbc_new(3, a, b, c), '3', cbc(a, b, c)
+      enddo
+      enddo
+      enddo
+
+     
+           istate = cudaMemcpy(d_cbc,cbc_new,3*6*lelt*(ldimt1+1),cudaMemcpyHostToDevice)
       print *,"istate 41", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(42).eq.1) then
@@ -414,10 +433,10 @@
       if(togpucopy_gas(60).eq.1) then
            !istate = cudaMemcpy(d_flux,flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
       endif
-      if(togpucopy_gas(61).eq.1) then
+!      if(togpucopy_gas(61).eq.1) then
            !istate = cudaMemcpy(d_fatface,fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
 !      print *,"istate 61", cudaGetErrorString(istate)
-      endif
+!      endif
      if(togpucopy_gas(62).eq.1) then
            !istate = cudaMemcpy(d_wkd,wkd,2*lxd*lxd*lxd*lelt,cudaMemcpyHostToDevice)
 !      print *,"istate 62", cudaGetErrorString(istate)
@@ -719,7 +738,6 @@
       print *,"cmtparu.cuf compute_rhs_and_dt_gpu before fluxes_full_filed_gpu", nid
       call fluxes_full_field_gpu
       print *,"cmtparu.cuf compute_rhs_and_dt_gpu after fluxes_full_filed_gpu", nid
-      stop
       nstate=nqq
       nfq=lx1*lz1*2*ldim*nelt
       iwm =1
@@ -1892,9 +1910,9 @@
            istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
 !      print *,"istate 60", cudaGetErrorString(istate) 
       endif
-      if(tocpucopy_gas(61).eq.1) then
-           istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-      endif
+!      if(tocpucopy_gas(61).eq.1) then
+!           istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!      endif
 
 
 !-----copy particles data

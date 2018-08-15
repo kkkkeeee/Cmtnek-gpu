@@ -397,8 +397,10 @@ void gpu_get_int_ptr(int *ip,int  if3d, int mx, int md, int nelt,double *jgl, do
 		pjgl[0]  = nstore;
 		ip[0]       = pjgl[ij-1];
 		int nwrkd = mx + md;
+		printf("Warning!!! ip[0] is 0. This should not happen \n");
 		//gpu_gen_int(jgl+ip[0]-1,jgt+ip[0]-1,md,mx,wkd);
 	}
+	ip[0]=1;  // dummy for now. change to the actual value later. adeesha.
 }
 
 void gpu_gen_dgl(double *dgl,double *dgt,int mp,int np,double *w){

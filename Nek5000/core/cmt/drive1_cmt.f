@@ -43,9 +43,19 @@ c     Solve the Euler equations
          call compute_primitive_vars ! get good mu
          call entropy_viscosity      ! for high diffno
          call compute_transport_props! at t=0
+
+
+
          if(nid.eq.15) then
           !   print *,"cmt_nek_advance before to init_gpu",nid
-             call usr_particles_init_gpu()
+      do c = 1, 2
+      do b = 1, nelt
+      do a = 1, 6
+         write(6,*) 'cpu cbc: ', nid, a, b, c, cbc(a,b,c)
+      enddo
+      enddo
+      enddo
+            call usr_particles_init_gpu()
          endif
 
       endif
@@ -72,8 +82,10 @@ c     Solve the Euler equations
          endif
          timefortimestep = dnekclock() - rhst_dum
          rhst = rhst + timefortimestep
+         call nekgsync()
          print *,"cmt_nek_advance after rhs_and_dt_gpu time is",rhst,
      >      timefortimestep,stage,istep,nelt,lelt,lx1,lxd,nid
+        stop
 c particle equations of motion are solved (also includes forcing)
 c In future this subroutine may compute the back effect of particles
 c on the fluid and suitably modify the residue computed by 

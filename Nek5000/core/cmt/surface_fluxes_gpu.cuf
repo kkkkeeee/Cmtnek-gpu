@@ -16,9 +16,9 @@
       nstate = nqq
 ! where different things live
       iwm =1
-      iwp =iwm+nstate*lfq
-      iflx=iwp+nstate*lfq
-      i_cvars=(iu1-1)*lfq+1
+      iwp =iwm+nstate*nfq
+      iflx=iwp+nstate*nfq
+      i_cvars=(iu1-1)*nfq+1
       ifield= 1
       
 
@@ -26,14 +26,14 @@
 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu 1 values iwm,iwp",iwm,iwp
 
-      call fluxes_full_field_gpu_wrapper(glbblockSize2, d_fatface,d_vtrans,&
+      call fluxes_full_field_gpu_wrapper(glbblockSize2, d_flux,d_vtrans,&
         d_u,d_vx, d_vy, d_vz, d_pr, d_t, d_csound, d_phig, d_vdiff, irho,&
         iux, iuy, iuz, ipr,ithm,isnd,iph,icvf, icpf, imuf, ikndf, ilamf,&
         iwm,iwp,icv, icp,imu,iknd,ilam, d_iface_flux, nelt, lx1, ly1,lz1,&
        ldim,lelt,i_cvars,toteq,nqq) 
 
       !following code is for testing only. delete later.
-      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
       print *,"istate 61", cudaGetErrorString(istate)
 
       print *,"$$$ fluxes_full_field.cuf f_f_f_gpu check", nid
@@ -55,25 +55,26 @@
       call face_state_commo_gpu(iwm,iwp,fatface(iwm),fatface(iwp),nfq,nstate&
                          ,dg_hndl,fatface)
       
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after face_state_commo_gpu", nid,ly1
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu after face_state_commo_gpu", nid,ly1
    
-      call get_int_ptr (i,lx1,lxd)
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
 
-      call inviscidbc_gpu_wrapper(glbblockSize2,d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,&
-       d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_pres,&
+      call inviscidbc_gpu_wrapper(glbblockSize2,d_lglel,d_flux,d_cbc,d_xm1,d_ym1,d_zm1,&
+       d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,&
        d_csound,d_unx,d_uny,d_unz,molarmass,iwm,iwp,irho,iux,iuy,iuz,iph,ipr,isnd,ithm,&
        icpf,icvf,iu1,iu2,iu3,iu4,iu5,lx1,lz1,toteq,ldim,nelt,lelt,p0th,ifield,icv,icp,&
        imu,ilam,molmass,npscal,if3dgpu,outflsub,pinfty,ly1)
 
 
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidBC_gpu", nid
-     
-      call inviscidflux_gpu_wrapper(glbblockSize2,jgl,jgt,d_unx,d_uny,d_unz,d_area,d_fatface,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq)
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidBC_gpu", nid
+      call get_int_ptr(i,lx1,lxd)     
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
+
+      call inviscidflux_gpu_wrapper(glbblockSize2,jgl,jgt,d_unx,d_uny,d_unz,d_area,d_flux,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq,lx1,ly1,lz1,i)
  
 
 
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidFlux_gpu", nid
+      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidFlux_gpu", nid
 
 
 
@@ -104,28 +105,28 @@
       ntot=nf*nstate
 
 !     print *,"surface_fluxes.cuf face_state_commo_gpu values iwp,iwm,ntot,nf,nstate", iwp,iwm,ntot,nf,nstate
-      call double_copy_gpu_wrapper(glbblockSize2,d_fatface,iwp-1,d_fatface,iwm-1,ntot );
+      call double_copy_gpu_wrapper(glbblockSize2,d_flux,iwp-1,d_flux,iwm-1,ntot );
 
 
 
 !     for now copy fatface(iwp) to fatface(iwp+nf*nstate) to yours array to get gs_op_fielsds
-      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!      print *,"istate state_commo", cudaGetErrorString(istate)
+      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      print *,"istate state_commo", cudaGetErrorString(istate)
 
       call gs_op_fields(handle,yours,nf,nstate,1,1,0)
 !     copy yours back to fatface(iwp)
-      istate = cudaMemcpy(d_fatface,fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
-!      print *,"istate state_commo gpu back", cudaGetErrorString(istate)
+      istate = cudaMemcpy(d_flux,fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
+      print *,"istate state_commo gpu back", cudaGetErrorString(istate)
 
-      call double_sub2_gpu_wrapper(glbblockSize2,d_fatface,iwp-1,d_fatface,iwm-1,ntot );
+      call double_sub2_gpu_wrapper(glbblockSize2,d_flux,iwp-1,d_flux,iwm-1,ntot );
 
        !following code is for testing only. delete later.
-!      istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!      print *,"istate 61", cudaGetErrorString(istate)
-!       print *,"$$$ fluxes_full_field.cuf state_commo_gpu check", nid
-!      do i=1,10
-!           print *, 'fatface iwp', i,fatface(iwp+i)
-!    enddo
+      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      print *,"istate 61", cudaGetErrorString(istate)
+       print *,"$$$ fluxes_full_field.cuf state_commo_gpu check", nid
+      do i=1,100
+           print *, 'fatface iwp', i,fatface(iwp+i)
+    enddo
 
       return
       end
