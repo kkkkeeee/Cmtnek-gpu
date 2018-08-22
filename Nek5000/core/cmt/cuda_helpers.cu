@@ -1,6 +1,8 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <cublas_v2.h>
 #include "nvml.h"
+
 // includes, project
 //#include "magma.h"
 #include "cuda_multi_gemm_unif.cu"
@@ -46,53 +48,53 @@ __global__ void double_copy_gpu_kernel(double *a1, double *a2,int n){
 
 extern "C" void double_copy_gpu_wrapper_(int *glbblockSize2,double *a1,int *n1,double *a2,int *n2,int *n ){
 #ifdef DEBUGPRINT
-cudaDeviceSynchronize();
-        cudaError_t code1 = cudaPeekAtLastError();
-        printf("CUDA: Start double_copy_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
+	cudaDeviceSynchronize();
+	cudaError_t code1 = cudaPeekAtLastError();
+	printf("CUDA: Start double_copy_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
 
-        printf("CUDA: Start double_copy_gpu_wrapper values glbblockSize2=%d n1=%d,n2=%d,n=%d\n", glbblockSize2[0],n1[0],n2[0],n[0]);
+	printf("CUDA: Start double_copy_gpu_wrapper values glbblockSize2=%d n1=%d,n2=%d,n=%d\n", glbblockSize2[0],n1[0],n2[0],n[0]);
 #endif
 	int blockSize = glbblockSize2[0], gridSize;
 	gridSize = (int)ceil((float)n[0]/blockSize);
 	double_copy_gpu_kernel<<<gridSize, blockSize>>>(a1+n1[0],a2+n2[0],n[0]);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
-	 cudaError_t code2 = cudaPeekAtLastError();
+	cudaError_t code2 = cudaPeekAtLastError();
 
-        printf("CUDA: End double_copy__wrapper cuda status: %s\n",cudaGetErrorString(code2));
+	printf("CUDA: End double_copy__wrapper cuda status: %s\n",cudaGetErrorString(code2));
 
 #endif
 	/*printf(" $$$ double_copy_gpu_wrapper check start ");
-	for(int b=0;b<10;b++){
-		printf("a1[%d]= %lf and a2[%d] = %lf \n",n1[0]+b,a1[n1[0]+b],n2[0]+b,a2[n2[0]+b]);
-	}
-	printf(" $$$ double_copy_gpu_wrapper check End ");*/
+	  for(int b=0;b<10;b++){
+	  printf("a1[%d]= %lf and a2[%d] = %lf \n",n1[0]+b,a1[n1[0]+b],n2[0]+b,a2[n2[0]+b]);
+	  }
+	  printf(" $$$ double_copy_gpu_wrapper check End ");*/
 
 
 
 }
 void gpu_double_copy_gpu_wrapper(int glbblockSize2,double *a1,int n1,double *a2,int n2,int n ){
 
-        int blockSize = glbblockSize2, gridSize;
-        gridSize = (int)ceil((float)n/blockSize);
-        double_copy_gpu_kernel<<<gridSize, blockSize>>>(a1+n1,a2+n2,n);
+	int blockSize = glbblockSize2, gridSize;
+	gridSize = (int)ceil((float)n/blockSize);
+	double_copy_gpu_kernel<<<gridSize, blockSize>>>(a1+n1,a2+n2,n);
 
 
 
 }
 
 void gpu_neksub2(int glbblockSize2,double *a, double*b, int n){
-	 int blockSize = glbblockSize2, gridSize;
-        gridSize = (int)ceil((float)n/blockSize);
-neksub2<<<gridSize, blockSize>>>(a,b,n);
+	int blockSize = glbblockSize2, gridSize;
+	gridSize = (int)ceil((float)n/blockSize);
+	neksub2<<<gridSize, blockSize>>>(a,b,n);
 
 
 }
 void gpu_nekcol2(int glbblockSize2,double *a, double*b, int n){
 
- 	int blockSize = glbblockSize2, gridSize;
-        gridSize = (int)ceil((float)n/blockSize);
-        nekcol2<<<gridSize, blockSize>>>(a,b,n);
+	int blockSize = glbblockSize2, gridSize;
+	gridSize = (int)ceil((float)n/blockSize);
+	nekcol2<<<gridSize, blockSize>>>(a,b,n);
 
 }
 
@@ -114,10 +116,10 @@ __global__ void double_sub2_gpu_kernel(double *a1, double *a2,int n){
 extern "C" void double_sub2_gpu_wrapper_(int *glbblockSize2,double *a1,int *n1,double *a2,int *n2,int *n ){
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
-        cudaError_t code1 = cudaPeekAtLastError();
-        printf("CUDA: Start double_sub2_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
+	cudaError_t code1 = cudaPeekAtLastError();
+	printf("CUDA: Start double_sub2_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
 
-        printf("CUDA: Start double_sub2_gpu_wrapper values glbblockSize2=%d n1=%d,n2=%d,n=%d\n", glbblockSize2[0],n1[0],n2[0],n[0]);
+	printf("CUDA: Start double_sub2_gpu_wrapper values glbblockSize2=%d n1=%d,n2=%d,n=%d\n", glbblockSize2[0],n1[0],n2[0],n[0]);
 #endif
 	int blockSize = glbblockSize2[0], gridSize;
 	gridSize = (int)ceil((float)n[0]/blockSize);
@@ -125,9 +127,9 @@ extern "C" void double_sub2_gpu_wrapper_(int *glbblockSize2,double *a1,int *n1,d
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
-         cudaError_t code2 = cudaPeekAtLastError();
+	cudaError_t code2 = cudaPeekAtLastError();
 
-        printf("CUDA: End double_copy__wrapper cuda status: %s\n",cudaGetErrorString(code2));
+	printf("CUDA: End double_copy__wrapper cuda status: %s\n",cudaGetErrorString(code2));
 
 #endif
 
@@ -172,96 +174,88 @@ extern "C" void gpu_cadd2_wrapper_(int *glbblockSize2,double *a1,int *n1,double 
 
 
 
-void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nxd, double *d, double *dt, double *w, int nel){
+void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nx1, double *d, double *dt, double *w, int nel){
 
 #ifdef DEBUGPRINT
- 	cudaDeviceSynchronize();
-        cudaError_t code1 = cudaPeekAtLastError();
+	cudaDeviceSynchronize();
+	cudaError_t code1 = cudaPeekAtLastError();
 
-        printf("CUDA: Start gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
-	
+	printf("CUDA: Start gpu_local_grad3_t cuda status: %s\n",cudaGetErrorString(code1));
+
 #endif
-	int nxd_2 = nxd * nxd;
-	int nxd_3 = nxd_2 * nxd;
-	// u(nxd,nxd*nxd) = dt(nxd,nxd) * ur(nxd, nxd*nxd) fortran
-	// u(nxd*nxd,nxd) = ur(nxd*nxd, nxd) * dt(nxd,nxd) C
+
+	cublasHandle_t handle;
+	cublasCreate(&handle);
+	const double alf = 1;
+	const double bet = 0;
+	const double *alpha = &alf;
+	const double *beta = &bet;
+	// Do the actual multiplication
+	cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nx1*nel,nx1,alpha,dt, nx1, ur, nx1, beta,u,nx1);
+
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	cudaError_t code3 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+
+#endif
+	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,us, nx1,nx1*nx1, d,nx1,0, beta,w ,nx1,nx1*nx1,nel*nx1);
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	cudaError_t code4 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
+
+#endif
 	int blockSize=1024, gridSize;
-	cudaStream_t stream;
-	cudaStreamCreate( &stream );
-	const double alpha = 1;
-	const double beta = 0;
+	gridSize = (int)ceil((float)nel*nx1*nx1*nx1/blockSize);
+	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nx1*nx1*nx1);
 
-	gridSize = (int)ceil((float)nel*nxd_3/blockSize);
-	//mxm<<<gridSize, blockSize>>>(ur,nxd_2, dt, nxd, u, nxd, nel, nxd_3, 0, nxd_3, 0);
-	cuda_multi_gemm_unif(stream, 'N', 'N', nxd, nxd, nxd_2, &alpha, dt, nxd, 0, ur, nxd, nxd_3, &beta, u, nxd, nxd_3, nel, gridSize);
-
+	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1*nx1, nx1, nx1, alpha,ut, nx1*nx1,nx1*nx1*nx1, d,nx1,0, beta,w ,nx1*nx1,nx1*nx1*nx1,nel);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
-        code1 = cudaPeekAtLastError();
-
-        printf("CUDA: gpu_local_grad3 after cuda_multi_gemm_unif 1 cuda status: %s\n",cudaGetErrorString(code1));
+	cudaError_t code5 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
 #endif
-
-	for(int k = 0; k<nxd;k++){
-		//wk(nxd,nxd) = usk(nxd,nxd)*D(nxd,nxd) fortran
-		//wk(nxd,nxd) = D(nxd,nxd)*usk(nxd,nxd) C
-		gridSize = (int)ceil((float)nel*nxd_2/blockSize);
-		//mxm<<<gridSize, blockSize>>>(d,nxd, us+k*nxd_2, nxd, w+k*nxd_2, nxd, nel, 0, nxd_3, nxd_3, 0);
-		cuda_multi_gemm_unif(stream, 'N', 'N', nxd, nxd, nxd, &alpha, us+k*nxd_2, nxd, nxd_3, d, nxd, 0, &beta, w+k*nxd_2, nxd, nxd_3, nel, gridSize);
-	}
-
-#ifdef DEBUGPRINT
-	 cudaDeviceSynchronize();
-         code1 = cudaPeekAtLastError();
-
-        printf("CUDA: gpu_local_grad3 after cuda_multi_gemm_unif 2 for loop cuda status: %s\n",cudaGetErrorString(code1));
-#endif
-
-	gridSize = (int)ceil((float)nel*nxd_3/blockSize);
-	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nxd_3);
-	//w(nxd*nxd,nxd) = ut(nxd*nxd,nxd) * D(nxd,nxd) fortran
-	//w(nxd,nxd*nxd) = D(nxd,nxd) * ut(nxd,nxd*nxd) C
-	//mxm<<<gridSize, blockSize>>>(d,nxd, ut, nxd, w, nxd_2, nel, 0, nxd_3, nxd_3, 0);
-	cuda_multi_gemm_unif(stream, 'N', 'N', nxd_2, nxd, nxd, &alpha, ut, nxd, nxd_3, d, nxd, 0, &beta, w, nxd_2, nxd_3, nel, gridSize);
-
-#ifdef DEBUGPRINT
-	cudaDeviceSynchronize();
-        code1 = cudaPeekAtLastError();
-
-        printf("CUDA: gpu_local_grad3 after cuda_multi_gemm_unif 3 cuda status: %s\n",cudaGetErrorString(code1));
-
-#endif
-
-	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nxd_3);
-	cudaStreamDestroy(stream);
-
-
+	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nx1*nx1*nx1);
 
 }
-void gpu_local_grad2_t(double *u, double *ur, double *us, int nxd, double *d, double *dt, double *w, int nel){
+void gpu_local_grad2_t(double *u, double *ur, double *us, int nx1, double *d, double *dt, double *w, int nel){
 
-	int nxd_2 = nxd * nxd;
-	int nxd_3 = nxd_2 * nxd;
-	// u(nxd,nxd*nxd) = dt(nxd,nxd) * ur(nxd, nxd*nxd) fortran
-	// u(nxd*nxd,nxd) = ur(nxd*nxd, nxd) * dt(nxd,nxd) C
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	cudaError_t code1 = cudaPeekAtLastError();
+
+	printf("CUDA: Start gpu_local_grad2_t cuda status: %s\n",cudaGetErrorString(code1));
+
+#endif
+
+	cublasHandle_t handle;
+	cublasCreate(&handle);
+	const double alf = 1;
+	const double bet = 0;
+	const double *alpha = &alf;
+	const double *beta = &bet;
+	// Do the actual multiplication
+	cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nel,nx1,alpha,dt, nx1, ur, nx1, beta,u,nx1);
+
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	cudaError_t code3 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+
+#endif
+
+	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,us, nx1,nx1*nx1, d,nx1,0, beta,w ,nx1,nx1*nx1,nel);
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	cudaError_t code5 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
+#endif
 	int blockSize=1024, gridSize;
-	cudaStream_t stream;
-	cudaStreamCreate( &stream );
-	const double alpha = 1;
-	const double beta = 0;
+	gridSize = (int)ceil((float)nel*nx1*nx1*nx1/blockSize);
 
-	gridSize = (int)ceil((float)nel*nxd_2/blockSize);
-	//mxm<<<gridSize, blockSize>>>(ur,nxd_2, dt, nxd, u, nxd, nel, nxd_3, 0, nxd_3, 0);
-	cuda_multi_gemm_unif(stream, 'N', 'N', nxd, nxd, nxd, &alpha, dt, nxd, 0, ur, nxd, nxd_2, &beta, u, nxd, nxd_2, nel, gridSize);
+	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nx1*nx1);
 
-	gridSize = (int)ceil((float)nel*nxd_2/blockSize);
-	//w(nxd*nxd,nxd) = ut(nxd*nxd,nxd) * D(nxd,nxd) fortran
-	//w(nxd,nxd*nxd) = D(nxd,nxd) * ut(nxd,nxd*nxd) C
-	//mxm<<<gridSize, blockSize>>>(d,nxd, ut, nxd, w, nxd_2, nel, 0, nxd_3, nxd_3, 0);
-	cuda_multi_gemm_unif(stream, 'N', 'N', nxd, nxd, nxd, &alpha, us, nxd, nxd_2, d, nxd, 0, &beta, w, nxd, nxd_2, nel, gridSize);
-
-	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nxd_3);
-	cudaStreamDestroy(stream);
 
 
 }
@@ -289,72 +283,79 @@ __global__ void mxm(double *a, int n1, double *b, int n2, double *c, int n3, int
 
 }
 
-void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx, int nxd, double *d, double *dt, int nel){
+void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx1, double *d, double *dt, int nel){
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code1 = cudaPeekAtLastError();
+	cudaDeviceSynchronize();
+	cudaError_t code1 = cudaPeekAtLastError();
 
-        printf("CUDA: Start gpu_local_grad3 nott cuda status: %s\n",cudaGetErrorString(code1));
-
-#endif
-	int nx_2 = nx*nx;
-	int nx_3 = nx_2*nx;
-	int nxd_3 = pow(nxd,3);
-	//ur(nx,nx*nx) = D(nx,nx) * u(nx,nx*nx) fortran
-	//ur(nx*nx,nx) = u(nx*nx,nx) * D(nx,nx) C
-	int blockSize=1024, gridSize;
-	gridSize = (int)ceil((float)nel*nx_3/blockSize);
-//	mxm<<<gridSize, blockSize>>>(u,nx_2, d, nx, ur, nx, nel, nx_3, 0, nxd_3, 0);//ur,us, ut should be indexed by nxd
-#ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        code1 = cudaPeekAtLastError();
-
-        printf("CUDA: gpu_local_grad3 nott after 1st mxmcuda status: %s\n",cudaGetErrorString(code1));
+	printf("CUDA: Start gpu_local_grad3 nott cuda status: %s\n",cudaGetErrorString(code1));
 
 #endif
 
-	for(int k = 0; k<nx; k++){
-		//usk(nx,nx) = uk(nx,nx) * dt(nx,nx) fortran
-		//usk(nx,nx) = dt(nx,nx) * uk(nx,nx) C
-		gridSize = (int)ceil((float)nel*nx_2/blockSize);
-//		mxm<<<gridSize, blockSize>>>(dt,nx, u+k*nx_2, nx, us+k*nx_2, nx, nel, 0, nx_3, nxd_3, 0);
-	}
+ cublasHandle_t handle;
+        cublasCreate(&handle);
+        const double alf = 1;
+        const double bet = 0;
+        const double *alpha = &alf;
+        const double *beta = &bet;
+        // Do the actual multiplication
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nx1*nel,nx1,alpha,d, nx1, u, nx1, beta,ur,nx1);
+
 #ifdef DEBUGPRINT
         cudaDeviceSynchronize();
-        code1 = cudaPeekAtLastError();
-
-        printf("CUDA: gpu_local_grad3 nott after for loop  mxmcuda status: %s\n",cudaGetErrorString(code1));
+        cudaError_t code3 = cudaPeekAtLastError();
+        printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
 
 #endif
-	//ut(nx_2,nx) = u(nx_2,nx) * dt(nx,nx) fortran
-	//ut(nx,nx_2) = dt(nx,nx) * u(nx,nx_2) C
-	gridSize = (int)ceil((float)nel*nx_3/blockSize);
-//	mxm<<<gridSize, blockSize>>>(dt, nx, u, nx, ut, nx_2, nel, 0, nx_3, nxd_3, 0);
+        cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,u, nx1,nx1*nx1, dt,nx1,0, beta,us ,nx1,nx1*nx1,nel*nx1);
 #ifdef DEBUGPRINT
         cudaDeviceSynchronize();
-        code1 = cudaPeekAtLastError();
+        cudaError_t code4 = cudaPeekAtLastError();
+        printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
 
-        printf("CUDA: End gpu_local_grad3 nott cuda status: %s\n",cudaGetErrorString(code1));
 
+ cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1*nx1, nx1, nx1, alpha,u, nx1*nx1,nx1*nx1*nx1, dt,nx1,0, beta,ut ,nx1*nx1,nx1*nx1*nx1,nel);
+#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code5 = cudaPeekAtLastError();
+        printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
 #endif
 
 }
 
-void gpu_local_grad2(double * ur, double *us, double *u, int nx, int nxd, double *d, double *dt, int nel){
+void gpu_local_grad2(double * ur, double *us, double *u, int nx1, double *d, double *dt, int nel){
 
-	int nx_2 = nx*nx;
-	int nx_3 = nx_2*nx;
-	int nxd_2 = pow(nxd,2);
-	int nxd_3 = pow(nxd,3);
-	//ur(nx,nx*nx) = D(nx,nx) * u(nx,nx*nx) fortran
-	//ur(nx*nx,nx) = u(nx*nx,nx) * D(nx,nx) C
-	int blockSize=1024, gridSize;
-	gridSize = (int)ceil((float)nel*nx_2/blockSize);
-	mxm<<<gridSize, blockSize>>>(u,nx, d, nx, ur, nx, nel, nx_2, 0, nxd_2, 0);//ur,us, ut should be indexed by nxd
-	//ut(nx_2,nx) = u(nx_2,nx) * dt(nx,nx) fortran
-	//ut(nx,nx_2) = dt(nx,nx) * u(nx,nx_2) C
-	gridSize = (int)ceil((float)nel*nx_2/blockSize);
-	mxm<<<gridSize, blockSize>>>(dt, nx, u, nx, us, nx, nel, 0, nx_2, nxd_2, 0);
+#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code1 = cudaPeekAtLastError();
+
+        printf("CUDA: Start gpu_local_grad2 cuda status: %s\n",cudaGetErrorString(code1));
+
+#endif
+
+        cublasHandle_t handle;
+        cublasCreate(&handle);
+        const double alf = 1;
+        const double bet = 0;
+        const double *alpha = &alf;
+        const double *beta = &bet;
+        // Do the actual multiplication
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nel,nx1,alpha,d, nx1, u, nx1, beta,ur,nx1);
+
+#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code3 = cudaPeekAtLastError();
+        printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+
+#endif
+
+        cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,u, nx1,nx1*nx1, dt,nx1,0, beta,us ,nx1,nx1*nx1,nel);
+#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code5 = cudaPeekAtLastError();
+        printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
+#endif
+
 
 }
 
@@ -458,9 +459,9 @@ void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double
 
 #ifdef DEBUGPRINT
 	cudaError_t code1 = cudaPeekAtLastError();
-        if (code1 != cudaSuccess){
-                printf("Start gpu_specmpn cuda error str 1: %s\n",cudaGetErrorString(code1));
-        }
+	if (code1 != cudaSuccess){
+		printf("Start gpu_specmpn cuda error str 1: %s\n",cudaGetErrorString(code1));
+	}
 #endif
 
 	if(if3d){

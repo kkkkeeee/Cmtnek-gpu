@@ -77,7 +77,7 @@
       real, device :: d_tzm1(lx1,ly1,lz1,lelt)         ! 31
       real, device :: d_jacmi(lx1,ly1,lz1,lelt)      ! 32
 !      real, device :: d_dt(lxd*lyd*lzd)              ! 33
-      real, device :: d_usrf(lx1,ly1,lz1,5)      ! 34
+      real, device :: d_usrf(lx1,ly1,lz1,5,lelt)      ! 34 additional lelt to support gpu.
 !!      real, device :: d_vols(lx1,ly1,lz1,nelt,5)    ! 35
       real, device :: d_wghtc(lx1*lz1)               ! 36
       real, device :: d_wghtf(lxd*lzd)               ! 37
@@ -311,7 +311,7 @@
 !           istate = cudaMemcpy(d_res3, res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
 !      endif 
       if(togpucopy_gas(34).eq.1) then
-           istate = cudaMemcpy(d_usrf,usrf, lx1*ly1*lz1*5,cudaMemcpyHostToDevice)
+!           istate = cudaMemcpy(d_usrf,usrf, lx1*ly1*lz1*5,cudaMemcpyHostToDevice)
 !      print *,"istate 34", cudaGetErrorString(istate)
       endif 
 !      if(togpucopy_gas(1).eq.1) then
@@ -1804,7 +1804,7 @@
 !           istate = cudaMemcpy(res3, d_res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyDeviceToHost)
 !      endif 
       if(tocpucopy_gas(34).eq.1) then
-           istate = cudaMemcpy(usrf,d_usrf, lx1*ly1*lz1*5,cudaMemcpyDeviceToHost)
+!           istate = cudaMemcpy(usrf,d_usrf, lx1*ly1*lz1*5,cudaMemcpyDeviceToHost)
 !      print *,"istate 34", cudaGetErrorString(istate) 
       endif 
 !      if(tocpucopy_gas(1).eq.1) then

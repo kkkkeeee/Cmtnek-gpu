@@ -334,7 +334,7 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 				}
 				for(int jj=0;jj<ldim;jj++){
 					for(int eq2=1;eq2<ldim+1;eq2++){
-						viscscr[id]=gradu[jj*toteqlxyzlelt+eq2*lxyzlelt+id ]* u[e*toteqlxyz+eq2*nxyz+iz*lxy+iy*lx1+ix]+vdiff[(inus-1)*lxyzlelt+id] ;
+						viscscr[id]=gradu[jj*toteqlxyzlelt+eq2*lxyzlelt+id ]* u[e*toteqlxyz+eq2*nxyz+iz*lxy+iy*lx1+ix]*vdiff[(inus-1)*lxyzlelt+id] ;
 						viscscr[id]=viscscr[id]/vtrans[(irho-1)*lxyzlelt+id];	
 						diffh[jj*lxyzlelt+id]=diffh[jj*lxyzlelt+id]-viscscr[id];
 						diffh[jj*lxyzlelt+id]=  diffh[jj*lxyzlelt+id]+vdiff[(inus-1)*lxyzlelt+id] *gradu[jj*toteqlxyzlelt+(toteq-1)*lxyzlelt+id ];
@@ -383,75 +383,6 @@ __global__ void igtu_cmt_gpu_kernel4(double *res1, double *gradm1_t_overwrites, 
 		res1[eq*lxyzlelt+id]  = res1[eq*lxyzlelt+id] +gradm1_t_overwrites[id];
 	}
 }
-/*void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nxd, double *d, double *dt, double *w, int nel){
-
-  int nxd_2 = nxd * nxd;
-  int nxd_3 = nxd_2 * nxd;
-// u(nxd,nxd*nxd) = dt(nxd,nxd) * ur(nxd, nxd*nxd) fortran
-// u(nxd*nxd,nxd) = ur(nxd*nxd, nxd) * dt(nxd,nxd) C
-int blockSize=1024, gridSize;
-cudaStream_t stream;
-cudaStreamCreate( &stream );
-const double alpha = 1;
-const double beta = 0;
-
-gridSize = (int)ceil((float)nel*nxd_3/blockSize);
-//mxm<<<gridSize, blockSize>>>(ur,nxd_2, dt, nxd, u, nxd, nel, nxd_3, 0, nxd_3, 0);
-cuda_multi_gemm_unif(stream, 'N', 'N', nxd, nxd, nxd_2, &alpha, dt, nxd, 0, ur, nxd, nxd_3, &beta, u, nxd, nxd_3, nel, gridSize);
-
-for(int k = 0; k<nxd;k++){
-//wk(nxd,nxd) = usk(nxd,nxd)*D(nxd,nxd) fortran
-//wk(nxd,nxd) = D(nxd,nxd)*usk(nxd,nxd) C
-gridSize = (int)ceil((float)nel*nxd_2/blockSize);
-//mxm<<<gridSize, blockSize>>>(d,nxd, us+k*nxd_2, nxd, w+k*nxd_2, nxd, nel, 0, nxd_3, nxd_3, 0);
-cuda_multi_gemm_unif(stream, 'N', 'N', nxd, nxd, nxd, &alpha, us+k*nxd_2, nxd, nxd_3, d, nxd, 0, &beta, w+k*nxd_2, nxd, nxd_3, nel, gridSize);
-
-
-}
-gridSize = (int)ceil((float)nel*nxd_3/blockSize);
-nekadd2<<<gridSize, blockSize>>>(u,w, nel*nxd_3);
-//w(nxd*nxd,nxd) = ut(nxd*nxd,nxd) * D(nxd,nxd) fortran
-//w(nxd,nxd*nxd) = D(nxd,nxd) * ut(nxd,nxd*nxd) C
-//mxm<<<gridSize, blockSize>>>(d,nxd, ut, nxd, w, nxd_2, nel, 0, nxd_3, nxd_3, 0);
-cuda_multi_gemm_unif(stream, 'N', 'N', nxd_2, nxd, nxd, &alpha, ut, nxd, nxd_3, d, nxd, 0, &beta, w, nxd_2, nxd_3, nel, gridSize);
-
-nekadd2<<<gridSize, blockSize>>>(u,w, nel*nxd_3);
-cudaStreamDestroy(stream);
-
-
-
-}
-
-void gpu_local_grad2_t(double *u, double *ur, double *us, double *ut, int nxd, double *d, double *dt, double *w, int nel){
-
-int nxd_2 = nxd * nxd;
-int nxd_3 = nxd_2 * nxd;
-// u(nxd,nxd*nxd) = dt(nxd,nxd) * ur(nxd, nxd*nxd) fortran
-// u(nxd*nxd,nxd) = ur(nxd*nxd, nxd) * dt(nxd,nxd) C
-int blockSize=1024, gridSize;
-cudaStream_t stream;
-cudaStreamCreate( &stream );
-const double alpha = 1;
-const double beta = 0;
-
-gridSize = (int)ceil((float)nel*nxd_3/blockSize);
-//mxm<<<gridSize, blockSize>>>(ur,nxd_2, dt, nxd, u, nxd, nel, nxd_3, 0, nxd_3, 0);
-cuda_multi_gemm_unif(stream, 'N', 'N', nxd, nxd, nxd_2, &alpha, dt, nxd, 0, ur, nxd, nxd_3, &beta, u, nxd, nxd_3, nel, gridSize);
-
-gridSize = (int)ceil((float)nel*nxd_3/blockSize);
-//w(nxd*nxd,nxd) = ut(nxd*nxd,nxd) * D(nxd,nxd) fortran
-//w(nxd,nxd*nxd) = D(nxd,nxd) * ut(nxd,nxd*nxd) C
-//mxm<<<gridSize, blockSize>>>(d,nxd, ut, nxd, w, nxd_2, nel, 0, nxd_3, nxd_3, 0);
-cuda_multi_gemm_unif(stream, 'N', 'N', nxd_2, nxd, nxd, &alpha, ut, nxd, nxd_3, d, nxd, 0, &beta, w, nxd_2, nxd_3, nel, gridSize);
-
-nekadd2<<<gridSize, blockSize>>>(u,w, nel*nxd_3);
-cudaStreamDestroy(stream);
-
-
-}
-
- */
-
 
 extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,double *d_flux,double *d_gradu,double *d_graduf, int *d_iface_flux,double *d_diffh,double *d_vtrans,double *d_vdiff,double *d_vx,double *d_vy,double *d_vz,double *d_u,double *d_viscscr, double *d_jacmi,double *d_rxm1,double *d_rym1, double *d_rzm1,double *d_sxm1, double *d_sym1,double *d_szm1,double *d_txm1, double *d_tym1,double *d_tzm1,double *d_dxm1,double *d_dxtm1,double *d_res1,int *toteq,int *iuj,int *lx1,int *ly1,int *lz1,int *irho, int *ilam,int *imu,int *icv, int *iknd,int *inus,int *nelt,int *lelt, int *ldim,int *ifsip,double *d_area,double *d_unx,double *d_uny,double *d_unz,int *if3d){
 
@@ -470,7 +401,7 @@ extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,doub
 	int nvol  =nxyz*nelt[0];
 	int ngradu=nxyz*toteq[0]*3;
 
-	int lxz2ldimlelt=nf*lelt[0];
+	int lxz2ldimlelt=nf*nelt[0];
 	int toteqlxz2ldimlelt= toteq[0]*lxz2ldimlelt;
 	int toteqlxyzlelt= toteq[0]*nlel;
 	double consta;
@@ -602,14 +533,6 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 		int iz = (id / (lxy))%lz1;
 		int e = id/nxyz;
 
-		if(istep==0&&e==0){
-			usrf[5*(iz*(lxy)+iy*lx1+ix)+0]=0;
-			usrf[5*(iz*(lxy)+iy*lx1+ix)+1]=0;
-			usrf[5*(iz*(lxy)+iy*lx1+ix)+2]=0;
-			usrf[5*(iz*(lxy)+iy*lx1+ix)+3]=0;
-			usrf[5*(iz*(lxy)+iy*lx1+ix)+4]=0;
-		}
-
 		int eg=lglel[e];
 		//nek assign
 		double x = xm1[e*nxyz+iz*lxy+iy*lx1+ix];
@@ -642,15 +565,10 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 		double ffx,ffy,ffz,qvol;  //actually these things should copy back to the cpu varibales. adeesha.
 		if (two_way >=2) {
 			if (istep > time_delay) {
-				ffx =  ptw[eg*nxyz+iz*lxy+iy*lx1+ix]/vtrans[eg*nxyz+iz*lxy+iy*lx1+ix] /(1.0-ptw[3*lxyzlelt+eg*nxyz+iz*lx1*ly1+iy*lx1+ix]);
-				ffy =  ptw[1*lxyzlelt+eg*lx1*nxyz+iz*lxy+iy*lx1+ix]/vtrans[eg*nxyz+iz*lxy+iy*lx1+ix] /(1.0-ptw[3*lxyzlelt+eg*nxyz+iz*lxy+iy*lx1+ix]);
-				ffz =  ptw[2*lxyzlelt+eg*nxyz+iz*lx1*ly1+iy*lx1+ix]/vtrans[eg*nxyz+iz*lxy+iy*lx1+ix] /(1.0-ptw[3*lxyzlelt+eg*nxyz+iz*lxy+iy*lx1+ix]);
-				if (icmtp == 1){
-					qvol= ptw[4*lxyzlelt+eg*nxyz+iz*lx1*ly1+iy*lx1+ix] + rhs_fluidp[4*lxyzlelt+eg*nxyz+iz*lxy+iy*lx1+ix];
-				}
-				else{
-					qvol=0.0;
-				}
+				ffx =  ptw[egg*nxyz+iz*lxy+iy*lx1+ix]/vtrans[egg*nxyz+iz*lxy+iy*lx1+ix] /(1.0-ptw[3*lxyzlelt+egg*nxyz+iz*lx1*ly1+iy*lx1+ix]);
+				ffy =  ptw[1*lxyzlelt+egg*lx1*nxyz+iz*lxy+iy*lx1+ix]/vtrans[egg*nxyz+iz*lxy+iy*lx1+ix] /(1.0-ptw[3*lxyzlelt+egg*nxyz+iz*lxy+iy*lx1+ix]);
+				ffz =  ptw[2*lxyzlelt+egg*nxyz+iz*lx1*ly1+iy*lx1+ix]/vtrans[egg*nxyz+iz*lxy+iy*lx1+ix] /(1.0-ptw[3*lxyzlelt+egg*nxyz+iz*lxy+iy*lx1+ix]);
+					qvol= ptw[4*lxyzlelt+egg*nxyz+iz*lx1*ly1+iy*lx1+ix] + rhs_fluidp[3*lxyzlelt+egg*nxyz+iz*lxy+iy*lx1+ix];
 			}
 			else{
 				ffx = 0.0;
@@ -666,10 +584,10 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 
 		}			
 
-		usrf[1*nxyz+iz*(lxy)+iy*lx1+ix] = ffx*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
-		usrf[2*nxyz+iz*(lxy)+iy*lx1+ix] = ffy*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
-		usrf[3*nxyz+iz*(lxy)+iy*lx1+ix] = ffz*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
-		usrf[4*nxyz+iz*(lxy)+iy*lx1+ix] = qvol;
+		usrf[e*5*nxyz+1*nxyz+iz*(lxy)+iy*lx1+ix] = ffx*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
+		usrf[e*5*nxyz+2*nxyz+iz*(lxy)+iy*lx1+ix] = ffy*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
+		usrf[e*5*nxyz+3*nxyz+iz*(lxy)+iy*lx1+ix] = ffz*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
+		usrf[e*5*nxyz+4*nxyz+iz*(lxy)+iy*lx1+ix] = qvol;
 
 
 
@@ -794,12 +712,12 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 		compute_gradients_gpu_kernel1<<<gridSize, blockSize>>>(d_ud,d_u,d_phig,nnel,lx1[0],ly1[0],lz1[0],lxy,nxyz,toteqlxyz,eq);
 
 		if(if3d[0]){
-			gpu_local_grad3(d_ur,d_us,d_ut,d_ud,m0,1,d_dxm1,d_dxtm1,nelt[0]);// why define  d_ur .. to ldd if only using lx1. check with Dr.Tania. adeesha.
+			gpu_local_grad3(d_ur,d_us,d_ut,d_ud,lx1[0],d_dxm1,d_dxtm1,nelt[0]);// why define  d_ur .. to ldd if only using lx1. check with Dr.Tania. adeesha.
 			compute_gradients_gpu_kernel2<<<gridSize, blockSize>>>(d_ur,d_us,d_ut,d_gradu,d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,lx1[0],ly1[0],lz1[0],lxy,nxyz,toteqlxyz,eq,nnel);
 
 		}
 		else{
-			gpu_local_grad2(d_ur,d_us,d_ud,m0,1,d_dxm1,d_dxtm1,nelt[0]);
+			gpu_local_grad2(d_ur,d_us,d_ud,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
 			compute_gradients_gpu_kernel3<<<gridSize, blockSize>>>(d_ur,d_us,d_gradu,d_jacmi,d_rxm1,d_rym1,d_sxm1,d_sym1,nnel,lx1[0],ly1[0],lxy,nxyz,toteqlxyz,eq,lz1[0]);
 
 
@@ -1419,7 +1337,7 @@ __global__ void viscous_cmt_gpu_kernel1(double *diffh,double *gradu, double *vtr
 		}
 		else{
 			if(eq<toteq-1){
-				viscscr[id]=gradu[0*toteqlxyzlelt+(eq-1)*lxyzlelt+id ]; // problem with du indices. du(1,1,eq-1) third is for ldim check wih Dr.Tania adeesha.
+				viscscr[id]=gradu[(eq-1)*toteqlxyzlelt+0*lxyzlelt+id ]; // problem with du indices. du(1,1,eq-1) third is for ldim check wih Dr.Tania adeesha. update: change after Jason's reply on slack
 				viscscr[id]=viscscr[id]*vdiff[(inus-1)*lxyzlelt+id];
 				diffh[0*lxyzlelt+id]=  diffh[0*lxyzlelt+id]+viscscr[id]*vx[id]; 
 				diffh[1*lxyzlelt+id]=  diffh[1*lxyzlelt+id]+viscscr[id]*vy[id];
