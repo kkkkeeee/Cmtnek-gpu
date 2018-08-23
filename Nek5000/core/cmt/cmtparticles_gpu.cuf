@@ -76,7 +76,7 @@
       real, device :: d_szm1(lx1,ly1,lz1,lelt)         ! 30
       real, device :: d_tzm1(lx1,ly1,lz1,lelt)         ! 31
       real, device :: d_jacmi(lx1,ly1,lz1,lelt)      ! 32
-!      real, device :: d_dt(lxd*lyd*lzd)              ! 33
+      real, device :: d_dt(lxd*lyd*lzd)              ! 33
       real, device :: d_usrf(lx1,ly1,lz1,5,lelt)      ! 34 additional lelt to support gpu.
 !!      real, device :: d_vols(lx1,ly1,lz1,nelt,5)    ! 35
       real, device :: d_wghtc(lx1*lz1)               ! 36
@@ -107,8 +107,14 @@
 !      real, device :: d_fatface(nqq*3*lx1*lz1*2*ldim*lelt) !61 only for now. remove this and put it in surfaces cuda functions and delete. change this later.
       real, device :: d_wkd(2*lxd*lxd*lxd*lelt) !62  ! may be not needed. check and remove later. adeesha.
       real, device :: d_viscscr(lx1*ly1*lz1*lelt) !63  ! may be not needed. check and remove later. adeesha.
-      real, device :: d_dg(lxd*lyd*lzd) !64  ! may be not needed. check and remove later. adeesha. also check why there is no lelt
-      real, device :: d_dgt(lxd*lyd*lzd) !65  ! may be not needed. check and remove later. adeesha. also check why there is no lelt
+      real, device :: d_d(lxd*lyd*lzd)              ! 66
+      real, device :: d_jgl(lxd*lyd*lzd)              ! 67
+      real, device :: d_jgt(lxd*lyd*lzd)              ! 68
+      real, device :: d_dg(lxd*lyd*lzd)              ! 69
+      real, device :: d_dgt(lxd*lyd*lzd)              !70 
+
+!important **** need jgl and jgt arrays here to store constant values in get_int_ptr or some similar function
+
 
 !      particles structures
 
@@ -307,11 +313,11 @@
 !      print *,"istate 32", cudaGetErrorString(istate)
       endif 
 
-!      if(togpucopy_gas(1).eq.1) then
-!           istate = cudaMemcpy(d_res3, res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
-!      endif 
+      if(togpucopy_gas(33).eq.1) then
+           istate = cudaMemcpy(d_dt,dt, lxd*lyd*lzd,cudaMemcpyHostToDevice)
+      endif 
       if(togpucopy_gas(34).eq.1) then
-!           istate = cudaMemcpy(d_usrf,usrf, lx1*ly1*lz1*5,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_usrf,usrf, lx1*ly1*lz1*5,cudaMemcpyHostToDevice)
 !      print *,"istate 34", cudaGetErrorString(istate)
       endif 
 !      if(togpucopy_gas(1).eq.1) then
@@ -445,8 +451,26 @@
            !istate = cudaMemcpy(d_wkd,wkd,2*lxd*lxd*lxd*lelt,cudaMemcpyHostToDevice)
 !      print *,"istate 63", cudaGetErrorString(istate)
       endif
-
-
+      if(togpucopy_gas(66).eq.1) then
+           istate = cudaMemcpy(d_d,d,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 66", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(67).eq.1) then
+           istate = cudaMemcpy(d_jgl,jgl,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 67", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(68).eq.1) then
+           istate = cudaMemcpy(d_jgt,jgt,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 68", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(69).eq.1) then
+           istate = cudaMemcpy(d_dg,dg,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 69", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(70).eq.1) then
+           istate = cudaMemcpy(d_dgt,dgt,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 70", cudaGetErrorString(istate)
+      endif
 
 !-----copy particles data
 
@@ -788,7 +812,7 @@
 !         do eq=1,toteq  ! this is covered inside each function
             call convective_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_wkd,d_convh,d_vxd,d_vyd,&
               d_vzd,d_totalh,d_rx,d_dg,d_dgt,d_res1,lx1,ly1,lz1,nelt,lelt,toteq,lxd,&
-              lyd,lzd,ldim,if3dgpu,d_u,d_phig,d_pr)        ! convh & totalh -> res1
+              lyd,lzd,ldim,if3dgpu,d_u,d_phig,d_pr,d_dt,d_d,d_jgl,d_jgt)        ! convh & totalh -> res1
 
 
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after convective_cmt_gpu_wrapper", nid
@@ -803,7 +827,7 @@
 
             call compute_forcing_gpu_wrapper(glbblockSize1,d_phig,d_rxm1,d_sxm1,d_txm1,d_rym1,d_sym1,d_tym1,&
              d_rzm1,d_szm1,d_tzm1,d_jacmi,d_pr,d_res1,d_usrf,d_bm1,lx1,ly1,lz1,lelt,nelt,if3dgpu,&
-             lxd,lyd,lzd,toteq,ldim,d_wkd)
+             lxd,lyd,lzd,toteq,ldim,d_wkd,d_d,d_dt)
 
 
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_forcing_gpu_wrapper", nid

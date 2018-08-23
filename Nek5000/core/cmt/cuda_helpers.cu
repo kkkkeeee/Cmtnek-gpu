@@ -292,33 +292,33 @@ void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx1, do
 
 #endif
 
- cublasHandle_t handle;
-        cublasCreate(&handle);
-        const double alf = 1;
-        const double bet = 0;
-        const double *alpha = &alf;
-        const double *beta = &bet;
-        // Do the actual multiplication
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nx1*nel,nx1,alpha,d, nx1, u, nx1, beta,ur,nx1);
+	cublasHandle_t handle;
+	cublasCreate(&handle);
+	const double alf = 1;
+	const double bet = 0;
+	const double *alpha = &alf;
+	const double *beta = &bet;
+	// Do the actual multiplication
+	cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nx1*nel,nx1,alpha,d, nx1, u, nx1, beta,ur,nx1);
 
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code3 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+	cudaDeviceSynchronize();
+	cudaError_t code3 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
 
 #endif
-        cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,u, nx1,nx1*nx1, dt,nx1,0, beta,us ,nx1,nx1*nx1,nel*nx1);
+	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,u, nx1,nx1*nx1, dt,nx1,0, beta,us ,nx1,nx1*nx1,nel*nx1);
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code4 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
+	cudaDeviceSynchronize();
+	cudaError_t code4 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
+#endif
 
-
- cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1*nx1, nx1, nx1, alpha,u, nx1*nx1,nx1*nx1*nx1, dt,nx1,0, beta,ut ,nx1*nx1,nx1*nx1*nx1,nel);
+	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1*nx1, nx1, nx1, alpha,u, nx1*nx1,nx1*nx1*nx1, dt,nx1,0, beta,ut ,nx1*nx1,nx1*nx1*nx1,nel);
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code5 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
+	cudaDeviceSynchronize();
+	cudaError_t code5 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
 #endif
 
 }
@@ -326,34 +326,34 @@ void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx1, do
 void gpu_local_grad2(double * ur, double *us, double *u, int nx1, double *d, double *dt, int nel){
 
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code1 = cudaPeekAtLastError();
+	cudaDeviceSynchronize();
+	cudaError_t code1 = cudaPeekAtLastError();
 
-        printf("CUDA: Start gpu_local_grad2 cuda status: %s\n",cudaGetErrorString(code1));
-
-#endif
-
-        cublasHandle_t handle;
-        cublasCreate(&handle);
-        const double alf = 1;
-        const double bet = 0;
-        const double *alpha = &alf;
-        const double *beta = &bet;
-        // Do the actual multiplication
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nel,nx1,alpha,d, nx1, u, nx1, beta,ur,nx1);
-
-#ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code3 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+	printf("CUDA: Start gpu_local_grad2 cuda status: %s\n",cudaGetErrorString(code1));
 
 #endif
 
-        cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,u, nx1,nx1*nx1, dt,nx1,0, beta,us ,nx1,nx1*nx1,nel);
+	cublasHandle_t handle;
+	cublasCreate(&handle);
+	const double alf = 1;
+	const double bet = 0;
+	const double *alpha = &alf;
+	const double *beta = &bet;
+	// Do the actual multiplication
+	cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1*nel,nx1,alpha,d, nx1, u, nx1, beta,ur,nx1);
+
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code5 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
+	cudaDeviceSynchronize();
+	cudaError_t code3 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+
+#endif
+
+	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,u, nx1,nx1*nx1, dt,nx1,0, beta,us ,nx1,nx1*nx1,nel);
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	cudaError_t code5 = cudaPeekAtLastError();
+	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
 #endif
 
 
@@ -445,18 +445,8 @@ void gpu_get_dgl_ptr (int *ip,int  if3d, int mx, int md, int nelt,double *dg, do
 
 }
 
-void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double* d_ab, bool if3d, double * d_w, int ldw, int nel, int neq, int eq, bool second_eq){
-	//d_a is array(na,na,na)*nel, d_b(nb,nb,nb)*nel, w(ldw)*nel where ldw = na*na*nb+nb*nb*na
-	//d_a is array of nel each array(na,na,na)
-	int blockSize, gridSize;
-
-	// Number of threads in each thread block
-	blockSize = 1024;
-	cudaStream_t stream;
-	cudaStreamCreate( &stream );
-	const double alpha = 1;
-	const double beta = 0;
-
+void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double* d_ab, bool if3d, double * d_w, int ldw, int nel, int intermediatestride, int eq, bool second_eq){
+	//intermediatestride means the stride size need to skip
 #ifdef DEBUGPRINT
 	cudaError_t code1 = cudaPeekAtLastError();
 	if (code1 != cudaSuccess){
@@ -464,59 +454,140 @@ void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double
 	}
 #endif
 
-	if(if3d){
-		int nab = na*nb;
-		int nbb = nb*nb;
-		//calc w = ba*a in fortran
-		//so in c calc wt = at * bat
-		//call mxm(ba,nb,a,na,w,na*na)
-		//in fortran calc w(nb,na*na) = ba(nb,na) * a(na,na*na)
-		//in c w(na*na,nb) = a(na*na,na) * ba(na,nb)
-		//neq = 1 if array not indexed by eq and eq = 0
-		int aSize = neq*pow(na,3), bSize = pow(nb,3);
-		gridSize = (int)ceil((float)na*na*nb*nel/blockSize);
-		//mxm<<<gridSize, blockSize>>>(d_a,na*na, d_ba, na, d_w, nb, nel, aSize, 0, ldw, eq*pow(na,3));
+	cublasHandle_t handle;
+	cublasCreate(&handle);
+	const double alf = 1;
+	const double bet = 0;
+	const double *alpha = &alf;
+	const double *beta = &bet;
 
-		int resultfrommultigem = cuda_multi_gemm_unif(stream, 'N', 'N', nb, na, na*na, &alpha, d_ba, nb, 0, d_a, na, aSize, &beta, d_w, nb, ldw, nel, gridSize);
-		int k = 0, l = na*na*nb;
-		for(int iz=0; iz<na;iz++){
-			//calc in fortran wl(nb*nb) = wk(nb*na) * ab(na*nb)
-			//in c wl(nb*nb) = ab(nb*na) * wk(na*nb)
-			gridSize = (int)ceil((float)nb*nb*nel/blockSize);
-			//mxm<<<gridSize, blockSize>>>(d_ab,nb, d_w+k, na, d_w+l, nb, nel, 0, ldw, ldw, 0);
-			cuda_multi_gemm_unif(stream, 'N', 'N', nb, na, nb, &alpha, d_w+k, nb, ldw, d_ab, na, 0, &beta, d_w+l, nb, ldw, nel, gridSize);
+	if(second_eq){// this is idir in intp_rstd function
 
-			k = k + nab;
-			l = l + nbb;
+		if(if3d){
+			int nab = na*nb;
+			int nbb = nb*nb;
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na*na , na, alpha,d_ba, nb,0, d_a,na,na*na*na*intermediatestride, beta,d_w ,nb,nb*na*na,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code4 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride 4: %s\n",cudaGetErrorString(code4));
+
+#endif
+
+
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,na*nb , d_ab,na,0, beta,d_w+na*na*nb*nel ,nb,nb*nb,na*nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code5 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride 5: %s\n",cudaGetErrorString(code5));
+
+#endif
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb*nb,nb,na, alpha,d_w+na*na*nb*nel, nb*nb,nb*nb*na , d_ab,na,0, beta,d_b,nb*nb,nb*nb*nb,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code6 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride 6: %s\n",cudaGetErrorString(code6));
+
+#endif
+
 		}
-		l = na*na*nb;
-		//calc in fortran b(nb*nb,nb) = wl(nb*nb,na)* ab(na,nb)
-		//in C b(nb,nb*nb) = ab(nb,na) * wl(na,nb*nb)
-		gridSize = (int)ceil((float)nb*nb*nb*nel/blockSize);
-		//mxm<<<gridSize, blockSize>>>(d_ab,nb, d_w+l, na, d_b, nb*nb, nel, 0, ldw, bSize, 0);
-		cuda_multi_gemm_unif(stream, 'N', 'N', nb*nb, na, nb, &alpha, d_w+l, nb*nb, ldw, d_ab, na, 0, &beta, d_b, nb*nb, bSize, nel, gridSize);
+		else{
 
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na, na, alpha,d_ba, nb,0, d_a,na,na*na*intermediatestride, beta,d_w ,nb,nb*na,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code7 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride:  7 %s\n",cudaGetErrorString(code7));
+
+#endif
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,nb*na , d_ab,na,0, beta,d_b,nb,nb*nb,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code8 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride: 8%s\n",cudaGetErrorString(code8));
+
+#endif
+
+		}
 
 	}
 	else{
-		//calc w(nb*na) = ba(nb,na) * a(na,na) in fortran,
-		//in C w(na*nb) = a(na,na) * ba(na,nb)
-		gridSize = (int)ceil((float)na*nb*nel/blockSize);
-		mxm<<<gridSize, blockSize>>>(d_a,na, d_ba, na, d_w, nb, nel, neq*na*na, 0, ldw, eq*na*na);
-		//in fortran, b(nb,nb) = w(nb,na)*ab(na,nb)
-		//in C b(nb,nb) = ab(nb,na) * w(na,nb)
-		gridSize = (int)ceil((float)nb*nb*nel/blockSize);
-		mxm<<<gridSize, blockSize>>>(d_ab,nb, d_w, na, d_b, nb, nel, 0, ldw, nb*nb, 0);
 
+
+		if(if3d){
+			int nab = na*nb;
+			int nbb = nb*nb;
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na*na , na, alpha,d_ba, nb,0, d_a,na,na*na*na*intermediatestride, beta,d_w ,nb,nb*na*na,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code4 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride 4: %s\n",cudaGetErrorString(code4));
+
+#endif
+
+
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,na*nb , d_ab,na,0, beta,d_w+na*na*nb*nel ,nb,nb*nb,na*nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code5 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride 5: %s\n",cudaGetErrorString(code5));
+
+#endif
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb*nb,nb,na, alpha,d_w+na*na*nb*nel, nb*nb,nb*nb*na , d_ab,na,0, beta,d_b,nb*nb,nb*nb*nb,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code6 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride 6: %s\n",cudaGetErrorString(code6));
+
+#endif
+
+		}
+		else{
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na, na, alpha,d_ba, nb,0, d_a,na,na*na*intermediatestride, beta,d_w ,nb,nb*na,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code7 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride:  7 %s\n",cudaGetErrorString(code7));
+
+#endif
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,nb*na , d_ab,na,0, beta,d_b,nb,nb*nb,nel);
+
+#ifdef DEBUGPRINT
+			cudaDeviceSynchronize();
+			cudaError_t code8 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride: 8%s\n",cudaGetErrorString(code8));
+
+#endif
+
+		}
 
 	}
+
 #ifdef DEBUGPRINT
 	cudaError_t code = cudaPeekAtLastError();
 	if (code != cudaSuccess){
 		printf("cuda error str 1: %s\n",cudaGetErrorString(code));
 	}
 #endif
-	cudaStreamDestroy(stream);
+
 
 }
 void gpu_gen_dgll(double *dgl,double *dgt,int mp,int np,double *w){
@@ -562,18 +633,5 @@ void gpu_get_dgll_ptr (int *ip,int  if3d, int mx, int md, int nelt,double *d, do
 }
 
 
-
-void gpu_gradl_rst(double *ur, double *us, double *ut, double *u, double *d, double *dt, int md, int nel, bool if3d,int *ip,double *wkd,int *pdg,int nx, int nxd){
-	int m0=md-1;
-	//gpu_get_dgll_ptr(ip,if3d,md,md,nel,d,dt,wkd,nxd,pdg);
-	if(if3d){
-		gpu_local_grad3(ur, us, ut, u, nx, nxd, d, dt, nel);  //something is wrong with these functions. Need to do some deep digging to find out the correct values for nx and nx2. Talk with Mohamed to find out the correct way. adeesha.
-	}
-	else{
-		gpu_local_grad2(ur, us, u, nx, nxd, d, dt, nel);
-	}
-
-
-}
 
 

@@ -1,11 +1,11 @@
 
-void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nxd, double *d, double *dt, double *w, int nel);
+void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nx1, double *d, double *dt, double *w, int nel);
 
-void gpu_local_grad2_t(double *u, double *ur, double *us, int nxd, double *d, double *dt, double *w, int nel);
+void gpu_local_grad2_t(double *u, double *ur, double *us, int nx1, double *d, double *dt, double *w, int nel);
 
-void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx, int nxd, double *d, double *dt, int nel);
+void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx, double *d, double *dt, int nel);
 
-void gpu_local_grad2(double * ur, double *us, double *u, int nx, int nxd, double *d, double *dt, int nel);
+void gpu_local_grad2(double * ur, double *us, double *u, int nx, double *d, double *dt, int nel);
 
 void gpu_gen_int(double *jgl, double *jgt,int mp,int np,double *w);
 
