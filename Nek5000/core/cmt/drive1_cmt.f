@@ -85,7 +85,7 @@ c     Solve the Euler equations
          call nekgsync()
          print *,"cmt_nek_advance after rhs_and_dt_gpu time is",rhst,
      >      timefortimestep,stage,istep,nelt,lelt,lx1,lxd,nid
-        stop
+       
 c particle equations of motion are solved (also includes forcing)
 c In future this subroutine may compute the back effect of particles
 c on the fluid and suitably modify the residue computed by 
@@ -98,6 +98,9 @@ c compute_rhs_dt for the 5 conserved variables
 !           call fbinvert(res1(1,1,1,1,eq))
 !        enddo
 !         print *,"cmt_nek_advance after usr_particles_solver",nid
+         if(nid.eq.15) then
+            call update_u_gpu
+         else 
          do e=1,nelt
             do eq=1,toteq
             do i=1,nxyz1
@@ -117,12 +120,19 @@ c-----------------------------------------------------------------------
             enddo
             enddo
          enddo
+         endif
 !         print *,"cmt_nek_advance after 3 nested  for loop",nid
       enddo
 
 !      print *,"cmt_nek_advance after stage for loop",nid
+      if(nid.eq.15) then
+          call compute_primitive_vars_gpu
+          call copy_t_vtrans_gpu
+      else
+
       call compute_primitive_vars ! for next time step? Not sure anymore
       call copy(t(1,1,1,1,2),vtrans(1,1,1,1,irho),nxyz1*nelt)
+      endif
       ftime = ftime + dnekclock() - ftime_dum
 
       if (mod(istep,iostep).eq.0.or.istep.eq.1)then

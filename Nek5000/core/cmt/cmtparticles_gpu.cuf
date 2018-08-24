@@ -836,9 +836,9 @@
 !         enddo
 !      enddo
 
-      call igu_cmt(flux(iwp),graduf,flux(iwm))   !  yet to implement.  not sure how with all the global calls
+      call igu_cmt_gpu(flux(iwp),graduf,flux(iwm))  
       do eq=1,toteq
-         ieq=(eq-1)*ndg_face+iwp+abafbdf
+         ieq=(eq-1)*ndg_face+iwp
          call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
 
       enddo
@@ -847,6 +847,15 @@
       return
       end
 !-----------------------------------------------------------------------
+
+      subroutine update_u_gpu
+      use  glbvariable_gpu
+
+      call update_u_gpu_wrapper(glbblockSize1, d_u, d_bm1, d_tcoef, d_res3, &
+           d_res1, nelt, lelt, lx1, ly1, lz1, toteq, stage) 
+
+      return 
+      end
 
 !c----------------------------------------------------------------------
 !c     particle force routines

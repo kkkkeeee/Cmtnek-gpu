@@ -132,7 +132,38 @@ cudaError_t code2 = cudaPeekAtLastError();
 
 printf("CUDA: End compute_primitive_vars_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code2));
 #endif
+}
+
+__global__ void update_u_gpu_kernel(double *u, double *bm1, double *tcoef, double *res3, double *res1, int nelt, int lelt, int lx1, int ly1, int lz1, int toteq, int stage, int lxyz, int lxyznelttoteq, int lxyznelt){
+int id = blockIdx.x*blockDim.x+threadIdx.x;
+int ix = id % lx1;
+int iy = (id/lx1)%ly1;
+int iz = (id / (lx1*ly1))%lz1;
+int e = (id/lxyz) % nelt;
+int eq = id/lxyznelt;
+if(id<lxyznelttoteq){
+u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1] = bm1[ix + iy*lx1 + iz*lx1*ly1 + e*lxyz] * tcoef[(stage-1)*3] * res3[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1] + bm1[ix + iy*lx1 + iz*lx1*ly1 + e*lxyz] *  tcoef[(stage-1)*3+1] * u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1] - tcoef[(stage-1)*3+2] * res1[id];
+
+u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1] = u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1] / bm1[ix + iy*lx1 + iz*lx1*ly1 + e*lxyz];
+
+}
 
 
+}
+
+extern "C" void update_u_gpu_wrapper_(int *glbblockSize1, double *d_u, double *d_bm1, double *d_tcoef, double *d_res3, double *d_res1, int *nelt, int *lelt, int *lx1, int *ly1, int *lz1, int *toteq, int *stage){
+
+       int lxyz = lx1[0]*ly1[0]*lz1[0];
+       int lxyznelt = lx1[0]*ly1[0]*lz1[0]*nelt[0];
+       int lxyznelttoteq = lx1[0]*ly1[0]*lz1[0]*nelt[0]*toteq[0];
+       int blockSize =glbblockSize1[0], gridSize;
+       gridSize = (int)ceil((float)nelt[0]*lxyz*toteq[0]/blockSize);
+        update_u_gpu_kernel<<<gridSize, blockSize>>>(d_u, d_bm1, d_tcoef, d_res3, d_res1, nelt[0], lelt[0], lx1[0], ly1[0], lz1[0], toteq[0], stage[0], lxyz, lxyznelttoteq, lxyznelt);
+
+#ifdef DEBUGPRINT
+cudaError_t code2 = cudaPeekAtLastError();
+
+printf("CUDA: End compute_primitive_vars_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code2));
+#endif
 
 }

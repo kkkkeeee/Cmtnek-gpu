@@ -673,7 +673,7 @@ extern "C" void  igu_cmt_gpu_wrapper1_(int *glbblockSize2,double *d_flux,double 
 #endif
 	int lxz2ldim = lx1[0]*lz1[0]*2*ldim[0];
 	int ntot = nelt[0]*lxz2ldim;
-	int lxz2ldimlelt= lxz2ldim*lelt[0];
+	int lxz2ldimlelt= lxz2ldim*nelt[0];
 	int blockSize = glbblockSize2[0], gridSize;
 	gridSize = (int)ceil((float)ntot/blockSize);
 
@@ -701,7 +701,7 @@ extern "C" void  igu_cmt_gpu_wrapper2_(int *glbblockSize2,double *d_flux,double 
 	int a2ldim= 2*ldim[0];
 	int lxz2ldim = lxz*2*ldim[0];
 	int ntot = nelt[0]*lxz2ldim;
-	int lxz2ldimlelt =lxz2ldim*lelt[0];
+	int lxz2ldimlelt =lxz2ldim*nelt[0];
 	int  lxz2ldimlelttoteq= lxz2ldimlelt*toteq[0];
 
 	int blockSize = glbblockSize2[0], gridSize;

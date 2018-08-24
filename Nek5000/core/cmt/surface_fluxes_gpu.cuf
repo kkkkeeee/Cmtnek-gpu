@@ -337,23 +337,17 @@
 
       call igu_cmt_gpu_wrapper1(glbblockSize2,d_flux,d_graduf,toteq,iwp,lx1,ly1,lz1,ldim,nelt,lelt)
 
-!      call copy (flxscr,gdudxk,ntot) ! save AgradU.n
-!      const = 0.5
-!      call cmult(gdudxk,const,ntot)
-!-----------------------------------------------------------------------
-!      copy relevant arrays back to cpu. adeesha.
+      tocpucopy_gas(6)=1
+      call copytocpu_gpu()
+
       call gs_op_fields(dg_hndl,gdudxk,nfq,toteq,1,1,0)
-!      copy the back to gpu. adeesha.
-!-----------------------------------------------------------------------
+
+      togpucopy_gas(6)=1
+      call copytogpu_gpu()
 
       call igu_cmt_gpu_wrapper2(glbblockSize2,d_flux,d_graduf,d_cbc,d_unx,d_uny,d_unz,toteq,&
        iwp,iwm,ldim,irho,icvf,ilamf,imuf,iux,iuy,iuz,iu5,if3dgpu,lx1,ly1,lz1,nelt,lelt)
 
-!      call sub2  (flxscr,gdudxk,ntot) ! overwrite flxscr with
-!      call igu_dirichlet(flxscr,gdudxk)
-! 2. (Fbc.n)- on Neumann boundaries
-!      call bcflux(flxscr,gdudxk,wminus)
-!      call chsign(flxscr,ntot) ! needs to change with sign changes
 
       return
       end
