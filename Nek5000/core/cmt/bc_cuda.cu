@@ -165,11 +165,11 @@ __global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, do
 		char cb2 = cbc[e*18+iface+1];
 		char cb3 = cbc[e*18+iface+2];
 
-		if(id==0){
-			for(int i=0;i<5000;i++){
-				printf("cbc values cbc[%d]=%c \n",i,cbc[i]); 
-			}
-		}
+		//if(id==0){
+		//	for(int i=0;i<5000;i++){
+		//		printf("cbc values cbc[%d]=%c \n",i,cbc[i]); 
+		//	}
+		//}
 		//		printf("cb1 =%c \n",cb1);
 		if(cb1 =='O'){
 			int ieg=lglel[e];

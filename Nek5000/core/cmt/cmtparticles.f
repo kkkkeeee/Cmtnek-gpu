@@ -124,6 +124,9 @@ c        main loop to distribute particles
                rpart(jv2+j,n) = v_part(j)
                rpart(jv3+j,n) = v_part(j)
             enddo
+c           write(6,*) "debug particle", n, rpart(jx,n),
+c    >rpart(jx+1,n), rpart(jx+2,n), nwe, nw_tmp
+        
          
 c           set some rpart values for later use
             rpart(jdp,n)   = d_part                              ! particle diameter

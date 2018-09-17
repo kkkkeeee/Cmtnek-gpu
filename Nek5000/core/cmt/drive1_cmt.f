@@ -35,6 +35,8 @@ c     Solve the Euler equations
          else
             time_cmt=0.0 !time !0.0 ! until we can get settime to behave
          endif
+
+
          call cmt_flow_ics
          call init_cmt_timers
          call userchk ! need more ifdefs
@@ -44,17 +46,17 @@ c     Solve the Euler equations
          call entropy_viscosity      ! for high diffno
          call compute_transport_props! at t=0
 
-
+         if(nid.eq.15) then
+!            call printVdiff("before")
+         endif
 
          if(nid.eq.15) then
           !   print *,"cmt_nek_advance before to init_gpu",nid
-      do c = 1, 2
-      do b = 1, nelt
-      do a = 1, 6
-         write(6,*) 'cpu cbc: ', nid, a, b, c, cbc(a,b,c)
-      enddo
-      enddo
-      enddo
+!      do i=1,100
+!          print *, 'vtrans22,vx,vy,vz,pr,t,csound,phig,vtrans,vdiff', 
+!     > i,vtrans(i),vx(i),vy(i),vz(i),pr(i),t(i),csound(i),phig(i), 
+!     > vtrans(i),vdiff(i)
+!      enddo
             call usr_particles_init_gpu()
          endif
 
@@ -188,7 +190,10 @@ C> Store it in res1
 !     if(IFFLTR)  call filter_cmtvar(IFCNTFILT)
 !        primitive vars = rho, u, v, w, p, T, phi_g
 
+      !only for testing. delete later.
+
       call compute_primitive_vars
+
 
 !-----------------------------------------------------------------------
 ! JH072914 We can really only proceed with dt once we have current

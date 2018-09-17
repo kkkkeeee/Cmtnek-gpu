@@ -149,11 +149,24 @@
       subroutine usr_particles_init_gpu ()
       use cudafor
       use glbvariable_gpu       
-      
+     
+      parameter (ldg=lxd**3,lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt_1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg)&
+                  , wkd(lwkd)
+      real jgl,jgt
+ 
       integer code
       
       print *,"GPU: Start cmtparticles_gpu.cuf usr_particles_init ",nid
+
+!     call initial values of jgl,jgt,d,dt,dgl,dgt
+      call get_int_ptr (i,lx1,lxd)
+
+!       do i = 1, lxd*lxd*lxd
+!                write(6,*) " inint debug jgl first", i,jgl(i), jgt(i)
+!       enddo
  
+
       do i=1,lengthoftogpucopy_gas 
            togpucopy_gas(i)=1
       end do
@@ -177,6 +190,13 @@
       subroutine copytogpu_gpu ()
       use cudafor
       use glbvariable_gpu
+
+     
+      parameter (ldg=lxd**3)
+      parameter (lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt_1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg)&
+                  , wkd(lwkd)
+      real jgl,jgt
 
       integer code
       character cbc_new(3, 6, lelt, 0:ldimt1)
@@ -348,17 +368,17 @@
 !      do i = 1, 500
 !         write(6,*) 'gpu cbc: ', i, cbc(i,1,1)
 !      enddo
-      do c = 0, ldimt1
-      do b = 1, lelt
-      do a = 1, 6
-         cb=cbc(a, b, c)
-         cbc_new(1, a, b, c) = (cb(1:2))
-         cbc_new(2, a, b, c) = (cb(2:3))
-         cbc_new(3, a, b, c) = (cb(3:4))
-         write(6,*) 'cbc_new:', a, b, c, cbc_new(1, a, b, c), '1', cbc_new(2, a, b, c), '2', cbc_new(3, a, b, c), '3', cbc(a, b, c)
-      enddo
-      enddo
-      enddo
+!      do c = 0, ldimt1
+!      do b = 1, lelt
+!      do a = 1, 6
+!         cb=cbc(a, b, c)
+!         cbc_new(1, a, b, c) = (cb(1:2))
+!         cbc_new(2, a, b, c) = (cb(2:3))
+!         cbc_new(3, a, b, c) = (cb(3:4))
+!         write(6,*) 'cbc_new:', a, b, c, cbc_new(1, a, b, c), '1', cbc_new(2, a, b, c), '2', cbc_new(3, a, b, c), '3', cbc(a, b, c)
+!      enddo
+!      enddo
+!      enddo
 
      
            istate = cudaMemcpy(d_cbc,cbc_new,3*6*lelt*(ldimt1+1),cudaMemcpyHostToDevice)
@@ -643,6 +663,37 @@
       integer e,eq
       real wkj(lx1+lxd)
       character*32  dumchars
+
+
+
+
+
+!      do i = 1, nelt
+!        do j = 1, toteq
+!           do k = 1, lz1
+!              do m = 1, ly1
+!              do n = 1,lx1
+!              write(6,*) "uarray", n, m, k, j, i, u(n,m,k,j,i)
+!              enddo
+!              enddo
+!           enddo 
+!        enddo 
+!     enddo  
+!      call printUarray("before")
+
+      do i=1,100
+      print *, 'vtrans,vx,vy,vz,pr,t,csound,phig,vtrans,vdiff', &
+      i,vtrans(i),vx(i),vy(i),vz(i),pr(i),t(i),csound(i),phig(i), &
+      vtrans(i),vdiff(i)
+       enddo
+
+
+
+
+
+
+
+
  
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu start", nid
 
@@ -696,8 +747,11 @@
       endif
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before compute_primitive_vars_gpu", nid
 
+
+
       call compute_primitive_vars_gpu
 
+      
       !following code is for testing only. delete later.
       tocpucopy_gas(10)=1
       tocpucopy_gas(11)=1
@@ -709,7 +763,9 @@
       tocpucopy_gas(45)=1
       tocpucopy_gas(53)=1
       tocpucopy_gas(58)=1
+      tocpucopy_gas(56)=1
       call copytocpu_gpu()
+
 
 !      print *,"$$$ cmtparu.cuf compute_primitive_vars_gpu check", nid
 !      do i=1,100
@@ -741,16 +797,28 @@
 
       endif
 
+
+
+
 !     print *,"cmtparu.cuf compute_rhs_and_dt_gpu before entropy_viscosity_gpu", nid
 
       call entropy_viscosity_gpu ! accessed through uservp. computes
                              ! entropy residual and max wave speed
       print *,"cmtparu.cuf compute_rhs_and_dt_gpu after entropy_viscosity_gpu", nid
+!only for testing. delete later.
+!      tocpucopy_gas(53)=1
+!      call copytocpu_gpu()
+!      call printTemp("before")
+
+
 
       print *,"cmtparu.cuf compute_rhs_and_dt_gpu before compute_transport_props_gpu", nid
 
       call compute_transport_props_gpu ! everything inside rk stage
       
+
+      call printVdiff("before")
+
       print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_transport_props_gpu", nid
 
       ntot = lx1*ly1*lz1*lelt*toteq
@@ -1700,6 +1768,11 @@
       use cudafor
       use glbvariable_gpu
 
+      parameter (ldg=lxd**3)
+      parameter (lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt_1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg)&
+                  , wkd(lwkd)
+      real jgl,jgt
 
       integer code
 !      print *,"cmtpartcles_gpu copytocpu_gpu Start",nid 
@@ -1947,6 +2020,28 @@
 !           istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
 !      endif
 
+      if(tocpucopy_gas(66).eq.1) then
+           istate = cudaMemcpy(d,d_d,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 66", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(67).eq.1) then
+           istate = cudaMemcpy(jgl,d_jgl,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 67", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(68).eq.1) then
+           istate = cudaMemcpy(jgt,d_jgt,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 68", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(69).eq.1) then
+           istate = cudaMemcpy(dg,d_dg,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 69", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(70).eq.1) then
+           istate = cudaMemcpy(dgt,d_dgt,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 70", cudaGetErrorString(istate)
+      endif
+
+
 
 !-----copy particles data
 
@@ -2042,3 +2137,420 @@
 
 
 !----------------------------------------------------------------------
+      subroutine printUarray(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+      real   lpm_xerange(2,3,lelt)
+      common /lpm_elementrange/ lpm_xerange
+
+      integer isprint, i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+      isprint = 0
+         do i = 1, nelt
+            write(x1, fmt) i
+            write(x2, fmt) istep
+          OPEN(UNIT=9999+i,FILE='uarray.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+              do j=1, toteq
+                do k=1, lz1
+                   do n=1, ly1
+                       do m=1, lx1
+            WRITE(UNIT=9999+i, FMT=*) m, n, k, j, u(m,n,k,j,i)
+                       enddo
+                   enddo
+                enddo
+             enddo
+            CLOSE(UNIT=9999+i)
+        enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printTemp(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include t
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=11099+i,FILE='t.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn = 1, ldimt
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=11099+i, FMT = *) m,k,j,nn &
+      ,t(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=11099+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printVx(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=10799+i,FILE='vx.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED",&
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=10799+i, FMT = *) m,k,j &
+      ,vx(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=10799+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printVy(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=10899+i,FILE='vy.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=10899+i, FMT = *) m,k,j &
+      ,vy(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=10899+i)
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printVz(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=10999+i,FILE='vz.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED",&
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=10999+i, FMT = *) m,k,j &
+      ,vz(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=10999+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printCsound(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=11999+i,FILE='csound.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=11999+i, FMT = *) m,k,j &
+       ,csound(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=11999+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printVdiff(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vdiff
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12099+i,FILE='vdiff.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, ldimt1
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=12099+i, FMT = *) m,k,j, nn &
+       ,vdiff(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12099+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printVtrans(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vdiff
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12199+i,FILE='vtrans.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, ldimt1
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=12199+i, FMT = *) m,k,j, nn &
+       ,vtrans(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12199+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printRes2(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN' 
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12299+i,FILE='res2.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, toteq
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=12299+i, FMT = *) m,k,j, nn &
+       ,res2(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12299+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printFatface(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN' 
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nqq
+      do j = 1, 3
+         write(x1, fmt) i !geid
+         write(x2, fmt) j !geid
+         write(x3, fmt) istep
+         OPEN(UNIT=12399+i,FILE='fatface.nqq.'//trim(x1)//'.iwp.' &
+             //trim(x2) &
+             //'step.'//trim(x3)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, lfq
+          WRITE(UNIT=12399+i, FMT = *) nn &
+       ,flux((i-1)*3*lfq + (j-1)*lfq + nn)
+         enddo
+         CLOSE(UNIT=12399+i)
+      enddo
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printUnx(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'GEOM' 
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12499+i,FILE='unx.'//trim(x1) &
+             //'.step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, 6
+         do j=1, lz1
+         do k=1, lx1
+          WRITE(UNIT=12499+i, FMT = *) k, j, nn &
+       , unx(k, j, nn, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12499+i)
+      enddo
+      end

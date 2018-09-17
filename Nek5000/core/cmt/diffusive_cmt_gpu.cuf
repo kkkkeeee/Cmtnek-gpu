@@ -33,11 +33,23 @@
       nxyz= lx1*ly1*lz1
       ltot = nxyz*lelt
 
+
+
+
       call compute_transport_props_gpu_wrapper(glbblockSize1,d_vx, d_vy, d_vz, d_u, &
       nelt,irpu,irpv,irpw,iret,irg,toteq,if3dgpu, d_vtrans, irho, d_phig, &
       lx1,ly1, lz1, d_lglel,d_xm1, d_ym1, d_zm1,d_t,ldimt,npscal, d_pr, p0th, &
       d_sii, d_siii, d_vdiff, ifield,d_cb, icv, icp, d_csound, imu,ilam, &
       cpgref,cvgref,gmaref, rgasref,d_gllel,d_res2,iknd,inus,lelt)
+
+
+       !following code is for testing only. delete later.
+      tocpucopy_gas(20)=1
+      tocpucopy_gas(46)=1
+      call copytocpu_gpu()
+      call printVtrans("before")
+      call printRes2("before")
+
 
       !following code is for testing only. delete later.
       tocpucopy_gas(56)=1

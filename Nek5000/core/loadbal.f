@@ -3303,7 +3303,7 @@ c     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
 
 
 c-----------------------------------------------------------------------
-      subroutine printUarray
+      subroutine printUarray4
       include 'SIZE'
       include 'INPUT'
       include 'PARALLEL'

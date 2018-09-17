@@ -314,18 +314,20 @@ __global__ void wavevisc_gpu_kernel(double *t,double *csound, double *vx, double
 		// find max of wavespeed using reduction
 		__syncthreads();
 		unsigned int i = lxyz/2;
-		int e= id/(lx1*ly1*lz1);
-		int startofcurrentelement = id-e;
+                int len = lxyz;
+		int e= id/(lxyz);
+		int startofcurrentelement = e*lxyz;
 		while(i != 0){
-			if(id-startofcurrentelement < i){
-				wavespeed[id] = fmaxf(wavespeed[id], wavespeed[id + i]);
+			if(id-startofcurrentelement <= i){
+				wavespeed[id] = fmaxf(fabs(wavespeed[id]),fabs(wavespeed[startofcurrentelement + (id+i)%len]));
 			}
 
 			__syncthreads();
+                        len = i;
 			i /= 2;
 		}
 
-		double maxeig = wavespeed[id-e];
+		double maxeig = wavespeed[e*lxyz];
 		// find max of vtrans using reduction. But never used? check with Dr.Tania
 		//i = lxyz/2;
 		//int e= id/(lx1*ly1*lz1);

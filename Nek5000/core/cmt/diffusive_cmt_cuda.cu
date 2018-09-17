@@ -61,10 +61,12 @@ __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, doubl
 		double lambda = vdiff[(ilam-1)*nlel+e*nxyz+k*lxy+j*lx1+newi];
 
 		// uservp
-		int uservpe = gllel[ieg];
+		int uservpe = gllel[ieg-1];
 		mu=rho*res2[(uservpe-1)*nxyz+k*lxy+j*lx1+newi] ;//! finite c_E;
 		double nu_s=0.75*mu/rho;
-
+                if(e==7){
+ 			printf("mu in compute transport is %lf rho = %lf uservpe =  %d ieg=%d \n", mu,rho,uservpe,ieg);
+		}
 		mu=0.5*mu ;
 		lambda=0.0;
 		udiff=0.0;  // uservp makes these to zero. vdiff get zeros. Check with Dr. Tania. adeesha

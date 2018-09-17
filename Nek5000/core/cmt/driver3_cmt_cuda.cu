@@ -93,7 +93,7 @@ __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *v
       		cv=cvgref;
       		temp=e_internal/cv; // overrides
 		// function MixtPerf_C_GRT
-      		asnd=sqrtf(gmaref*rgasref*temp);  //overrides
+      		asnd=sqrt(gmaref*rgasref*temp);  //overrides
 		// function MixtPerf_P_DRT
       		pres=rho*rgasref*temp;//overrides
 		
@@ -111,7 +111,7 @@ extern "C" void compute_primitive_vars_gpu_wrapper_(int *glbblockSize1,double *d
 
 printf("CUDA: Start compute_primitive_vars_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
 
-printf("CUDA: Start compute_primitive_vars_gpu_wrapper values nxyz = %d,ntot = %d,nelt = %d,irpu = %d,irpv = %d,irpw = %d,iret = %d,irg=%d ,toteq = %d,if3d = %d,irho = %d,lx1 = %d,ly1 = %d,lz1 = %d,ldimt = %d,npscal = %d,p0th = %lf,ifield = %d,icv = %d,icp = %d,imu = %d,ilam = %d,cpgref = %lf,cvgref = %lf,gmaref = %lf,rgasref = %lf,ltot = %d,  \n", nxyz[0],ntot[0],nelt[0],irpu[0],irpv[0],irpw[0],iret[0],irg[0],toteq[0],if3d[0],irho[0],lx1[0],ly1[0],lz1[0],ldimt[0],npscal[0],p0th[0],ifield[0],icv[0],icp[0],imu[0],ilam[0],cpgref[0],cvgref[0],gmaref[0],rgasref[0],ltot[0]);
+printf("CUDA: Start compute_primitive_vars_gpu_wrapper values nxyz = %d,ntot = %d,nelt = %d,irpu = %d,irpv = %d,irpw = %d,iret = %d,irg=%d ,toteq = %d,if3d = %d,irho = %d,lx1 = %d,ly1 = %d,lz1 = %d,ldimt = %d,npscal = %d,p0th = %lf,ifield = %d,icv = %d,icp = %d,imu = %d,ilam = %d,cpgref = %lf,cvgref = %.20lf,gmaref = %lf,rgasref = %lf,ltot = %d,  \n", nxyz[0],ntot[0],nelt[0],irpu[0],irpv[0],irpw[0],iret[0],irg[0],toteq[0],if3d[0],irho[0],lx1[0],ly1[0],lz1[0],ldimt[0],npscal[0],p0th[0],ifield[0],icv[0],icp[0],imu[0],ilam[0],cpgref[0],cvgref[0],gmaref[0],rgasref[0],ltot[0]);
 #endif
 
 	double *d_scr;  // I think this is a tempory variable. need to check with Dr.Tania. adeesha

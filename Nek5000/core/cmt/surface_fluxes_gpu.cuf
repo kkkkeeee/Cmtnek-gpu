@@ -8,7 +8,13 @@
                         heresize=nqq*3*lfq,&! guarantees transpose of Q+ fits
                         hdsize=toteq*3*lfq) ! might not need ldim
       common /CMTSURFLX/ fatface(heresize),notyet(hdsize)
-      common /dgrad/ jgl(ldg),jgt(ldg)
+   
+       parameter (lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt_1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg)&
+                  , wkd(lwkd)
+      real jgl,jgt
+
+
       real fatface,notyet
       integer eq
       character*32 cname
@@ -26,11 +32,52 @@
 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu 1 values iwm,iwp",iwm,iwp
 
+      !following code is for testing only. delete later.
+      tocpucopy_gas(53)=1
+      tocpucopy_gas(58)=1
+      tocpucopy_gas(56)=1
+      call copytocpu_gpu()
+!      call printCsound("before")
+      
+!      call printVdiff("before")
+
+
       call fluxes_full_field_gpu_wrapper(glbblockSize2, d_flux,d_vtrans,&
         d_u,d_vx, d_vy, d_vz, d_pr, d_t, d_csound, d_phig, d_vdiff, irho,&
         iux, iuy, iuz, ipr,ithm,isnd,iph,icvf, icpf, imuf, ikndf, ilamf,&
         iwm,iwp,icv, icp,imu,iknd,ilam, d_iface_flux, nelt, lx1, ly1,lz1,&
        ldim,lelt,i_cvars,toteq,nqq) 
+
+
+      !following code is for testing only. delete later.
+ 
+     write(6,*) "irho, iux,iuy,iuz,ipr,ithm,isnd,iph, icvf,icpf,imuf"&
+       ,"ikndf,ilamf,iwm,iwp,icv, icp,imu,iknd,ilam,nelt,lx1 ,ly1 ,lz1"&
+      ,"ldim,lelt,i_cvars,toteq,nqq",&
+      irho, iux,iuy,iuz,ipr,ithm,isnd,iph, icvf,icpf,imuf&
+      , ikndf,ilamf,iwm,iwp,icv, icp,imu,iknd,ilam,nelt,lx1 ,ly1 ,lz1&
+      , ldim,lelt,i_cvars,toteq,nqq
+
+      tocpucopy_gas(46)=1
+      tocpucopy_gas(10)=1
+      tocpucopy_gas(11)=1
+      tocpucopy_gas(12)=1
+      tocpucopy_gas(45)=1
+      tocpucopy_gas(53)=1
+      tocpucopy_gas(58)=1
+      tocpucopy_gas(19)=1
+      tocpucopy_gas(56)=1
+      call copytocpu_gpu()
+
+
+      print *,"$$$ fluxes_full_field.cuf vtrans_gpu check", nid
+      do i=1,100
+      print *, 'vtrans,vx,vy,vz,pr,t,csound,phig,vtrans,vdiff', &
+      i,vtrans(i),vx(i),vy(i),vz(i),pr(i),t(i),csound(i),phig(i), &
+      vtrans(i),vdiff(i)
+       enddo
+
+
 
       !following code is for testing only. delete later.
       istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
@@ -39,18 +86,21 @@
       print *,"$$$ fluxes_full_field.cuf f_f_f_gpu check", nid
       do i=1,100
            print *, 'fatface irho,iux, iuy,iuz,ipr,ithm,isnd,iph,icvf,icpf,imuf,ikndf,ilamf', i,&
-           fatface(irho*lx1*lz1*2*ldim*lelt+i),fatface(iux*lx1*lz1*2*ldim*lelt+i),&
-           fatface(iux*lx1*lz1*2*ldim*lelt+i),fatface(iuy*lx1*lz1*2*ldim*lelt+i),&
-           fatface(iuz*lx1*lz1*2*ldim*lelt+i),fatface(ipr*lx1*lz1*2*ldim*lelt+i),&
-           fatface(ithm*lx1*lz1*2*ldim*lelt+i),fatface(isnd*lx1*lz1*2*ldim*lelt+i),&
-           fatface(iph*lx1*lz1*2*ldim*lelt+i),fatface(icvf*lx1*lz1*2*ldim*lelt+i),&
-           fatface(icpf*lx1*lz1*2*ldim*lelt+i),fatface(imuf*lx1*lz1*2*ldim*lelt+i),&
-           fatface(ikndf*lx1*lz1*2*ldim*lelt+i),fatface(ilamf*lx1*lz1*2*ldim*lelt+i)
+           fatface(irho*lx1*lz1*2*ldim*nelt+i),&
+           fatface(iux*lx1*lz1*2*ldim*nelt+i),fatface(iuy*lx1*lz1*2*ldim*nelt+i),&
+           fatface(iuz*lx1*lz1*2*ldim*nelt+i),fatface(ipr*lx1*lz1*2*ldim*nelt+i),&
+           fatface(ithm*lx1*lz1*2*ldim*nelt+i),fatface(isnd*lx1*lz1*2*ldim*nelt+i),&
+           fatface(iph*lx1*lz1*2*ldim*nelt+i),fatface(icvf*lx1*lz1*2*ldim*nelt+i),&
+           fatface(icpf*lx1*lz1*2*ldim*nelt+i),fatface(imuf*lx1*lz1*2*ldim*nelt+i),&
+           fatface(ikndf*lx1*lz1*2*ldim*nelt+i),fatface(ilamf*lx1*lz1*2*ldim*nelt+i)
     enddo
 
 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu before face_state_commo_gpu", nid
       print *,"surface_fluxes.cuf fluxes_full_field_gpu values lx1,lz1,ldim,nelt,nqq,iwp,iwm,nfq,nstate",lx1,lz1,ldim,nelt,nqq, iwp,iwm,nfq,nstate
+
+
+
 
       call face_state_commo_gpu(iwm,iwp,fatface(iwm),fatface(iwp),nfq,nstate&
                          ,dg_hndl,fatface)
@@ -58,6 +108,8 @@
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after face_state_commo_gpu", nid,ly1
    
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
+
+
 
       call inviscidbc_gpu_wrapper(glbblockSize2,d_lglel,d_flux,d_cbc,d_xm1,d_ym1,d_zm1,&
        d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,&
@@ -67,11 +119,26 @@
 
 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidBC_gpu", nid
-      call get_int_ptr(i,lx1,lxd)     
+      call get_int_ptr(i,lx1,lxd)    
+      tocpucopy_gas(67)=1
+      tocpucopy_gas(68)=1
+      tocpucopy_gas(38)=1
+      call copytocpu_gpu()
+
+       do i = 1, lxd*lxd*lxd
+                write(6,*) " inint debug jgl first", i,jgl(i), jgt(i)
+       enddo
+
+       call printUnx("before")
+ 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
 
-      call inviscidflux_gpu_wrapper(glbblockSize2,jgl,jgt,d_unx,d_uny,d_unz,d_area,d_flux,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq,lx1,ly1,lz1,i)
+      call inviscidflux_gpu_wrapper(glbblockSize2,d_jgl,d_jgt,d_unx,d_uny,d_unz,d_area,d_flux,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq,lx1,ly1,lz1,i)
  
+
+  !following code is for testing only. delete later.
+      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("before")
 
 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidFlux_gpu", nid
