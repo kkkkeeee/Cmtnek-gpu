@@ -152,17 +152,17 @@ c-----------------------------------------------------------------------
       call rzero(vdiff ,ltott*ldimt1)
       call rzero(u,ntotcv)
       !call usr_particles_init
-      if(nid.eq.15) then
-         do i = 1, nelt
-            do j = 1, lz1
-            do k = 1, ly1
-            do m = 1, lx1
-               write(6,*) "cmt_ics phig", m, k, j, i, phig(m, k, j, i)
-            enddo
-            enddo
-            enddo
-         enddo
-      endif
+!      if(nid.eq.15) then
+!         do i = 1, nelt
+!            do j = 1, lz1
+!            do k = 1, ly1
+!            do m = 1, lx1
+!               write(6,*) "cmt_ics phig", m, k, j, i, phig(m, k, j, i)
+!            enddo
+!            enddo
+!            enddo
+!         enddo
+!      endif
 
       call cmtuic
       if(ifrestart) call my_full_restart !  Check restart files. soon...

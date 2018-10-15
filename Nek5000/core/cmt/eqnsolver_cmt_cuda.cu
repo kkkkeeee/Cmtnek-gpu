@@ -30,6 +30,7 @@ __global__ void igtu_cmt_gpu_kernel1(double *flux, int nfq, int toteq,int toteql
 
 			}
 		}
+		//printf(" graduf[id] = %.20lf id = %d\n", graduf[id],id);
 	}
 }
 
@@ -45,13 +46,15 @@ __global__ void igtu_cmt_gpu_kernel2(double *gradu,double *graduf, int eq, int n
 				//add_face2full_cmt(nel,nx,ny,nz,iface,vols,faces)
 				//something is wrong with the original functions. gradu and graduf does not consider e. lot of overrides in the for loops vols(i,1,1,ie). check with Dr.Tania. adeesha  . gradu has nelt but not in original.
 
-				int newi = iface_flux[id];
+				int newi = iface_flux[id]-1;
 				gradu[j*toteqlxyzlelt+eq2*lxyzlelt+e*lxyz+newi ] =  gradu[j*toteqlxyzlelt+eq2*lxyzlelt+e*lxyz+newi ]  + graduf[j*toteqlxz2ldimlelt+eq2*lxz2ldimlelt+id]; 
 			}
 
 
 
 		}
+
+		//printf("e = %d eq= %d id=%d  gradu[id] = %.20lf\n",e,eq,id, gradu[id]);
 
 
 	}
@@ -304,6 +307,7 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 
 		//call fluxj_evm(flux,du,e,eq)
 
+
 		if(eq==0){
 			for(int jj=0;jj<ldim;jj++){
 				diffh[jj*lxyzlelt+id]=  diffh[jj*lxyzlelt+id]+vdiff[(inus-1)*lxyzlelt+id]*gradu[jj*toteqlxyzlelt+id];
@@ -346,6 +350,7 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 
 			}
 		}
+		//		printf("e = %d eq= %d id=%d  diffh[id] = %.20lf,  diffh[1id] = %.20lf, diffh[2id] = %.20lf\n",e,eq,id, diffh[0*lxyzlelt+id],diffh[1*lxyzlelt+id],diffh[2*lxyzlelt+id]);
 		//end of agradu
 		for(int j=0;j<ldim;j++){
 			superhugeh[j*lxyzlelt+id] = diffh[j*lxyzlelt+id];
@@ -557,9 +562,9 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 		double si3 =  siii[e*nxyz+iz*lxy+iy*lx1+ix];
 		double udiff =  vdiff[(ifield-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
 		double utrans =  vtrans[(ifield-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
-		char cbu1 = cb[0];
-		char cbu2 = cb[1];
-		char cbu3 = cb[2];
+		//		char cbu1 = cb[0];
+		//		char cbu2 = cb[1];
+		//		char cbu3 = cb[2];
 		//userf(i,j,k,eg)
 		int egg=gllel[eg];// use glleg twice. check with Dr.Tania to find the real effect. If it reverses can use just id for the following arrays indices. adeesha.
 		double ffx,ffy,ffz,qvol;  //actually these things should copy back to the cpu varibales. adeesha.
@@ -590,6 +595,7 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 		usrf[e*5*nxyz+4*nxyz+iz*(lxy)+iy*lx1+ix] = qvol;
 
 
+		printf("ix =%d iy= %d iz= %d e = %d usrf[0] = %.20lf usrf[1] = %.20lf  usrf[2] = %.20lf  usrf[3] = %.20lf  usrf[4] = %.20lf  \n",ix,iy,iz,e,usrf[e*5*nxyz+0*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+1*nxyz+iz*(lxy)+iy*lx1+ix],usrf[e*5*nxyz+2*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+3*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+4*nxyz+iz*(lxy)+iy*lx1+ix])  ;
 
 
 	}
@@ -633,11 +639,13 @@ __global__ void compute_gradients_gpu_kernel1(double *ud, double *u, double *phi
 		int e = id/nxyz;
 
 		ud[id] = u[e*toteqlxyz+eq*nxyz+iz*lxy+iy*lx1+ix]/phig[id];
+		//                printf("e = %d eq= %d id=%d  ud[id] = %.20lf \n",e,eq,id,ud[id]);
+
 
 	}
 }
 
-__global__ void compute_gradients_gpu_kernel2(double *ur,double *us,double *ut,double *gradu, double *jacmi,double *rxm1,double *rym1, double *rzm1, double *sxm1, double *sym1, double *szm1,double *txm1, double *tym1, double *tzm1, int lx1, int ly1, int lz1, int lxy, int nxyz, int toteqlxyz,int eq,int nnel){
+__global__ void compute_gradients_gpu_kernel2(double *ur,double *us,double *ut,double *gradu, double *jacmi,double *rxm1,double *rym1, double *rzm1, double *sxm1, double *sym1, double *szm1,double *txm1, double *tym1, double *tzm1, int lx1, int ly1, int lz1, int lxy, int nxyz, int toteqlxyz,int eq,int nnel,int toteqlxyzlelt,int nxyzlelt){
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<nnel){
 		int ix = id % lx1;
@@ -645,23 +653,29 @@ __global__ void compute_gradients_gpu_kernel2(double *ur,double *us,double *ut,d
 		int iz = (id / (lxy))%lz1;
 		int e = id/nxyz;
 
-		gradu[0*toteqlxyz+eq*nxyz+id] =  jacmi[id] *( rxm1[id]*ur[id]+ sxm1[id]*us[id]+txm1[id]*ut[id]);
-		gradu[1*toteqlxyz+eq*nxyz+id] =  jacmi[id] *( rym1[id]*ur[id]+ sym1[id]*us[id]+tym1[id]*ut[id]);
-		gradu[2*toteqlxyz+eq*nxyz+id] =  jacmi[id] *( rzm1[id]*ur[id]+ szm1[id]*us[id]+tzm1[id]*ut[id]);
+		gradu[0*toteqlxyzlelt+eq*nxyzlelt+id] =  jacmi[id] *( rxm1[id]*ur[id]+ sxm1[id]*us[id]+txm1[id]*ut[id]);
+		gradu[1*toteqlxyzlelt+eq*nxyzlelt+id] =  jacmi[id] *( rym1[id]*ur[id]+ sym1[id]*us[id]+tym1[id]*ut[id]);
+		gradu[2*toteqlxyzlelt+eq*nxyzlelt+id] =  jacmi[id] *( rzm1[id]*ur[id]+ szm1[id]*us[id]+tzm1[id]*ut[id]);
+
+		//		printf("e = %d eq= %d id=%d  gradu[id] = %.20lf  gradu[1+id] = %.20lf gradu[2+id] = %.20lf\n",e,eq,id,gradu[0*toteqlxyzlelt+eq*nxyzlelt+id] ,gradu[1*toteqlxyzlelt+eq*nxyzlelt+id] ,gradu[2*toteqlxyzlelt+eq*nxyzlelt+id] );
+
+
 
 	}
 }
 
-__global__ void compute_gradients_gpu_kernel3(double *ur,double *us,double *gradu, double *jacmi,double *rxm1, double *rym1, double *sxm1, double *sym1, int nnel,int lx1, int ly1, int lxy,int nxyz, int toteqlxyz, int eq,int lz1){
+__global__ void compute_gradients_gpu_kernel3(double *ur,double *us,double *gradu, double *jacmi,double *rxm1, double *rym1, double *sxm1, double *sym1, int nnel,int lx1, int ly1, int lxy,int nxyz, int toteqlxyz, int eq,int lz1,int toteqlxyzlelt,int nxyzlelt){
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
+
+
 	if(id<nnel){
 		int ix = id % lx1;
 		int iy = (id/lx1)%ly1;
 		int iz = (id / (lxy))%lz1;
 		int e = id/nxyz;
 
-		gradu[0*toteqlxyz+eq*nxyz+id] =  jacmi[id] *( rxm1[id]*ur[id]+ sxm1[id]*us[id]);
-		gradu[1*toteqlxyz+eq*nxyz+id] =  jacmi[id] *( rym1[id]*ur[id]+ sym1[id]*us[id]);
+		gradu[0*toteqlxyzlelt+eq*nxyzlelt+id] =  jacmi[id] *( rxm1[id]*ur[id]+ sxm1[id]*us[id]);
+		gradu[1*toteqlxyzlelt+eq*nxyzlelt+id] =  jacmi[id] *( rym1[id]*ur[id]+ sym1[id]*us[id]);
 
 	}
 }
@@ -680,6 +694,7 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 
 #endif
 	int nnel = lx1[0]*ly1[0]*lz1[0]*nelt[0];
+	int nlel = lx1[0]*ly1[0]*lz1[0]*lelt[0];
 
 	int lxy  = lx1[0]*ly1[0];
 	int  lyz  = ly1[0]*lz1[0];
@@ -687,6 +702,9 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 	int m0 = lx1[0]-1;
 	int ndlel=lxd[0]*lyd[0]*lzd[0]*lelt[0];
 	int toteqlxyz= nxyz*toteq[0];
+	int toteqlxyzlelt=toteqlxyz*lelt[0];
+	int nxyzlelt=nxyz*lelt[0];
+
 
 	double *d_ur;
 	double *d_us;
@@ -712,17 +730,68 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 		compute_gradients_gpu_kernel1<<<gridSize, blockSize>>>(d_ud,d_u,d_phig,nnel,lx1[0],ly1[0],lz1[0],lxy,nxyz,toteqlxyz,eq);
 
 		if(if3d[0]){
+
+			if(eq==0){
+				double *cpu_dxm1;
+				cpu_dxm1= (double*)malloc(lx1[0]*lx1[0]*sizeof(double));
+				cudaMemcpy(cpu_dxm1,d_dxm1,lx1[0]*lx1[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+				for(int i=0;i<lx1[0]*lx1[0];i++){
+					//   printf("debug d_dxm1 %d %.30lf \n ",i,cpu_dxm1[i]);
+				}
+
+				double *cpu_dxtm1;
+				cpu_dxtm1= (double*)malloc(lx1[0]*lx1[0]*sizeof(double));
+				cudaMemcpy(cpu_dxtm1,d_dxtm1,lx1[0]*lx1[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+				for(int i=0;i<lx1[0]*lx1[0];i++){
+					//  printf("debug d_dxtm1 %d %.30lf \n ",i,cpu_dxtm1[i]);
+				}
+
+
+				double *cpu_dud;
+				cpu_dud= (double*)malloc(ndlel*sizeof(double));
+				cudaMemcpy(cpu_dud,d_ud,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
+				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
+					// printf("debug d_ud %d %d %d %.30lf \n ",eq,i%(lx1[0]*lx1[0]*lx1[0]),i/(lx1[0]*lx1[0]*lx1[0]),cpu_dud[i]);
+				}
+			}
+
 			gpu_local_grad3(d_ur,d_us,d_ut,d_ud,lx1[0],d_dxm1,d_dxtm1,nelt[0]);// why define  d_ur .. to ldd if only using lx1. check with Dr.Tania. adeesha.
-			compute_gradients_gpu_kernel2<<<gridSize, blockSize>>>(d_ur,d_us,d_ut,d_gradu,d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,lx1[0],ly1[0],lz1[0],lxy,nxyz,toteqlxyz,eq,nnel);
+			if(eq==0){
+				double *cpu_dur;
+				cpu_dur= (double*)malloc(ndlel*sizeof(double));
+				cudaMemcpy(cpu_dur,d_ur,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
+				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
+					//  printf("debug d_ur %d %d %d %.30lf \n ",eq,i%(lx1[0]*lx1[0]*lx1[0]),i/(lx1[0]*lx1[0]*lx1[0]),cpu_dur[i]);
+				}
+
+				double *cpu_dus;
+				cpu_dus= (double*)malloc(ndlel*sizeof(double));
+				cudaMemcpy(cpu_dus,d_us,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
+				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
+					//printf("debug d_us %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dus[i]);
+				}
+			}
+			compute_gradients_gpu_kernel2<<<gridSize, blockSize>>>(d_ur,d_us,d_ut,d_gradu,d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,lx1[0],ly1[0],lz1[0],lxy,nxyz,toteqlxyz,eq,nnel,toteqlxyzlelt,nxyzlelt);
 
 		}
 		else{
 			gpu_local_grad2(d_ur,d_us,d_ud,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
-			compute_gradients_gpu_kernel3<<<gridSize, blockSize>>>(d_ur,d_us,d_gradu,d_jacmi,d_rxm1,d_rym1,d_sxm1,d_sym1,nnel,lx1[0],ly1[0],lxy,nxyz,toteqlxyz,eq,lz1[0]);
+			compute_gradients_gpu_kernel3<<<gridSize, blockSize>>>(d_ur,d_us,d_gradu,d_jacmi,d_rxm1,d_rym1,d_sxm1,d_sym1,nnel,lx1[0],ly1[0],lxy,nxyz,toteqlxyz,eq,lz1[0],toteqlxyzlelt,nxyzlelt);
 
 
-		}	
+		}
+
+
 	}
+
+	double *cpu_gradu;
+	cpu_gradu= (double*)malloc(toteq[0]*3*nlel*sizeof(double));
+	cudaMemcpy(cpu_gradu,d_gradu,toteq[0]*3*nlel*sizeof(double) , cudaMemcpyDeviceToHost);
+	for(int i=0;i<toteq[0]*nlel;i++){
+		//    printf("debug d_gradu %d %d %d %.30lf %.30lf %.30lf \n ",i/nlel,i%(lx1[0]*lx1[0]*lx1[0]),i/(lx1[0]*lx1[0]*lx1[0]),cpu_gradu[i],cpu_gradu[1*toteq[0]*nlel+i],cpu_gradu[2*toteq[0]*nlel+i]);
+	}
+
+
 	cudaFree(d_ur);
 	cudaFree(d_us);
 	cudaFree(d_ut);
@@ -872,7 +941,8 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 	printf("CUDA: Start convective_cmt_gpu_wrapper values lx1=%d ,ly1=%d,lz1=%d,nelt=%d,lelt=%d,toteq=%d,lxd=%d,lyd=%d, lzd=%d,ldim=%d,if3d=%d \n", lx1[0],ly1[0],lz1[0],nelt[0],lelt[0],toteq[0],lxd[0],lyd[0], lzd[0],ldim[0],if3d[0]);
 #endif
 	int nnel = lx1[0]*ly1[0]*lz1[0]*nelt[0];
-
+	int nlel = lx1[0]*ly1[0]*lz1[0]*lelt[0];
+	int lxyzlelt =nlel;
 	int lxy  = lx1[0]*ly1[0];
 	int  lxyz  = lxy*lz1[0];
 	int toteqlxyz= lxyz*toteq[0];
@@ -919,7 +989,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)nnel/blockSize);
 
-	int i=0;
+	//	int i=0;
 
 	//printf("GPU :eqnsolver.cu : convective_cmt_gpu_wrapper after malloc\n");
 
@@ -936,13 +1006,15 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 					//printf("GPU :eqnsolver.cu : convective_cmt_gpu_wrapper start if lxd>lx1 before gpu_gett_int_ptr\n");
 					//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
 					//printf("GPU :eqnsolver.cu : convective_cmt_gpu_wrapper start if lxd>lx1 after gpu_gett_int_ptr\n");
-					gpu_specmpn(d_convh+j*ldd, lxd[0], d_u+(j+1)*lxyz ,lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], toteq[0], j+1, true ); 
+					gpu_specmpn(d_convh+j*ldd*lelt[0], lxd[0], d_u+(j+1)*lxyz ,lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], toteq[0], j+1, true ); 
 #ifdef DEBUGPRINT
 					cudaDeviceSynchronize();
 					code1 = cudaPeekAtLastError();
 					printf("CUDA: eq=0 and j=%d convective_cmt_gpu_wrapper after gpu_specmpn cuda status: %s\n",j,cudaGetErrorString(code1));
 #endif
 				}
+
+
 				//printf("GPU :eqnsolver.cu : convective_cmt_gpu_wrapper end if  eq==0 toteq= %d\n",eq);
 			}
 			else{
@@ -1001,6 +1073,17 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 			}
 
+
+			//				if(eq==4){
+			//				double *cpu_convh;
+			//                              cpu_convh= (double*)malloc(3*ldd*lelt[0]*sizeof(double));
+			//                            cudaMemcpy(cpu_convh,d_convh,3*ldd*lelt[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+			//                            for(int i=0;i<ldd*nelt[0];i++){
+			//                                    printf("debug d_convh %d %d %d %.30lf %.30lf %.30lf \n ",i/ldd,i%ldd,eq,cpu_convh[i],cpu_convh[1*ldd*lelt[0]+i],cpu_convh[2*ldd*lelt[0]+i]);
+			//                           }
+			//				}
+
+
 #ifdef DEBUGPRINT
 			cudaDeviceSynchronize();
 			code1 = cudaPeekAtLastError();
@@ -1029,6 +1112,46 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 			printf("CUDA: convective_cmt_gpu_wrapper after convective_cmt_flux_div_integral_dealiased_gpu_kernel1 cuda status: %s\n",cudaGetErrorString(code1));
 
 #endif
+
+			double *cpu_dur;
+			cpu_dur= (double*)malloc( nelt[0]*ldd*sizeof(double));
+			cudaMemcpy(cpu_dur,d_ur ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+			for(int i=0;i< nelt[0]*ldd;i++){
+				//                        printf("debug 2d_ur %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dur[i]);
+			}
+
+			double *cpu_dus;
+			cpu_dus= (double*)malloc( nelt[0]*ldd*sizeof(double));
+			cudaMemcpy(cpu_dus,d_us ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+			for(int i=0;i< nelt[0]*ldd;i++){
+				//                      printf("debug 2d_us %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dus[i]);
+			}
+
+
+			double *cpu_dut;
+			cpu_dut= (double*)malloc( nelt[0]*ldd*sizeof(double));
+			cudaMemcpy(cpu_dut,d_ut ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+			for(int i=0;i< nelt[0]*ldd;i++){
+				//                    printf("debug 2d_ut %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dut[i]);
+			}
+
+
+			double *cpu_dg;
+			cpu_dg= (double*)malloc(ldd*sizeof(double));
+			cudaMemcpy(cpu_dg,d_dg ,ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+			for(int i=0;i< ldd;i++){
+				//                  printf("debug d_dg %d %d %.30lf \n ",eq,i,cpu_dg[i]);
+			}
+
+			double *cpu_dgt;
+			cpu_dgt= (double*)malloc(ldd*sizeof(double));
+			cudaMemcpy(cpu_dgt,d_dgt ,ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+			for(int i=0;i< ldd;i++){
+				//                printf("debug 2d_dgt %d %d %.30lf \n ",eq,i,cpu_dgt[i]);
+			}
+
+
+
 			if(if3d){
 				//uncooment after fix gpu_local_grad3_t
 				gpu_local_grad3_t(d_ud, d_ur, d_us, d_ut, lxd[0], d_dg, d_dgt, d_w, nelt[0]);
@@ -1043,10 +1166,42 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 			printf("CUDA: convective_cmt_gpu_wrapper after gpu_local_grad_kernel1 cuda status: %s\n",cudaGetErrorString(code1));
 
 #endif
+
+
+
+			double *cpu_ud;
+			cpu_ud= (double*)malloc( nelt[0]*ldd*sizeof(double));
+			cudaMemcpy(cpu_ud,d_ud, nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+			for(int i=0;i< nelt[0]*ldd;i++){
+				//                            printf("debug 2d_ud %d %d %d %.30lf \n ",i/ldd,i%ldd,eq,cpu_ud[i]);
+			}
+
+
+
+
+
 			//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
-			gpu_specmpn(d_tu,lx1[0],d_ud,lxd[0],d_jgt,d_jgl,if3d[0],d_w,ldw,nelt[0],1,0,false);
-			gpu_neksub2(glbblockSize2[0],d_res1+eq*nnel,d_tu,nnel);
+			gpu_specmpn(d_tu,lx1[0],d_ud,lxd[0],d_jgt,d_jgl,if3d[0],d_w,ldw,nelt[0],1,eq,false);
+
+			double *cpu_tu;
+			cpu_tu= (double*)malloc( nelt[0]*ldd*sizeof(double));
+			cudaMemcpy(cpu_tu,d_tu, nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+			//                              cudaMemcpy(cpu_res1,d_res1, nnel*sizeof(double) , cudaMemcpyDeviceToHost);
+			//                             for(int i=0;i< nelt[0]*lx1[0]*lx1[0]*lx1[0];i++){
+			//                        printf("debug 2d_tu %d %d %d %.30lf %.30lf %.30lf \n ",i/(lx1[0]*lx1[0]*lx1[0]),i%(lx1[0]*lx1[0]*lx1[0]),eq,cpu_tu[i],cpu_res1[i],cpu_res1[i]-cpu_tu[i]);
+			//                               }
+
+
+
+
+
+						gpu_neksub2(glbblockSize2[0],d_res1+eq*nlel,d_tu,nnel);
 #ifdef DEBUGPRINT
+
+
+
+
+
 			cudaDeviceSynchronize();
 			code1 = cudaPeekAtLastError();
 			printf("CUDA: convective_cmt_gpu_wrapper end of lxd>lx1 if_gpu_kernel1 cuda status: %s\n",cudaGetErrorString(code1));
@@ -1077,7 +1232,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 			}
 			gpu_double_copy_gpu_wrapper(glbblockSize2[0],d_tu,0,d_ud,0,nnel );
-				gpu_neksub2(glbblockSize2[0],d_res1+eq*nnel,d_tu,nnel);
+			gpu_neksub2(glbblockSize2[0],d_res1+eq*nlel,d_tu,nnel);
 
 		}
 #ifdef DEBUGPRINT
@@ -1086,6 +1241,15 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 		printf("CUDA: End eq for loop eq = %d convective_cmt_wrapper cuda status: %s\n",eq,cudaGetErrorString(code1));
 #endif
 	}
+
+			double *cpu_res1;
+			cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
+			cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+			for(int j=0;j<toteq[0];j++){
+				for(int i=0;i<nnel;i++){
+				printf("debug 2d_res1 %d %d %d %.30lf \n ",j,i/lxyz,i%(lxyz),cpu_res1[j*lxyzlelt+i]);
+				}
+			}
 	cudaFree(d_ur);
 	cudaFree(d_us);
 	cudaFree(d_ut);
@@ -1112,6 +1276,74 @@ __global__ void viscous_cmt_gpu_kernel1(double *diffh,double *gradu, double *vtr
 		int iy = (id/lx1)%ly1;
 		int iz = (id / (lxy))%lz1;
 		int e = id/nxyz;
+
+
+/*		gradu[0*toteqlxyzlelt+0*lxyzlelt+id ] =0.0000000001*(id%nxyz);
+
+		gradu[0*toteqlxyzlelt+1*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[0*toteqlxyzlelt+2*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[0*toteqlxyzlelt+3*lxyzlelt+id ] =0.0000000001*(id%nxyz);
+
+		gradu[0*toteqlxyzlelt+4*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[1*toteqlxyzlelt+0*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[1*toteqlxyzlelt+1*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[1*toteqlxyzlelt+2*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[1*toteqlxyzlelt+3*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[1*toteqlxyzlelt+4*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[2*toteqlxyzlelt+0*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[2*toteqlxyzlelt+1*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[2*toteqlxyzlelt+2*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[2*toteqlxyzlelt+3*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+
+		gradu[2*toteqlxyzlelt+4*lxyzlelt+id ] = 0.0000000001*(id%nxyz);
+*/
+		/*
+		   gradu[0*toteqlxyzlelt+0*lxyzlelt+id ] =0.001;
+
+		   gradu[0*toteqlxyzlelt+1*lxyzlelt+id ] = 0.001;
+
+		   gradu[0*toteqlxyzlelt+2*lxyzlelt+id ] = 0.001;
+
+		   gradu[0*toteqlxyzlelt+3*lxyzlelt+id ] =0.001;
+
+		   gradu[0*toteqlxyzlelt+4*lxyzlelt+id ] = 0.001;
+
+		   gradu[1*toteqlxyzlelt+0*lxyzlelt+id ] = 0.001;
+
+		   gradu[1*toteqlxyzlelt+1*lxyzlelt+id ] = 0.001;
+
+		   gradu[1*toteqlxyzlelt+2*lxyzlelt+id ] = 0.001;
+
+		   gradu[1*toteqlxyzlelt+3*lxyzlelt+id ] = 0.001;
+
+		   gradu[1*toteqlxyzlelt+4*lxyzlelt+id ] = 0.001;
+
+		   gradu[2*toteqlxyzlelt+0*lxyzlelt+id ] = 0.001;
+
+		   gradu[2*toteqlxyzlelt+1*lxyzlelt+id ] = 0.001;
+
+		   gradu[2*toteqlxyzlelt+2*lxyzlelt+id ] = 0.001;
+
+		   gradu[2*toteqlxyzlelt+3*lxyzlelt+id ] = 0.001;
+
+		   gradu[2*toteqlxyzlelt+4*lxyzlelt+id ] = 0.001;
+		 */
+
+//		if(id<256){
+//
+//			printf("gradu =%d changed %.20lf \n",id,gradu[id]);
+//		}
 
 		//agradu(diffh,gradu,e,eq) // flux =diffh change later. adeesha
 		// call fluxj_ns (flux,du,e,eq)
@@ -1392,7 +1624,7 @@ __global__ void viscous_cmt_gpu_kernel1(double *diffh,double *gradu, double *vtr
 
 }
 
-__global__ void viscous_cmt_gpu_kernel2(double *graduf,double *normal,double *unx,double *uny, double *unz,double *iface_flux,double *hface,double *diffh,int ntot,int lxz2ldim,int lxz2ldimlelt,int lxyz,int eq,int lxyzlelt,double *area){
+__global__ void viscous_cmt_gpu_kernel2(double *graduf,double *normal,double *unx,double *uny, double *unz,int *iface_flux,double *hface,double *diffh,int ntot,int lxz2ldim,int lxz2ldimlelt,int lxyz,int eq,int lxyzlelt,double *area){
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
 		int e = id/lxz2ldim;
@@ -1410,7 +1642,7 @@ __global__ void viscous_cmt_gpu_kernel2(double *graduf,double *normal,double *un
 	}
 }
 
-__global__ void viscous_cmt_gpu_kernel3( double *ur, double *us, double *ut, double *jacmi, double *rxm1,double *rym1, double *rzm1, double *sxm1, double *sym1, double *szm1,double *txm1, double *tym1, double *tzm1,double *diffh,int ldim, int nnel,int lxyzlelt,double *bm1,int if3d){
+__global__ void viscous_cmt_gpu_kernel3( double *ur, double *us, double *ut, double *jacmi, double *rxm1,double *rym1, double *rzm1, double *sxm1, double *sym1, double *szm1,double *txm1, double *tym1, double *tzm1,double *diffh,int ldim, int nnel,int lxyzlelt,double *bm1,int if3d,int nxyz){
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<nnel){
 		//half_iku_cmt(res1(1,1,1,e,eq),diffh,e)
@@ -1418,11 +1650,32 @@ __global__ void viscous_cmt_gpu_kernel3( double *ur, double *us, double *ut, dou
 		for(int j=0;j<ldim;j++){
 			diffh[j*lxyzlelt+id]= diffh[j*lxyzlelt+id]*bm1[id];
 		}
+
+//		diffh[0*lxyzlelt+id] = 0.00000000001*(id%nxyz);
+//		diffh[1*lxyzlelt+id] = 0.00000000001*(id%nxyz);
+//		diffh[2*lxyzlelt+id] = 0.00000000001*(id%nxyz);
+
+
+		//                 diffh[0*lxyzlelt+id] = 0.0001;
+		//                 diffh[1*lxyzlelt+id] = 0.0001;
+		//                 diffh[2*lxyzlelt+id] = 0.0001;
+
+//		if(id<256){
+//
+//			printf("diffh =%d changed %.20lf jacmi rxm1 rym1 rzm1 sxm1 sym1 szm1 txm1 tym1 tzm1 %.20lf %.20lf %.20lf %.20lf %.20lf %.20lf %.20lf %.20lf %.20lf %.20lf \n",id,diffh[id],jacmi[id], rxm1[id],rym1[id],rzm1[id], sxm1[id],sym1[id],szm1[id], txm1[id],tym1[id],tzm1[id]);
+//		}
+
 		//gradm11_t(res,diffh,const,e)	
 		if(if3d){
 			ur[id] =  jacmi[id] *( rxm1[id]*diffh[0*lxyzlelt+id]+ rym1[id]*diffh[1*lxyzlelt+id]+rzm1[id]*diffh[2*lxyzlelt+id]);
 			us[id] =  jacmi[id] *( sxm1[id]*diffh[0*lxyzlelt+id]+ sym1[id]*diffh[1*lxyzlelt+id]+szm1[id]*diffh[2*lxyzlelt+id]);
 			ut[id] =  jacmi[id] *( txm1[id]*diffh[0*lxyzlelt+id]+ tym1[id]*diffh[1*lxyzlelt+id]+tzm1[id]*diffh[2*lxyzlelt+id]);
+
+			if(id<256){
+
+				printf("ur %d %.20lf \n",id,ur[id]);
+			}
+
 
 		}
 		else{
@@ -1442,7 +1695,7 @@ __global__ void viscous_cmt_gpu_kernel4(double *res1,double *ud,int nnel, int  e
 }
 
 
-extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,double *d_diffh,double *d_gradu,double *d_vtrans,double *d_vdiff,double *d_vx,double *d_vy,double *d_vz,double *d_u,double *d_viscscr,double *d_jacmi,double *d_rxm1,double *d_rym1,double *d_rzm1,double *d_sxm1,double *d_sym1,double *d_szm1,double *d_txm1,double *d_tym1,double *d_tzm1,double *d_graduf,double *d_unx,double *d_uny,double *d_unz,double *d_iface_flux,double *d_dxm1,double *d_dxtm1,double *d_res1,double *d_area,double *d_bm1,int *lx1,int *ly1,int *lz1,int *toteq,int *irho,int *ilam,int *imu,int *icv,int *iknd,int *inus,int *if3d,int *ldim,int *nelt,int *lelt){
+extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,double *d_diffh,double *d_gradu,double *d_vtrans,double *d_vdiff,double *d_vx,double *d_vy,double *d_vz,double *d_u,double *d_viscscr,double *d_jacmi,double *d_rxm1,double *d_rym1,double *d_rzm1,double *d_sxm1,double *d_sym1,double *d_szm1,double *d_txm1,double *d_tym1,double *d_tzm1,double *d_graduf,double *d_unx,double *d_uny,double *d_unz,int *d_iface_flux,double *d_dxm1,double *d_dxtm1,double *d_res1,double *d_area,double *d_bm1,int *lx1,int *ly1,int *lz1,int *toteq,int *irho,int *ilam,int *imu,int *icv,int *iknd,int *inus,int *if3d,int *ldim,int *nelt,int *lelt){
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
@@ -1497,9 +1750,9 @@ extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,d
 		gridSize2= (int)ceil((float)ntot/blockSize2);
 
 		viscous_cmt_gpu_kernel2<<<gridSize2, blockSize2>>>(d_graduf,d_normal,d_unx,d_uny,d_unz,d_iface_flux,d_hface,d_diffh,ntot,lxz2ldim,lxz2ldimlelt,nxyz,eq,lxyzlelt,d_area);
-// kernel 2 is diffh2graduf function
-		viscous_cmt_gpu_kernel3<<<gridSize1, blockSize1>>>(d_ur,d_us,d_ut, d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,d_diffh,ldim[0],nnel,lxyzlelt,d_bm1,if3d[0]);
-//kernel3 is gradm11_t function
+		// kernel 2 is diffh2graduf function
+		viscous_cmt_gpu_kernel3<<<gridSize1, blockSize1>>>(d_ur,d_us,d_ut, d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,d_diffh,ldim[0],nnel,lxyzlelt,d_bm1,if3d[0],nxyz);
+		//kernel3 is gradm11_t function
 		if(if3d){
 			gpu_local_grad3_t(d_ud, d_ur, d_us,d_ut,lx1[0],d_dxm1,d_dxtm1, d_tmp, nelt[0]);		
 		}
@@ -1510,7 +1763,19 @@ extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,d
 		viscous_cmt_gpu_kernel4<<<gridSize1, blockSize1>>>(d_res1,d_ud,nnel, eq,lxyzlelt);
 
 
+
 	}
+
+ double *cpu_res1;
+                        cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
+                        cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+                        for(int j=0;j<toteq[0];j++){
+                                for(int i=0;i<nnel;i++){
+                                printf("debug 3d_res1 %d %d %d %.30lf \n ",j,i/nxyz,i%(nxyz),cpu_res1[j*lxyzlelt+i]);
+                                }
+                        }
+
+
 	cudaFree(d_ur);
 	cudaFree(d_us);
 	cudaFree(d_ut);
@@ -1606,6 +1871,16 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)nnel/blockSize);
 
+ double *cpu_d;
+                                cpu_d= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+                                cudaMemcpy(cpu_d,d_d,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+ double *cpu_dt;
+                                cpu_dt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+                                cudaMemcpy(cpu_dt,d_dt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+                                for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
+                                           printf("d*g d_d d_dt %d %.30lf  %.30lf\n ",i,cpu_d[i],cpu_dt[i]);
+                                }
+
 
 	for(int eq=0; eq<toteq[0];eq++){
 		int ip=0;
@@ -1616,14 +1891,14 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 			printf("CUDA: before gpu_gradl_rst compute_forcing_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
 
 #endif
-	
 
-if(if3d){
-                gpu_local_grad3(d_ur, d_us, d_ut, d_phig, lx1[0], d_d, d_dt, nelt[0]);  
-        }
-        else{
-                gpu_local_grad2(d_ur, d_us, d_phig, lx1[0], d_d, d_dt, nelt[0]);
-        }
+
+			if(if3d){
+				gpu_local_grad3(d_ur, d_us, d_ut, d_phig, lx1[0], d_d, d_dt, nelt[0]);  
+			}
+			else{
+				gpu_local_grad2(d_ur, d_us, d_phig, lx1[0], d_d, d_dt, nelt[0]);
+			}
 
 
 
@@ -1702,12 +1977,27 @@ if(if3d){
 		}
 #ifdef DEBUGPRINT
 
+
+
+
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
 		printf("CUDA: eq= %d gpu_gradl_rst ccmpute_forcing_gpu_wrapper cuda status: %s\n",eq,cudaGetErrorString(code1));
 #endif
 
 	}
+
+	 double *cpu_res1;
+                        cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
+                        cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+                        for(int j=0;j<toteq[0];j++){
+                                for(int i=0;i<nnel;i++){
+                                printf("debug 6d_res1 %d %d %d %.30lf \n ",j,i/nxyz,i%(nxyz),cpu_res1[j*lxyzlelt+i]);
+                                }
+                        }
+
+
+
 	cudaFree(d_ur);
 	cudaFree(d_us);
 	cudaFree(d_ut);

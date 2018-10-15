@@ -6,7 +6,7 @@
 // includes, project
 //#include "magma.h"
 #include "cuda_multi_gemm_unif.cu"
-//#define DEBUGPRINT 0
+#define DEBUGPRINT 0
 
 __global__ void nekadd2(double *a, double*b, int n){
 
@@ -198,6 +198,16 @@ void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nx1, d
 	cudaError_t code3 = cudaPeekAtLastError();
 	printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
 
+
+ double *cpu_du;
+                               cpu_du= (double*)malloc((nel*nx1*nx1*nx1)*sizeof(double));
+                              cudaMemcpy(cpu_du,u, nel*nx1*nx1*nx1*sizeof(double) , cudaMemcpyDeviceToHost);
+//                               for(int i=0;i<nel*nx1*nx1*nx1;i++){
+ //                                       printf("debug 3u %d %d %.30lf \n ",i/(nx1*nx1*nx1),i%(nx1*nx1*nx1),cpu_du[i]);
+  //                              }
+
+
+
 #endif
 	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,us, nx1,nx1*nx1, d,nx1,0, beta,w ,nx1,nx1*nx1,nel*nx1);
 #ifdef DEBUGPRINT
@@ -205,18 +215,32 @@ void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nx1, d
 	cudaError_t code4 = cudaPeekAtLastError();
 	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
 
+        double *cpu_dw= (double*)malloc((nel*nx1*nx1*nx1)*sizeof(double));
+                              cudaMemcpy(cpu_dw,w, nel*nx1*nx1*nx1*sizeof(double) , cudaMemcpyDeviceToHost);
+    //                           for(int i=0;i<nel*nx1*nx1*nx1;i++){
+     //                                   printf("debug 3w %d %d %.30lf \n ",i/(nx1*nx1*nx1),i%(nx1*nx1*nx1),cpu_dw[i]);
+      //                          }
+
+
 #endif
 	int blockSize=1024, gridSize;
 	gridSize = (int)ceil((float)nel*nx1*nx1*nx1/blockSize);
 	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nx1*nx1*nx1);
 
 	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1*nx1, nx1, nx1, alpha,ut, nx1*nx1,nx1*nx1*nx1, d,nx1,0, beta,w ,nx1*nx1,nx1*nx1*nx1,nel);
+	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nx1*nx1*nx1);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code5 = cudaPeekAtLastError();
 	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
 #endif
-	nekadd2<<<gridSize, blockSize>>>(u,w, nel*nx1*nx1*nx1);
+
+                              cudaMemcpy(cpu_dw,u, nel*nx1*nx1*nx1*sizeof(double) , cudaMemcpyDeviceToHost);
+//                               for(int i=0;i<nel*nx1*nx1*nx1;i++){
+ //                                       printf("debug 4du %d %d %.30lf \n ",i/(nx1*nx1*nx1),i%(nx1*nx1*nx1),cpu_dw[i]);
+  //                              }
+
+
 
 }
 void gpu_local_grad2_t(double *u, double *ur, double *us, int nx1, double *d, double *dt, double *w, int nel){
@@ -282,7 +306,6 @@ __global__ void mxm(double *a, int n1, double *b, int n2, double *c, int n3, int
 	}
 
 }
-
 void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx1, double *d, double *dt, int nel){
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
@@ -366,84 +389,6 @@ __global__ void nekinvcol3_gpu_kernel(double *a, double *b, double *c, int n){
 
 	}
 }
-//complete this function.  adeesha.
-void gpu_gen_int(double *jgl, double *jgt,int mp,int np,double *w){
-	int iz = 1;
-	int id = iz + np;
-
-	//  call zwgll (w(iz),jgt,np); need to implement this. talk with Dr.Tania adeesha
-	//  call zwgl  (w(id),jgt,mp);
-
-	int n  = np-1;
-	for(int i=0;i<mp;i++){
-		//  call gpu_fd_weights_full(w(id+i-1),w(iz),n,0,jgt);
-		for(int j=0;j<np;j++){
-			jgl[j*mp+i] = jgt[j];                 //  Interpolation matrix
-		}
-	}
-	// call gpu_transpose(jgt,np,jgl,mp)
-
-}
-
-void gpu_get_int_ptr(int *ip,int  if3d, int mx, int md, int nelt,double *jgl, double *jgt,double *wkd,int lxd,int *pjgl){
-
-	int ld= 2*lxd;
-
-	int ij = md + ld*(mx-1);
-	ip[0] = pjgl[ij-1];
-	if (ip[0]==0){
-		int nstore   = pjgl[0];
-		pjgl[ij-1] = nstore+1;
-		nstore   = nstore + md*mx;
-		pjgl[0]  = nstore;
-		ip[0]       = pjgl[ij-1];
-		int nwrkd = mx + md;
-		printf("Warning!!! ip[0] is 0. This should not happen \n");
-		//gpu_gen_int(jgl+ip[0]-1,jgt+ip[0]-1,md,mx,wkd);
-	}
-	ip[0]=1;  // dummy for now. change to the actual value later. adeesha.
-}
-
-void gpu_gen_dgl(double *dgl,double *dgt,int mp,int np,double *w){
-	int iz = 1;
-	int id = iz + np;
-
-	//  call zwgl  (w(iz),dgt,np)  ! GL points
-	//  call zwgl  (w(id),dgt,mp)  ! GL points
-
-	int  ndgt = 2*np;
-	int  ldgt = mp*np;
-
-	int  n  = np-1;
-	for(int i=0;i<mp;i++){
-		//call fd_weights_full(w(id+i-1),w(iz),n,1,dgt) ! 1=1st deriv.
-		for(int j=0;j<np;j++){
-			dgl[j*mp+i] = dgt[np+j];            //           ! Derivative matrix
-		}
-	}
-	//  call gpu_transpose(dgt,np,dgl,mp)
-
-
-}
-void gpu_get_dgl_ptr (int *ip,int  if3d, int mx, int md, int nelt,double *dg, double *dgt,double *wkd, int lxd, int *pdg){
-
-	int ld=2*lxd;
-	int ij = md + ld*(mx-1);
-	ip[0] = pdg [ij];
-
-	if (ip[0]==0){
-
-		int nstore   = pdg [0];
-		pdg[ij-1] = nstore+1;
-		nstore   = nstore + md*mx;
-		pdg [0] = nstore;
-		ip[0]       = pdg [ij-1];
-		int nwrkd = mx + md;
-		gpu_gen_dgl(dg+ip[0]-1,dgt+ip[0]-1,md,mx,wkd);
-
-	}
-
-}
 
 void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double* d_ab, bool if3d, double * d_w, int ldw, int nel, int intermediatestride, int eq, bool second_eq){
 	//intermediatestride means the stride size need to skip
@@ -461,7 +406,7 @@ void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double
 	const double *alpha = &alf;
 	const double *beta = &bet;
 
-	if(second_eq){// this is idir in intp_rstd function
+	if(second_eq){// this is idir==0 case in intp_rstd function
 
 		if(if3d){
 			int nab = na*nb;
@@ -534,11 +479,26 @@ void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double
 			cudaError_t code4 = cudaPeekAtLastError();
 			printf("CUDA: Start map_faced cuda status after Dgemmstride 4: %s\n",cudaGetErrorString(code4));
 
+                          double *cpu_dw;
+                               cpu_dw= (double*)malloc((nel*nb*na*na+nel*nb*nb*na)*sizeof(double));
+                              cudaMemcpy(cpu_dw,d_w, nel*nb*na*na*sizeof(double) , cudaMemcpyDeviceToHost);
+                               for(int i=0;i<  nel*nb*na*na;i++){
+//                                        printf("debug 2d_w %d %d %d %.30lf \n ",i/(nb*na*na),i%(nb*na*na),eq,cpu_dw[i]);
+                                }
+
+
 #endif
 
 
 
 			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,na*nb , d_ab,na,0, beta,d_w+na*na*nb*nel ,nb,nb*nb,na*nel);
+
+                              cudaMemcpy(cpu_dw,d_w, (nel*nb*na*na+nel*nb*nb*na)*sizeof(double) , cudaMemcpyDeviceToHost);
+                               for(int i=0;i<  nel*nb*nb*na;i++){
+//                                        printf("debug 2d_w %d %d %d %.30lf \n ",i/(nb*nb*na),i%(nb*nb*na),eq,cpu_dw[nel*na*na*nb+i]);
+                                }
+
+
 
 #ifdef DEBUGPRINT
 			cudaDeviceSynchronize();
@@ -553,6 +513,15 @@ void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double
 			cudaDeviceSynchronize();
 			cudaError_t code6 = cudaPeekAtLastError();
 			printf("CUDA: Start map_faced cuda status after Dgemmstride 6: %s\n",cudaGetErrorString(code6));
+
+			 double *cpu_db;
+                               cpu_db= (double*)malloc((nel*nb*nb*nb)*sizeof(double));
+                              cudaMemcpy(cpu_db,d_b, nel*nb*nb*nb*sizeof(double) , cudaMemcpyDeviceToHost);
+                               for(int i=0;i<  nel*nb*nb*nb;i++){
+                                        printf("debug 2d_b %d %d %d %.30lf \n ",i/(nb*nb*nb),i%(nb*nb*nb),eq,cpu_db[i]);
+                                }
+
+
 
 #endif
 
@@ -590,48 +559,3 @@ void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double
 
 
 }
-void gpu_gen_dgll(double *dgl,double *dgt,int mp,int np,double *w){
-	int iz = 1;
-	int id = iz + np;
-
-	//  call zwgl  (w(iz),dgt,np)  ! GL points
-	//  call zwgl  (w(id),dgt,mp)  ! GL points
-
-	int  ndgt = 2*np;
-	int  ldgt = mp*np;
-
-	int  n  = np-1;
-	for(int i=0;i<mp;i++){
-		//call fd_weights_full(w(id+i-1),w(iz),n,1,dgt) ! 1=1st deriv.
-		for(int j=0;j<np;j++){
-			dgl[j*mp+i] = dgt[np+j];            //           ! Derivative matrix
-		}
-	}
-	//  call gpu_transpose(dgt,np,dgl,mp)
-
-
-}
-
-void gpu_get_dgll_ptr (int *ip,int  if3d, int mx, int md, int nelt,double *d, double *dt,double *wkd,int  lxd, int *pdg){
-
-	int ld=2*lxd;
-	int ij = md + ld*(mx-1);
-	ip[0] = pdg [ij];
-
-	if (ip[0]==0){
-
-		int nstore   = pdg [0];
-		pdg[ij-1] = nstore+1;
-		nstore   = nstore + md*mx;
-		pdg [0] = nstore;
-		ip[0]       = pdg [ij-1];
-		int nwrkd = mx + md;
-		gpu_gen_dgll(d+ip[0]-1,dt+ip[0]-1,md,mx,wkd);
-
-	}
-
-}
-
-
-
-

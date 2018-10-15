@@ -119,26 +119,39 @@
 
 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidBC_gpu", nid
-      call get_int_ptr(i,lx1,lxd)    
+      call get_int_ptr(ip,lx1,lxd)    
       tocpucopy_gas(67)=1
       tocpucopy_gas(68)=1
       tocpucopy_gas(38)=1
+      tocpucopy_gas(18)=1
+      tocpucopy_gas(36)=1
       call copytocpu_gpu()
 
-       do i = 1, lxd*lxd*lxd
-                write(6,*) " inint debug jgl first", i,jgl(i), jgt(i)
-       enddo
 
        call printUnx("before")
+       call printUny("before")
  
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
 
-      call inviscidflux_gpu_wrapper(glbblockSize2,d_jgl,d_jgt,d_unx,d_uny,d_unz,d_area,d_flux,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq,lx1,ly1,lz1,i)
+!      do i=1,lx1*lz1
+!           print *, 'wghtc ', i, wghtc(i)
+!      enddo
+
+!      do i=1,lx1*lz1*6*nelt
+!           print *, 'area ', i, area(i)
+!      enddo
+
+!       do i = 1, lxd*lxd*lxd
+!                write(6,*) " inint debug jgl first", i,jgl(i), jgt(i)
+!       enddo
+
+
+      call inviscidflux_gpu_wrapper(glbblockSize2,d_jgl,d_jgt,d_unx,d_uny,d_unz,d_area,d_flux,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq,lx1,ly1,lz1,ip)
  
 
   !following code is for testing only. delete later.
       istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-      call printFatface("before")
+!      call printFatface("before")
 
 
       print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidFlux_gpu", nid
@@ -387,8 +400,9 @@
 !-----------------------------------------------------------------------
 
 
-      subroutine igu_cmt_gpu(flxscr,gdudxk,wminus)
+      subroutine igu_cmt_gpu(flxscr,gdudxk,wminus,iwp,iwm)
 ! Hij^{d*}
+      use cudafor
       use glbvariable_gpu
       real flxscr(lx1*lz1*2*ldim*nelt,toteq)
       real gdudxk(lx1*lz1*2*ldim,nelt,toteq)
@@ -404,13 +418,23 @@
 
       call igu_cmt_gpu_wrapper1(glbblockSize2,d_flux,d_graduf,toteq,iwp,lx1,ly1,lz1,ldim,nelt,lelt)
 
-      tocpucopy_gas(6)=1
-      call copytocpu_gpu()
+      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu before copy"
+      
+!      tocpucopy_gas(6)=1
+!      call copytocpu_gpu()
 
+      istate = cudaMemcpy(gdudxk, d_graduf, lx1*lz1*2*ldim*nelt*toteq,cudaMemcpyDeviceToHost)
+
+      print *,"istate igtucmt", cudaGetErrorString(istate)
+
+      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu after copy"
+      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu before gs"
       call gs_op_fields(dg_hndl,gdudxk,nfq,toteq,1,1,0)
+      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu after gs"
 
-      togpucopy_gas(6)=1
-      call copytogpu_gpu()
+      istate = cudaMemcpy(d_graduf,gdudxk,  lx1*lz1*2*ldim*nelt*toteq,cudaMemcpyHostToDevice)
+!      togpucopy_gas(6)=1
+!      call copytogpu_gpu()
 
       call igu_cmt_gpu_wrapper2(glbblockSize2,d_flux,d_graduf,d_cbc,d_unx,d_uny,d_unz,toteq,&
        iwp,iwm,ldim,irho,icvf,ilamf,imuf,iux,iuy,iuz,iu5,if3dgpu,lx1,ly1,lz1,nelt,lelt)

@@ -64,8 +64,8 @@ __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, doubl
 		int uservpe = gllel[ieg-1];
 		mu=rho*res2[(uservpe-1)*nxyz+k*lxy+j*lx1+newi] ;//! finite c_E;
 		double nu_s=0.75*mu/rho;
-                if(e==7){
- 			printf("mu in compute transport is %lf rho = %lf uservpe =  %d ieg=%d \n", mu,rho,uservpe,ieg);
+		if(e==7){
+			printf("mu in compute transport is %lf rho = %lf uservpe =  %d ieg=%d \n", mu,rho,uservpe,ieg);
 		}
 		mu=0.5*mu ;
 		lambda=0.0;
@@ -172,7 +172,7 @@ __global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, 
 		char cb2 = cbc[e*18+iface+1];
 		char cb3 = cbc[e*18+iface+2];
 		if(cb1!='E' &&  cb1!='P'){
-				int iy,iz,ix,l;
+			int iy,iz,ix,l;
 			if(cb1 =='W'|| cb1=='I'){
 				int ieg=lglel[e];
 
@@ -217,53 +217,53 @@ __global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, 
 
 
 				//nekasgn
-				double x = xm1[e*nxyz+iz*lxy+iy*lx1+ix];
-				double y = ym1[e*nxyz+iz*lxy+iy*lx1+ix];
-				double z = zm1[e*nxyz+iz*lxy+iy*lx1+ix];
-				double r = x*x+y*y;
-				double theta=0.0;
-				if (r>0.0){ r = sqrtf(r);}
-				if ( x != 0.0 || y!= 0.0){theta = atan2(y,x);   }
+				//				double x = xm1[e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double y = ym1[e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double z = zm1[e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double r = x*x+y*y;
+				//				double theta=0.0;
+				//				if (r>0.0){ r = sqrtf(r);}
+				//				if ( x != 0.0 || y!= 0.0){theta = atan2(y,x);   }
 				double ux= vx[e*nxyz+iz*lxy+iy*lx1+ix];
 				double uy= vy[e*nxyz+iz*lxy+iy*lx1+ix];
 				double uz= vz[e*nxyz+iz*lxy+iy*lx1+ix];
 				double temp = t [ e*nxyz+iz*lxy+iy*lx1+ix];
-				int ips;
-				double ps[10]; // ps is size of ldimt which is 3. Not sure npscal is also 3. Need to check with Dr.Tania
-				for (ips=0;ips<npscal;ips++){
-					ps[ips]=t[(ips+1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix]; // 5 th dimension of t is idlmt which is 3. Not sure how the  nekasgn access ips+1. Need to check with Dr.Tania
-				}
-				double pa = pr [e*nxyz+iz*lxy+iy*lx1+ix];
-				double p0= p0th;
-				double si2 =  sii[e*nxyz+iz*lxy+iy*lx1+ix];
-				double si3 =  siii[e*nxyz+iz*lxy+iy*lx1+ix];
-				double udiff =  vdiff[(ifield-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
-				double utrans =  vtrans[(ifield-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
-				char cbu1 = cb[0];
-				char cbu2 = cb[1];
-				char cbu3 = cb[2];
+				//				int ips;
+				//				double ps[10]; // ps is size of ldimt which is 3. Not sure npscal is also 3. Need to check with Dr.Tania
+				//				for (ips=0;ips<npscal;ips++){
+				//					ps[ips]=t[(ips+1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix]; // 5 th dimension of t is idlmt which is 3. Not sure how the  nekasgn access ips+1. Need to check with Dr.Tania
+				//				}
+				//				double pa = pr [e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double p0= p0th;
+				//				double si2 =  sii[e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double si3 =  siii[e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double udiff =  vdiff[(ifield-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double utrans =  vtrans[(ifield-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
+				//				char cbu1 = cb[0];
+				//				char cbu2 = cb[1];
+				//				char cbu3 = cb[2];
 
 				//cmtasgn
-				int eqnum;
-				double varsic[10];
-				for (eqnum=0;eqnum<toteq;eqnum++){
-					varsic[eqnum] = u[e*e_offset+eqnum*nxyz+iz*lxy+iy*lx1+ix];
-
-				}
+				//				int eqnum;
+				//				double varsic[10];
+				//				for (eqnum=0;eqnum<toteq;eqnum++){
+				//					varsic[eqnum] = u[e*e_offset+eqnum*nxyz+iz*lxy+iy*lx1+ix];
+				//
+				//				}
 				double phi = phig[e*nxyz+iz*lxy+iy*lx1+ix];
-				double rho = vtrans[(irho-1)*nlel +e*nxyz+iz*lxy+iy*lx1+ix];
-				double pres = pr[e*nxyz+iz*lxy+iy*lx1+ix];
-				double cv=0.0,cp=0.0;
-				if(rho!=0){
-					cv=vtrans[(icv-1)*nlel +e*nxyz+iz*lxy+iy*lx1+ix]/rho;
-					cp=vtrans[(icp-1)*nlel +e*nxyz+iz*lxy+iy*lx1+ix]/rho;
-				}
-				double asnd = csound [e*nxyz+iz*lxy+iy*lx1+ix];
-				double mu = vdiff[(imu-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
-				udiff = vdiff[(imu-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];// this overrides the udiff in nekasgn (line 63 in this function). Need to check withDr.Tania
-				double lambda = vdiff[(ilam-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double rho = vtrans[(irho-1)*nlel +e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double pres = pr[e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double cv=0.0,cp=0.0;
+				//				if(rho!=0){
+				//					cv=vtrans[(icv-1)*nlel +e*nxyz+iz*lxy+iy*lx1+ix]/rho;
+				//					cp=vtrans[(icp-1)*nlel +e*nxyz+iz*lxy+iy*lx1+ix]/rho;
+				//				}
+				//				double asnd = csound [e*nxyz+iz*lxy+iy*lx1+ix];
+				//				double mu = vdiff[(imu-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
+				//				udiff = vdiff[(imu-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];// this overrides the udiff in nekasgn (line 63 in this function). Need to check withDr.Tania
+				//				double lambda = vdiff[(ilam-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix];
 				// userbc
-				double molarmass = molmass;
+				//				double molarmass = molmass;
 
 				if(fabs(vdiff[(ilam-1)*nlel+e*nxyz+iz*lxy+iy*lx1+ix]) > 0.0000000001){
 					flux[(iwp-1)+(iux-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l] = ux;
@@ -295,11 +295,15 @@ __global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, 
 
 
 			}
-
-			for(int ivar=0;ivar<toteq;ivar++){
-				flux[(iuj-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l] = flux[(iwm-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l]-flux[(iwp-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l];
-			}
-
+			//			if(id<10){
+			//				printf("iuj = %d, iwm = %d, iwp = %d, lxz2ldimlelt = %d, lxz2ldim = %d, lxz = %d, iface= %d id %d  \n",iuj,iwm,iwp,lxz2ldimlelt,lxz2ldim,lxz,iface,id );
+			//			}
+				for(int ivar=0;ivar<toteq;ivar++){
+					flux[(iuj-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1] = flux[(iwm-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1]-flux[(iwp-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1];
+				}
+						if(id<500){
+							printf("iuj = %d, iwm = %d, iwp = %d, lxz2ldimlelt = %d, lxz2ldim = %d, lxz = %d, iface= %d id %d l = %d ix = %d, iy =%d, iz = %d, i1 = %d, i2=%d,lx1=%d, ly1=%d,lz1=%d, cb1= %d \n",iuj,iwm,iwp,lxz2ldimlelt,lxz2ldim,lxz,iface,id ,l,ix,iy,iz,i1,i2,lx1,ly1,lz1,cb1);
+						}
 
 		}
 
@@ -334,6 +338,9 @@ extern "C" void imqqtu_dirichlet_gpu_wrapper_(int *glbblockSize2,double *d_flux,
 
 
 	imqqtu_dirichlet_gpu_kernel<<<gridSize, blockSize>>>(d_flux, ntot, ifield[0], ltot,ilam[0],irho[0],icv[0],icp[0],imu[0],molmass[0],iwp[0],iwm[0],iuj[0],iux[0],iuy[0],iuz[0],iph[0],ithm[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],icvf[0],toteq[0],lx1[0],ly1[0],lz1[0],lxy,lxz,nxyz,lxz2ldim,lxz2ldimlelt,a2ldim,d_cbc, d_lglel,d_xm1,d_ym1, d_zm1, d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans, d_cb,d_u, d_phig,d_pres,d_csound,npscal[0],p0th[0],e_offset,nlel,nqq[0] );
+
+
+
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();

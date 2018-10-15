@@ -78,12 +78,12 @@ __global__ void fluxes_full_field_gpu_kernel_faceu(double *flux, double *u,int i
 		int e = id/nxz2ldim;
 		int i = iface_flux[id];
 
-                for(int k=0;k<toteq;k++){
-		//full2face_cmt
+		for(int k=0;k<toteq;k++){
+			//full2face_cmt
 			flux[(i_cvars-1)+id] =u[e*toteq*lxyz+k*lxyz+i-1];
 			flux[(i_cvars-1)+id]= flux[(i_cvars-1)+id]/flux[iwm-1+nnel*(iph-1)+id];// invcol2
-		i_cvars= i_cvars+nnel;
-		// check with Dr.Tania. above functions may not work properly.
+			i_cvars= i_cvars+nnel;
+			// check with Dr.Tania. above functions may not work properly.
 		}
 
 	}
@@ -129,20 +129,22 @@ extern "C" void fluxes_full_field_gpu_wrapper_(int *glbblockSize2,double *d_flux
 
 }
 
-__global__ void inviscidFlux_gpu_kernel1(double *jaco_c,double *area,double *wghtc,int ntot){
+__global__ void inviscidFlux_gpu_kernel1(double *jaco_c,double *area,double *wghtc,int ntot,int lx1,int lz1){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
+	int lxy = id%(lx1*lz1);
 	if(id<ntot){
-		jaco_c[id]=  area[id]/wghtc[id];
+		jaco_c[id]=  area[id]/wghtc[lxy];
 	}
 
 }
 
-__global__ void inviscidFlux_gpu_kernel2(double *jaco_f,double *wghtf,int ntotd){
+__global__ void inviscidFlux_gpu_kernel2(double *jaco_f,double *wghtf,int ntotd,int lxd,int lzd){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
+	int lxyd = id%(lxd*lzd);
 	if(id<ntotd){
-		jaco_f[id]=jaco_f[id]*wghtf[id];
+		jaco_f[id]=jaco_f[id]*wghtf[lxyd];
 
 	}
 
@@ -271,18 +273,27 @@ void map_faced(double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w,
 			cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nxd, nx1*nelt*nfaces ,nx1,alpha, d_jgl+ip-1, nxd, u, nx1, beta, d_w,nxd);
 
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code3 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+			cudaDeviceSynchronize();
+			cudaError_t code3 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
 
 #endif
 
+			// 	double *cpu_dw;
+			//       cpu_dw= (double*)malloc(nelt*nfaces*nxd*nxd*sizeof(double));
+			//      cudaMemcpy(cpu_dw,d_w,nelt*nfaces*nxd*nxd*sizeof(double) , cudaMemcpyDeviceToHost);
+			//       for(int i=0;i<nelt*nfaces*nxd*nxd;i++){
+			//                printf("debug d_w %d %d %d %.30lf \n ",i%(nxd*nxd),(i/nelt)%nfaces,i/(nelt*nfaces),cpu_dw[i]);
+			//        }
 
-			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nxd, nxd, nx1, alpha,d_w, nxd,nxd*nx1, d_jgt,nx1,0, beta,ju ,nxd,nxd*nx1,nelt*nfaces);
+
+
+
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nxd, nxd, nx1, alpha,d_w, nxd,nxd*nx1, d_jgt,nx1,0, beta,ju ,nxd,nxd*nxd,nelt*nfaces);
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code4 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
+			cudaDeviceSynchronize();
+			cudaError_t code4 = cudaPeekAtLastError();
+			printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
 
 #endif
 
@@ -298,7 +309,7 @@ void map_faced(double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w,
 			// Do the actual multiplication
 			cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nxd*nelt*nfaces ,nxd,alpha, d_jgt+ip-1, nx1, u, nxd, beta, d_w, nx1);
 
-			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nxd, alpha,d_w, nx1,nxd*nx1, d_jgl,nxd,0, beta,ju ,nx1,nxd*nx1,nelt*nfaces);
+			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nxd, alpha,d_w, nx1,nxd*nx1, d_jgl,nxd,0, beta,ju ,nx1,nx1*nx1,nelt*nfaces);
 		}
 		else{
 			cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1,1, nxd*nelt*nfaces,alpha, d_jgt+ip-1, nx1, u, nxd, beta, ju,nx1);
@@ -307,9 +318,9 @@ void map_faced(double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w,
 		// Destroy the handle
 		cublasDestroy(handle);
 #ifdef DEBUGPRINT
-        cudaDeviceSynchronize();
-        cudaError_t code2 = cudaPeekAtLastError();
-        printf("CUDA: Start map_faced cuda status at the end: %s\n",cudaGetErrorString(code2));
+		cudaDeviceSynchronize();
+		cudaError_t code2 = cudaPeekAtLastError();
+		printf("CUDA: Start map_faced cuda status at the end: %s\n",cudaGetErrorString(code2));
 
 #endif
 
@@ -324,7 +335,7 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	cudaDeviceSynchronize();
 	cudaError_t code1 = cudaPeekAtLastError();
 	printf("CUDA: Start inviscidFlux_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
-	printf("CUDA: Start inviscidFlux_gpu_wrapper values  irho = %d, iux= %d,iuy= %d,iuz= %d,ipr= %d,ithm= %d,isnd= %d,iph= %d,icpf= %d,iwm= %d,iwp= %d,nelt= %d,lx1= %d,ly1= %d,lz1= %d,ldim= %d,lelt= %d,toteq= %d,lxd= %d, lzd = %d , ip = %d\n",irho[0],iux[0],iuy[0],iuz[0],ipr[0],ithm[0],isnd[0],iph[0],icpf[0],iwm[0],iwp[0],nelt[0],lx1[0],ly1[0],lz1[0],ldim[0],lelt[0],toteq[0],lxd[0],lzd[0],ip[0]);
+	printf("CUDA: Start inviscidFlux_gpu_wrapper values  irho = %d, iux= %d,iuy= %d,iuz= %d,ipr= %d,ithm= %d,isnd= %d,iph= %d,icpf= %d,iwm= %d,iwp= %d,nelt= %d,lx1= %d,ly1= %d,lz1= %d,ldim= %d,lelt= %d,toteq= %d,lxd= %d, lzd = %d , ip = %d iflx = %d \n",irho[0],iux[0],iuy[0],iuz[0],ipr[0],ithm[0],isnd[0],iph[0],icpf[0],iwm[0],iwp[0],nelt[0],lx1[0],ly1[0],lz1[0],ldim[0],lelt[0],toteq[0],lxd[0],lzd[0],ip[0],iflx[0]);
 #endif
 	int fdim = ldim[0]-1;
 	int nfaces = 2*ldim[0];
@@ -402,11 +413,12 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	cpu_jgt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
 	cudaMemcpy(cpu_jgl,d_jgl,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
 	cudaMemcpy(cpu_jgt,d_jgt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-        for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
+	for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
 		printf("debug jgl first %d %lf %lf \n ",i,cpu_jgl[i],cpu_jgt[i]);
 	}
 	if(lxd[0]>lx1[0]){
 		map_faced(d_jgl, d_jgt, d_nx, d_unx, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
+		//	cudaMemset(d_w, 0.0, ntotd*sizeof(double));
 		map_faced(d_jgl, d_jgt, d_ny, d_uny, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_nz, d_unz, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_rl, d_fatface+iwm[0]-1+(irho[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
@@ -435,29 +447,27 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 #endif
 
-// for testing only
+		// for testing only
 
-	double *cpu_nx;
-	cpu_nx= (double*)malloc(ntotd*sizeof(double));
-	cudaMemcpy(cpu_nx,d_nx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
-        for(int i=0;i<ntotd;i++){
-		printf("nx value %lf for i= %d f= %d e= %d  \n ",cpu_nx[i],i,(i/144)%6,i/(144*6));
-	}
-		
-	cudaMemcpy(cpu_jgl,d_jgl,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-	cudaMemcpy(cpu_jgt,d_jgt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-        for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
-		printf("debug jgl second %d %lf %lf \n ",i,cpu_jgl[i],cpu_jgt[i]);
-	}
+		double *cpu_nx;
+		cpu_nx= (double*)malloc(ntotd*sizeof(double));
+		cudaMemcpy(cpu_nx,d_nx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+//		for(int i=0;i<ntotd;i++){
+//			printf("nx value %.30lf for i= %d f= %d e= %d  \n ",cpu_nx[i],i,(i/144)%6,i/(144*6));
+//		}
 
-
+		double *cpu_ny;
+		cpu_ny= (double*)malloc(ntotd*sizeof(double));
+		cudaMemcpy(cpu_ny,d_ny,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+//		for(int i=0;i<ntotd;i++){
+//			printf("ny value %.30lf for i= %d f= %d e= %d  \n ",cpu_ny[i],i,(i/144)%6,i/(144*6));
+//		}
 		gridSize = (int)ceil((float)ntot/blockSize);
-		inviscidFlux_gpu_kernel1<<<gridSize, blockSize>>>(d_jaco_c,d_area,d_wghtc,ntot);
-
+		inviscidFlux_gpu_kernel1<<<gridSize, blockSize>>>(d_jaco_c,d_area,d_wghtc,ntot,lx1[0],lz1[0]);
 		map_faced(d_jgl, d_jgt, d_jaco_f, d_jaco_c, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 
 		gridSize = (int)ceil((float)ntotd/blockSize);
-		inviscidFlux_gpu_kernel2<<<gridSize, blockSize>>>(d_jaco_f,d_wghtf,ntotd);
+		inviscidFlux_gpu_kernel2<<<gridSize, blockSize>>>(d_jaco_f,d_wghtf,ntotd,lxd[0],lzd[0]);
 
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
@@ -478,6 +488,17 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	Ausm_flux<<<gridSize, blockSize>>>(toteq[0],ntotd, d_nx, d_ny, d_nz, d_jaco_f, d_fs, d_rl, d_ul, d_vl, d_wl, d_pl, d_al, d_tl, d_rr, d_ur, d_vr, d_wr, d_pr, d_ar, d_tr, d_flx, d_cpl, d_cpr,d_phl);
 
 
+	// for testing only
+
+	double *cpu_flx;
+	cpu_flx= (double*)malloc(ntotd*sizeof(double));
+	cudaMemcpy(cpu_flx,d_flx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+//	for(int i=0;i<ntotd;i++){
+		//printf("flx value %.30lf for i= %d f= %d e= %d  \n ",cpu_flx[i],i,(i/144)%6,i/(144*6));
+//		printf("flx value   %.16e\n ",cpu_flx[i]);
+//	}
+
+
 	if(lxd[0]>lx1[0]){
 		for(int j=0; j<toteq[0];j++){
 			gridSize = (int)ceil((float)ntotd/blockSize);
@@ -495,8 +516,6 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 	}
 
-	cudaFree(d_jgl);	
-	cudaFree(d_jgt);	
 	cudaFree(d_nx);	
 	cudaFree(d_ny);	
 	cudaFree(d_nz);	
@@ -533,7 +552,25 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 }
 
-__global__ void surface_integral_full_gpu_kernel(double *iface_flux, double *res1, double *flux, int ntot,int lxyz,int lxyzlelt,int nxz2ldim,int eq ){
+__device__ double atomicAdd1(double* address, double val)
+{
+    unsigned long long int* address_as_ull =
+                              (unsigned long long int*)address;
+    unsigned long long int old = *address_as_ull, assumed;
+
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed,
+                        __double_as_longlong(val +
+                               __longlong_as_double(assumed)));
+
+    // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+    } while (assumed != old);
+
+    return __longlong_as_double(old);
+}
+
+__global__ void surface_integral_full_gpu_kernel(int *iface_flux, double *res1, double *flux, int ntot,int lxyz,int lxyzlelt,int nxz2ldim,int eq ){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
@@ -542,13 +579,28 @@ __global__ void surface_integral_full_gpu_kernel(double *iface_flux, double *res
 
 		//add_face2full_cmt(nel,nx,ny,nz,iface,vols,faces)
 		int newi=iface_flux[id];
-		res1[eq*lxyzlelt+e*lxyz+newi-1]=  res1[eq*lxyzlelt+e*lxyz+newi-1]+flux[id];
+
+//		if(newi<10){
+ //                                       printf("!!!newi from gpu %d id = %d res1 = %.16e flux = %.16e %d %d\n", newi, id,  res1[eq*lxyzlelt+e*lxyz+newi-1],flux[id],eq,e);
+//                                }
+
+                  
+		//		if(flux[id]<0){
+		//		  flux[id]=flux[id]*-1;	
+		//		}
+		//		 flux[id]= flux[id]+1.0;
+		atomicAdd1(&res1[eq*lxyzlelt+e*lxyz+newi-1],flux[id]);
+
+		//	res1[eq*lxyzlelt+e*lxyz+newi-1]=  res1[eq*lxyzlelt+e*lxyz+newi-1]+flux[id];
+//		                 if(newi<10){
+//					printf("newi from gpu %d id = %d res1 = %.16e flux = %.16e %d %d\n", newi, id,  res1[eq*lxyzlelt+e*lxyz+newi-1],flux[id],eq,e);
+//				}
 	}
 
 }
 
 
-extern "C" void surface_integral_full_gpu_wrapper_(int *glbblockSize2,double *d_res1,double *d_flux,int *eq,int *ieq,int *nelt, int *lelt, int *toteq,int *lx1,int *ly1,int *lz1,int *ldim,double *d_iface_flux ){
+extern "C" void surface_integral_full_gpu_wrapper_(int *glbblockSize2,double *d_res1,double *d_flux,int *eq,int *ieq,int *nelt, int *lelt, int *toteq,int *lx1,int *ly1,int *lz1,int *ldim,int *d_iface_flux ){
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
@@ -566,7 +618,34 @@ extern "C" void surface_integral_full_gpu_wrapper_(int *glbblockSize2,double *d_
 	int blockSize = glbblockSize2[0], gridSize;
 	gridSize = (int)ceil((float)ntot/blockSize);
 
+//		double *newcpu_res1;
+//		newcpu_res1= (double*)malloc(lx1[0]*ly1[0]*lz1[0]*lelt[0]*sizeof(double));
+//		cudaMemcpy(newcpu_res1,d_res1,lx1[0]*ly1[0]*lz1[0]*lelt[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+
+
 	surface_integral_full_gpu_kernel<<<gridSize, blockSize>>>(d_iface_flux,d_res1,d_flux+ieq[0]-1,ntot,lxyz,lxyzlelt,nxz2ldim,(eq[0]-1));
+
+
+//	if(eq[0]==5){
+//		float *cpu_res1;
+//		cpu_res1= (float*)malloc(lx1[0]*ly1[0]*lz1[0]*lelt[0]*toteq[0]*sizeof(float));
+//
+//		double *cpu_res1temp;
+//		cpu_res1temp= (double*)malloc(lx1[0]*ly1[0]*lz1[0]*lelt[0]*toteq[0]*sizeof(double));
+
+//		cudaMemcpy(cpu_res1,d_res1,lx1[0]*ly1[0]*lz1[0]*lelt[0]*toteq[0]*sizeof(float) , cudaMemcpyDeviceToHost);
+//		for(int i=0;i<lx1[0]*ly1[0]*lz1[0]*lelt[0]*toteq[0];i++){
+//			cpu_res1temp[i]=static_cast<double>(cpu_res1[i]);
+//			printf("iii= %d  \n ",i);
+//			printf(" i = %d in gpu res1 value %.20f double value %.20lf in i = %d  \n ",i,cpu_res1[i],cpu_res1temp[i],i);
+
+//		}
+//		cudaMemcpy(d_res1,cpu_res1temp,lx1[0]*ly1[0]*lz1[0]*lelt[0]*toteq[0]*sizeof(double) , cudaMemcpyHostToDevice);
+//      	free(cpu_res1);
+//        	free(cpu_res1temp);
+//	}
+
+
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
