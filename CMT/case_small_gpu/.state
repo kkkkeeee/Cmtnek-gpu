@@ -1,0 +1,6 @@
+SOURCE_ROOT=/g/g90/zhai1/latestNek5k072018/Nek5000-lbv2
+FC=mpixlf77
+FFLAGS= -qrealsize=8 -qdpc=e -qsuffix=cpp=f -qsuppress=cmpmsg
+CC=mpixlc
+CFLAGS=
+PPLIST=CMTNEK LPM MPIIO EXTBAR MPI TIMER

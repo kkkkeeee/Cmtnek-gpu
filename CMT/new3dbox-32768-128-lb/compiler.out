@@ -1,0 +1,34 @@
+nvcc -c /users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/cuda_functions.cu -g -O0 -DPTRSIZE8 -DMPI -DLONGINT8 -DUNDERSCORE -DGLOBAL_LONG_LONG -I/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/examples/new3dbox-32768-128-lb -I/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek -I. -o obj/cuda_functions.o
+nvcc -c /users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu -g -O0 -DPTRSIZE8 -DMPI -DLONGINT8 -DUNDERSCORE -DGLOBAL_LONG_LONG -I/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/examples/new3dbox-32768-128-lb -I/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek -I. -o obj/particles-cuda.o
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(214): warning: variable "ijk3" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(214): warning: variable "ijk2" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(214): warning: variable "ijk1" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(246): warning: variable "pmassf" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(248): warning: variable "c0" was set but never used
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(248): warning: variable "T0" was set but never used
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(248): warning: variable "M_p" was set but never used
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(289): warning: variable "pmassf" was set but never used
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(291): warning: variable "c0" was set but never used
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(291): warning: variable "T0" was set but never used
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/particles-cuda.cu(291): warning: variable "M_p" was set but never used
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/cuda_functions.cu(1961): warning: variable "rhx" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/cuda_functions.cu(2401): warning: variable "gridsize" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/cuda_functions.cu(2466): warning: variable "alpha" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/cuda_functions.cu(2467): warning: variable "beta" was declared but never referenced
+
+/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/trunk/nek/cmthybrid/cuda_functions.cu(2468): warning: variable "dim" was declared but never referenced
+

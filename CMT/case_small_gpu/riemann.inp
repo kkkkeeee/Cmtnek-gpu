@@ -1,0 +1,10 @@
+1.0         ! DOMLEN : Domain length
+0.23        ! DIAPH1 : Position of diaphragm  
+1.4         ! GAMMA  : Ratio of specific heats
+1.205       ! DL     : Initial density  on left  section of tube
+0.0         ! UL     : Initial velocity on left  section of tube
+101325.0    ! PL     : Initial pressure on left  section of tube
+0.610       ! DR     : Initial density  on right section of tube
+0.0         ! UR     : Initial velocity on right section of tube
+51325.0     ! PR     : Initial pressure on right section of tube
+0.000385    ! zerotime

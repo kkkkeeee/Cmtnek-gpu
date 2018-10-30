@@ -1,0 +1,1320 @@
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+ First break in drive1.f
+/----------------------------------------------------------\
+|      _   __ ______ __ __  ______  ____    ____    ____   |
+|     / | / // ____// //_/ / ____/ / __ \ / __ \ / __ \ |
+|    /  |/ // __/  / ,<   /___ \  / / / // / / // / / /   |
+|   / /|  // /___ / /| | ____/ / / /_/ // /_/ // /_/ /     |
+|  /_/ |_//_____//_/ |_|/_____/  \____/ \____/ \____/   |
+|                                                          |
+|----------------------------------------------------------|
+|                                                          |
+| NEK5000:  Open Source Spectral Element Solver            |
+| COPYRIGHT (c) 2008-2010 UCHICAGO ARGONNE, LLC            |
+| Version:  1.0rc1 / SVN  r1094                            |
+| Web:      http://nek5000.mcs.anl.gov                     |
+|                                                          |
+\----------------------------------------------------------/
+                                                              
+
+ Number of processors:           64
+ REAL    wdsize      :            8
+ INTEGER wdsize      :            4
+
+
+  Beginning session:
+  /users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/exampl
+
+ 
+ timer accuracy:   9.5367432E-08 sec
+
+ read .rea file
+ WARNING: lgmres might be too low!
+ read .re2 file
+ byte swap:  T  -2.9312772E+35    6.543210    
+ nelgt/nelgv/lelt:        1000        1000         600
+ lx1  /lx2  /lx3 :           7           7           7
+
+ mapping elements to processors
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ starting position of get_vertex_map
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ break point in navier8.f   3.6357879638671875E-002
+ read map file   3.6357879638671875E-002
+ first middle point in navier8.f get_vertex_map
+ After .not.ifgfdm
+ inside gfirst .eq. 1 if cluase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ before first if in assign_gllnid
+ after bcase
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after bcase
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            4            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           15          130          130         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            7            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            2            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            8            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            9            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           17            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           18            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           20            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            5            8            8         1000         1000  NELV
+ after bcase
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           45            8            8         1000         1000  NELV
+ after bcase
+ after bcase
+ after bcase
+ after bcase
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ cores           16 cpuload   0.5000000000000000     
+ before isort
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           53            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            3            8            8         1000         1000  NELV
+ second middle point in navier8.f get_vertex_map
+            0            8            8         1000         1000  NELV
+ after isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           11            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           55            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           31          130          130         1000         1000  NELV
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ after isort
+ after isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ before first if in assign_gllnid
+ after first if in gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after bcase
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after bcase
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           29            8            8         1000         1000  NELV
+ after isort
+ after isort
+ after isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           32            8            8         1000         1000  NELV
+ after isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           19            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           40            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           28            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ after bcase
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           26            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           22            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           47          130          130         1000         1000  NELV
+ after bcase
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           37            8            8         1000         1000  NELV
+ second middle point in navier8.f get_vertex_map
+           23            8            8         1000         1000  NELV
+ after bcase
+ after bcase
+ after first if in gllnid
+ after np/num_cores           64           16
+ after bcase
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before first if in assign_gllnid
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           58            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ reach end of  gfirst .eq. 1 if clase
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           12            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           59            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           51            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           35            8            8         1000         1000  NELV
+ after first if in gllnid
+ after np/num_cores           64           16
+ after bcase
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           36            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           34            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           60            8            8         1000         1000  NELV
+ after bcase
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           24            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           62            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           63          130          130         1000         1000  NELV
+ after bcase
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           10            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ after isort
+            6            8            8         1000         1000  NELV
+ after first if in gllnid
+ after np/num_cores           64           16
+           42            8            8         1000         1000  NELV
+           46            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           39            8            8         1000         1000  NELV
+ second middle point in navier8.f get_vertex_map
+           57            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after bcase
+ after bcase
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           52            8            8         1000         1000  NELV
+ after first if in gllnid
+ after np/num_cores           64           16
+ after first if in gllnid
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ after first if in gllnid
+ after nelgt / numgpu         1000            4
+ before isort
+           43            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           54            8            8         1000         1000  NELV
+ after np/num_cores           64           16
+ after isort
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ second middle point in navier8.f get_vertex_map
+           61            8            8         1000         1000  NELV
+ before isort
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ after isort
+ after isort
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ after isort
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           44            8            8         1000         1000  NELV
+           33            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           38            8            8         1000         1000  NELV
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           56            8            8         1000         1000  NELV
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ second middle point in navier8.f get_vertex_map
+           41            8            8         1000         1000  NELV
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           49            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ after isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ reach end of  gfirst .eq. 1 if clase
+           30            8            8         1000         1000  NELV
+ second middle point in navier8.f get_vertex_map
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after first if in gllnid
+ reach end of  gfirst .eq. 1 if clase
+           25            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           27            8            8         1000         1000  NELV
+ after isort
+ after np/num_cores           64           16
+ after first if in gllnid
+ after np/num_cores           64           16
+ second middle point in navier8.f get_vertex_map
+           21            8            8         1000         1000  NELV
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after first if in gllnid
+ after np/num_cores           64           16
+ after first if in gllnid
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ before nelgt / numgpu         1000            4
+ after isort
+ after isort
+ after nelgt / numgpu         1000            4
+ before isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ after isort
+           50            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           14            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+           48            8            8         1000         1000  NELV
+ reach end of  gfirst .eq. 1 if clase
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+ second middle point in navier8.f get_vertex_map
+           13            8            8         1000         1000  NELV
+           16            8            8         1000         1000  NELV
+ before first if in assign_gllnid
+ after first if in gllnid
+ after np/num_cores           64           16
+ before nelgt / numgpu         1000            4
+ after nelgt / numgpu         1000            4
+ before isort
+ after isort
+ reach end of  gfirst .eq. 1 if clase
+ second middle point in navier8.f get_vertex_map
+            1            8            8         1000         1000  NELV
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ after get_vert_map in navier8.f
+ RANK     0 IEG     871     872     961     971     972     973     981     982
+ element load imbalance:           122            8          130
+ done :: mapping elements to processors
+  
+   reading mesh 
+   reading curved sides 
+   reading bc for ifld            1
+ done :: read .re2 file
+  
+            0  objects found
+ done :: read .rea file   0.17587     sec
+
+ setup mesh topology
+   Right-handed check complete for    1000 elements. OK.
+   setvert3d:   7       91000      216000       91000       91000
+ call usrsetvert
+ done :: usrsetvert
+
+gs_setup: 42714 unique labels shared
+   pairwise times (avg, min, max): 0.000406672 0.000362992 0.000435591
+   crystal router                : 0.00111673 0.00109458 0.0011704
+   all reduce                    : 0.00588733 0.00583909 0.00594361
+   used all_to_all method: pairwise
+   handle bytes (avg, min, max): 64440 37540 428180
+   buffer bytes (avg, min, max): 30426.5 20848 115024
+   setupds time 4.1280E-01 seconds   0  7       91000        1000
+            8  max multiplicity
+ done :: setup mesh topology
+  
+ call usrdat
+ done :: usrdat
+
+ generate geometry data
+ vol_t,vol_v:    7.999999999999886         7.999999999999886     
+ done :: generate geometry data
+  
+ call usrdat2
+ done :: usrdat2
+
+ regenerate geometry data            1
+ vol_t,vol_v:    7.999999999999886         7.999999999999886     
+ done :: regenerate geometry data            1
+  
+ verify mesh topology
+   -1.000000000000000         1.000000000000000       Xrange
+   -1.000000000000000         1.000000000000000       Yrange
+   -1.000000000000000         1.000000000000000       Zrange
+ done :: verify mesh topology
+  
+ 103   Parameters from file:/users/adeesha/CMT/SAICMT/HybrideCMTBone-newcurtainTestcase-master/nek5/examples/new3dbox-32768-128-lb/b3d.rea
+   1      1.00000         DENSIT Y  p1
+   2     1.e-31           VISCOS    p2
+   7      1.00000         RHOCPA    p7
+   8     0.0100000         CONDUCT  p8
+  11     10.0         NSTEPS    p11
+  12     1.000000E-05     DT       p12
+  15     5.0E+00     IOSTEP         p15
+  18     0.250000E-01     GRID      p18
+  19     -1.00000         INTYPE    p19
+  20      12.0000         NORDER    p20
+  21     0.100000E-13     DIVERGENCE p21
+  22     0.100000E-14     HELMHOLTZ  p22
+  24     0.100000E-09     TOLREL     p24
+  25     0.100000E-09     TOLABS     p25
+  26     0.400000         COURANT, var. timestp only works with rk3 not bdf in cmtnek p26
+  27      2.00000         TORDER        p27
+  28     0.000000E+00     TMESH         p28
+  33      100.000         MXGEOM        p33
+  34      100.000         MAXNEW        p34
+  35     0.100000E-03                   p35
+  36     0.100000E-03     XMAGNET       p36
+  37     0.100000E-01     NGRIDS        p37
+  43      1.00000         VHScaleFac    p43
+  49     0.140000         MIXLFAC       p49
+  65      1.00000         new file each dump (1)                   p65
+  66     4.000000E+00     write form (0), unform(1), universal(2)  p66
+  67     4.000000E+00     read form (0), unform (1), universal(2)  p67
+  69      50000.0         frequency of srf dump  p69
+  70     16.000000E+00                            p70
+  71     0.500000E+00                            p71
+  72     10000.0                                     p72
+  99    0 1.00000           No. of ON                                   p99
+ 102      1.00000           Dump out divergence at each time step       p102
+  
+ IFTRAN   =  T
+ IFFLOW   =  T
+ IFHEAT   =  F
+ IFSPLIT  =  T
+ IFLOMACH =  F
+ IFUSERVP =  F
+ IFUSERMV =  F
+ IFSTRS   =  F
+ IFCHAR   =  F
+ IFCYCLIC =  F
+ IFAXIS   =  F
+ IFMVBD   =  F
+ IFMELT   =  F
+ IFMODEL  =  F
+ IFKEPS   =  F
+ IFMOAB   =  F
+ IFNEKNEK =  F
+ IFSYNC   =  T
+   
+ IFVCOR   =  T
+ IFINTQ   =  F
+ IFCWUZ   =  F
+ IFSWALL  =  F
+ IFGEOM   =  F
+ IFSURT   =  F
+ IFWCNO   =  F
+ IFCMT    =  F
+ IFVISC   =  F
+ IFFLTR   =  F
+   
+ IFTMSH for field            1    =   F
+ IFADVC for field            1    =   T
+ IFNONL for field            1    =   F
+   
+ Dealiasing enabled, lxd=           13
+  
+ Estimated eigenvalues
+ EIGAA =     2.467401100272339     
+ EIGGA =     56209.49098417368     
+ EIGAE =     2.467401100272339     
+ EIGAS =    8.3333333333333329E-002
+ EIGGE =     56209.49098417368     
+ EIGGS =     2.000000000000000     
+  
+ verify mesh topology
+   -1.000000000000000         1.000000000000000       Xrange
+   -1.000000000000000         1.000000000000000       Yrange
+   -1.000000000000000         1.000000000000000       Zrange
+ done :: verify mesh topology
+  
+ call usrdat3
+ done :: usrdat3
+
+ set initial conditions
+ nekuic (1) for ifld             1
+ call nekuic for vel  
+ xyz min    -1.0000      -1.0000      -1.0000    
+ uvwpt min   0.0000       0.0000       0.0000       0.0000       0.0000    
+ PS min      0.0000       0.0000      0.99000E+22
+ xyz max     1.0000       1.0000       1.0000    
+ uvwpt max   0.0000       0.0000       0.0000       0.0000       0.0000    
+ PS max      0.0000       0.0000     -0.99000E+22
+ done :: set initial conditions
+  
+ call userchk
+--- Eulerian Properties ------
+Fluid Momentum :                  0.0000000000E+00    0.0000000000E+00    0.0000000000E+00
+ done :: userchk
+
+gridpoints unique/tot:        216000       343000
+  dofs:                   216000                   216000
+  
+ Initialization successfully completed    1.7480     sec
+ Working on GPU           47
+ Working on GPU           31
+ Working on GPU           63
+ Working on GPU           15
+
+ Hello!
+ Entering nek-mul-adv for            1 time
+ Entering nek-adv-gpu for            1 time
+ Hello!
+ Hello!
+ Hello!
+ Entering nek-mul-adv for            1 time
+ Entering nek-mul-adv for            1 time
+ Entering nek-adv-gpu for            1 time
+ Entering nek-adv-gpu for            1 time
+Starting time loop cpu ...
+
+ Entering nek-mul-adv for            1 time
+ Entering nek-adv-gpu for            1 time
+ Entering cmt-nek-adv-gpu for            1 time
+ Entering cmt-nek-adv-gpu for            1 time
+ Entering cmt-nek-adv-gpu for            1 time
+ Entering cmt-nek-adv-gpu for            1 time
+     DT/DTCFL/DTFS/DTINIT   0.100E-04   0.100E-04   0.000E+00   0.100E-04
+Step      1, t= 1.0000000E-05, DT= 1.0000000E-05, C=  0.000 0.0000E+00 0.0000E+00
+ CMT branch active CPU
+ copy time    7.8289031982421875E-002
+ copy time    7.1007013320922852E-002
+ llpart value is        100000
+ llpart value is        100000
+ copy time    0.1231410503387451     
+ copy time    0.1326298713684082     
+ llpart value is        100000
+ llpart value is        100000
+Abort is in progress...hit ctrl-c again within 5 seconds to forcibly terminate
+

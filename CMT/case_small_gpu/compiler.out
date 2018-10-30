@@ -1,0 +1,793 @@
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/drive.f -o obj/drive.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/drive1.f -o obj/drive1.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/drive2.f -o obj/drive2.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/plan4.f -o obj/plan4.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/bdry.f -o obj/bdry.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/coef.f -o obj/coef.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/conduct.f -o obj/conduct.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/connect1.f -o obj/connect1.o
+PGF90-W-0155-The type of FLOAT is now double precision with -r8  (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/connect1.f: 746)
+  0 inform,   1 warnings,   0 severes, 0 fatal for genxyzl
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/connect2.f -o obj/connect2.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/dssum.f -o obj/dssum.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/edgec.f -o obj/edgec.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/eigsolv.f -o obj/eigsolv.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/gauss.f -o obj/gauss.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/genxyz.f -o obj/genxyz.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier1.f -o obj/navier1.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/makeq.f -o obj/makeq.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier0.f -o obj/navier0.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier2.f -o obj/navier2.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier3.f -o obj/navier3.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier4.f -o obj/navier4.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/prepost.f -o obj/prepost.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/speclib.f -o obj/speclib.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/map2.f -o obj/map2.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/turb.f -o obj/turb.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/mvmesh.f -o obj/mvmesh.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/ic.f -o obj/ic.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/ssolv.f -o obj/ssolv.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/planx.f -o obj/planx.o
+ftn -mcmodel=medium -c  -O3 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/math.f -o obj/math.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/mxm_wrapper.f -o obj/mxm_wrapper.o 
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/hmholtz.f -o obj/hmholtz.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/gfdm_par.f -o obj/gfdm_par.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/gfdm_op.f -o obj/gfdm_op.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/gfdm_solve.f -o obj/gfdm_solve.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/subs1.f -o obj/subs1.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/subs2.f -o obj/subs2.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/genbox.f -o obj/genbox.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/gmres.f -o obj/gmres.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/hsmg.f -o obj/hsmg.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/convect.f -o obj/convect.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/induct.f -o obj/induct.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/perturb.f -o obj/perturb.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier5.f -o obj/navier5.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier6.f -o obj/navier6.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier7.f -o obj/navier7.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/navier8.f -o obj/navier8.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/loadbal.f -o obj/loadbal.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/reptSubrt.f -o obj/reptSubrt.o
+PGF90-W-0155-The type of FLOAT is now double precision with -r8  (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/loadbal.f: 2681)
+  0 inform,   1 warnings,   0 severes, 0 fatal for zufall_unused
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/fast3d.f -o obj/fast3d.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/fasts.f -o obj/fasts.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/calcz.f -o obj/calcz.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/byte.c -o obj/byte.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/chelpers.c -o obj/chelpers.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/byte_mpi.f -o obj/byte_mpi.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/postpro.f -o obj/postpro.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cvode_driver.f -o obj/cvode_driver.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/nek_comm.c -o obj/nek_comm.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/vprops.f -o obj/vprops.o
+PGF90-W-0155-The type of FLOAT is now double precision with -r8  (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cvode_driver.f: 659)
+  0 inform,   1 warnings,   0 severes, 0 fatal for cv_pstat
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/makeq_aux.f -o obj/makeq_aux.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/papi.f -o obj/papi.o
+ftn -mcmodel=medium -c   -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/3rd_party/nek_in_situ.f -o obj/nek_in_situ.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/readat_new.f -o obj/readat_new.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/reader_re2.f -o obj/reader_re2.o
+cc -mcmodel=medium  -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/3rd_party/finiparser.c -o obj/finiparser.o
+cc -mcmodel=medium  -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/3rd_party/iniparser.c -o obj/iniparser.o
+cc -mcmodel=medium  -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/3rd_party/dictionary.c -o obj/dictionary.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc.f -o obj/artvisc.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles.f -o obj/cmtparticles.o
+ftn -mcmodel=medium -c  -O3 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/mxm_std.f -o obj/mxm_std.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/comm_mpi.f -o obj/comm_mpi.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/singlmesh.f -o obj/singlmesh.o
+ftn -mcmodel=medium -c  -O0 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/3rd_party/blas.f -o obj/blas.o
+ftn -mcmodel=medium -c  -O0 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/3rd_party/dsygv.f -o obj/dsygv.o
+ftn -mcmodel=medium -c  -O0 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/3rd_party/ssygv.f -o obj/ssygv.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/drive1_cmt.f -o obj/drive1_cmt.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/drive2_cmt.f -o obj/drive2_cmt.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt.f -o obj/driver3_cmt.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/face.f -o obj/face.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/ausm.f -o obj/ausm.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/MixtPerf.f -o obj/MixtPerf.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/intpdiff.f -o obj/intpdiff.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt.f -o obj/diffusive_cmt.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt.f -o obj/eqnsolver_cmt.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes.f -o obj/surface_fluxes.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc.f -o obj/bc.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/inflow_bc.f -o obj/inflow_bc.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/outflow_bc.f -o obj/outflow_bc.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/wall_bc.f -o obj/wall_bc.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step.f -o obj/step.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/filters_cmt.f -o obj/filters_cmt.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diagnostics.f -o obj/diagnostics.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/drive1_cmt_gpu.cuf -o obj/drive1_cmt_gpu.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf -o obj/cmtparticles_gpu.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_gpu.cuf -o obj/artvisc_gpu.o
+PGF90-W-0103-Type conversion of subscript expression for cbc (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 389)
+PGF90-W-0103-Type conversion of subscript expression for cbc (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 389)
+PGF90-W-0103-Type conversion of subscript expression for cbc (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 389)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 390)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 390)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 390)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 391)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 391)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 391)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 392)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 392)
+PGF90-W-0103-Type conversion of subscript expression for cbc_new (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 392)
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_gpu.cuf -o obj/step_gpu.o
+  0 inform,  12 warnings,   0 severes, 0 fatal for copytogpu_gpu
+PGF90-W-0155-The number of subscripts is less than the rank of tlag (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_gpu.cuf: 96)
+PGF90-W-0155-The number of subscripts is less than the rank of bm1 (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_gpu.cuf: 96)
+  0 inform,   2 warnings,   0 severes, 0 fatal for entropy_viscosity_gpu
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_gpu.cuf -o obj/driver3_cmt_gpu.o
+PGF90-W-0025-Illegal character (`) - ignored (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 905)
+PGF90-W-0025-Illegal character (`) - ignored (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 906)
+PGF90-W-0155-The number of subscripts is less than the rank of vtrans (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of vx (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of vy (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of vz (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of pr (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of t (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of csound (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of phig (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of vtrans (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+PGF90-W-0155-The number of subscripts is less than the rank of vdiff (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf: 701)
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_gpu.cuf -o obj/diffusive_cmt_gpu.o
+  0 inform,  12 warnings,   0 severes, 0 fatal for compute_rhs_and_dt_gpu
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf -o obj/surface_fluxes_gpu.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_gpu.cuf -o obj/bc_gpu.o
+PGF90-W-0155-The number of subscripts is less than the rank of vtrans (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of vx (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of vy (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of vz (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of pr (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of t (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of csound (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of phig (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of vtrans (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+PGF90-W-0155-The number of subscripts is less than the rank of vdiff (/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_gpu.cuf: 75)
+  0 inform,  10 warnings,   0 severes, 0 fatal for fluxes_full_field_gpu
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_gpu.cuf -o obj/eqnsolver_cmt_gpu.o
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/drive1_gpu.cuf -o obj/drive1_gpu.o
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu -o obj/particles-cuda.o
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu -o obj/artvisc_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(38): warning: variable "ie" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(39): warning: variable "xloc" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(40): warning: variable "yloc" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(41): warning: variable "zloc" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(237): warning: variable "gridSize" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(176): warning: variable "mdm1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(416): warning: variable "firstlx" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(504): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(566): warning: variable "izm" was set but never used
+
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu -o obj/driver3_cmt_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(39): warning: variable "eg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(46): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(48): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(51): warning: variable "ux" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(52): warning: variable "uy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(53): warning: variable "uz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(56): warning: variable "ps" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(60): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(61): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(62): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(63): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(64): warning: variable "udiff" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(65): warning: variable "utrans" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(66): warning: variable "cbu1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(67): warning: variable "cbu2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(68): warning: variable "cbu3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(72): warning: variable "varsic" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(77): warning: variable "phi" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(79): warning: variable "pres" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(86): warning: variable "mu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(88): warning: variable "lambda" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(176): warning: variable "mdm1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(416): warning: variable "firstlx" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(504): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/artvisc_cuda.cu(566): warning: variable "izm" was set but never used
+
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu -o obj/step_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(39): warning: variable "eg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(46): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(48): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(51): warning: variable "ux" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(52): warning: variable "uy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(53): warning: variable "uz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(56): warning: variable "ps" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(60): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(61): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(62): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(63): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(64): warning: variable "udiff" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(65): warning: variable "utrans" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(66): warning: variable "cbu1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(67): warning: variable "cbu2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(68): warning: variable "cbu3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(72): warning: variable "varsic" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(77): warning: variable "phi" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(79): warning: variable "pres" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(86): warning: variable "mu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/driver3_cmt_cuda.cu(88): warning: variable "lambda" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "km1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "kp1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "izm" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "izp" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(152): warning: variable "k1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(153): warning: variable "k2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(154): warning: variable "j1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(155): warning: variable "j2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(156): warning: variable "i1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(157): warning: variable "i2" was declared but never referenced
+
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu -o obj/diffusive_cmt_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "km1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "kp1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "izm" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(148): warning: variable "izp" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(152): warning: variable "k1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(153): warning: variable "k2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(154): warning: variable "j1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(155): warning: variable "j2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(156): warning: variable "i1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/step_cuda.cu(157): warning: variable "i2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(18): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(20): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(23): warning: variable "ux" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(24): warning: variable "uy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(25): warning: variable "uz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(26): warning: variable "temp" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(28): warning: variable "ps" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(32): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(33): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(34): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(35): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(37): warning: variable "utrans" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(38): warning: variable "cbu1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(39): warning: variable "cbu2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(40): warning: variable "cbu3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(44): warning: variable "varsic" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(50): warning: variable "phi" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(52): warning: variable "pres" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(53): warning: variable "cv" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(53): warning: variable "cp" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(58): warning: variable "asnd" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(177): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(172): warning: variable "cb2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(173): warning: variable "cb3" was declared but never referenced
+
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu -o obj/surface_fluxes_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(18): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(20): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(23): warning: variable "ux" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(24): warning: variable "uy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(25): warning: variable "uz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(26): warning: variable "temp" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(28): warning: variable "ps" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(32): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(33): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(34): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(35): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(37): warning: variable "utrans" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(38): warning: variable "cbu1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(39): warning: variable "cbu2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(40): warning: variable "cbu3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(44): warning: variable "varsic" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(50): warning: variable "phi" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(52): warning: variable "pres" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(53): warning: variable "cv" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(53): warning: variable "cp" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(58): warning: variable "asnd" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(177): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(172): warning: variable "cb2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/diffusive_cmt_cuda.cu(173): warning: variable "cb3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(19): warning: variable "j" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(109): warning: variable "nnelnqq" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(345): warning: variable "lxd_3" was declared but never referenced
+
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu -o obj/bc_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(16): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(60): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(62): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(69): warning: variable "ips" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(70): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(71): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(72): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(73): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(74): warning: variable "udiff" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(75): warning: variable "utrans" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(76): warning: variable "cbu1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(77): warning: variable "cbu2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(78): warning: variable "cbu3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(90): warning: variable "mu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(92): warning: variable "lambda" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(94): warning: variable "molarmass" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(111): warning: variable "snz" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(120): warning: variable "snx" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(121): warning: variable "sny" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(13): warning: variable "cb2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(14): warning: variable "cb3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(175): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(217): warning: variable "x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(218): warning: variable "y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(219): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(266): warning: variable "gam1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(165): warning: variable "cb2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(166): warning: variable "cb3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(349): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(351): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(368): warning: variable "fs" was declared but never referenced
+
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu -o obj/eqnsolver_cmt_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(212): warning: variable "dU3x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(214): warning: variable "dU5x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(216): warning: variable "dU2y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(219): warning: variable "dU5y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(234): warning: variable "lambdamu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(235): warning: variable "kmcvmu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(264): warning: variable "dU5z" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(383): warning: variable "ix" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(384): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(385): warning: variable "iz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(386): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(406): warning: variable "nvol" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(407): warning: variable "ngradu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(545): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(547): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(550): warning: variable "ux" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(551): warning: variable "uy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(552): warning: variable "uz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(553): warning: variable "temp" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(555): warning: variable "ps" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(559): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(560): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(561): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(562): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(563): warning: variable "udiff" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(564): warning: variable "utrans" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(651): warning: variable "ix" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(652): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(653): warning: variable "iz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(654): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(672): warning: variable "ix" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(673): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(674): warning: variable "iz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(675): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(700): warning: variable "lyz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(702): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1103): warning: variable "ip" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(949): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1482): warning: variable "dU3x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1484): warning: variable "dU5x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1486): warning: variable "dU2y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1489): warning: variable "dU5y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1504): warning: variable "lambdamu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1505): warning: variable "kmcvmu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1534): warning: variable "dU5z" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1712): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1819): warning: variable "ixyz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1835): warning: variable "ixyz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1886): warning: variable "ip" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1855): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1856): warning: variable "ldd" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(16): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(60): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(62): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(69): warning: variable "ips" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(70): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(71): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(72): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(73): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(74): warning: variable "udiff" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(75): warning: variable "utrans" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(76): warning: variable "cbu1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(77): warning: variable "cbu2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(78): warning: variable "cbu3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(90): warning: variable "mu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(92): warning: variable "lambda" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(94): warning: variable "molarmass" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(111): warning: variable "snz" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(120): warning: variable "snx" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(121): warning: variable "sny" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(13): warning: variable "cb2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(14): warning: variable "cb3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(175): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(217): warning: variable "x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(218): warning: variable "y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(219): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(266): warning: variable "gam1" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(165): warning: variable "cb2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(166): warning: variable "cb3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(349): warning: variable "ieg" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(351): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/bc_cuda.cu(368): warning: variable "fs" was declared but never referenced
+
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu -o obj/cuda_helpers.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(412): warning: variable "nab" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(413): warning: variable "nbb" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(472): warning: variable "nab" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(473): warning: variable "nbb" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(212): warning: variable "dU3x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(214): warning: variable "dU5x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(216): warning: variable "dU2y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(219): warning: variable "dU5y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(234): warning: variable "lambdamu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(235): warning: variable "kmcvmu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(264): warning: variable "dU5z" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(383): warning: variable "ix" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(384): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(385): warning: variable "iz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(386): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(406): warning: variable "nvol" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(407): warning: variable "ngradu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(545): warning: variable "z" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(547): warning: variable "theta" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(550): warning: variable "ux" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(551): warning: variable "uy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(552): warning: variable "uz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(553): warning: variable "temp" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(555): warning: variable "ps" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(559): warning: variable "pa" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(560): warning: variable "p0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(561): warning: variable "si2" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(562): warning: variable "si3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(563): warning: variable "udiff" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(564): warning: variable "utrans" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(651): warning: variable "ix" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(652): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(653): warning: variable "iz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(654): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(672): warning: variable "ix" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(673): warning: variable "iy" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(674): warning: variable "iz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(675): warning: variable "e" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(700): warning: variable "lyz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(702): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1103): warning: variable "ip" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(949): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1482): warning: variable "dU3x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1484): warning: variable "dU5x" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1486): warning: variable "dU2y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1489): warning: variable "dU5y" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1504): warning: variable "lambdamu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1505): warning: variable "kmcvmu" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1534): warning: variable "dU5z" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1712): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1819): warning: variable "ixyz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1835): warning: variable "ixyz" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1886): warning: variable "ip" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1855): warning: variable "m0" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/eqnsolver_cmt_cuda.cu(1856): warning: variable "ldd" was declared but never referenced
+
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/gs.c -o obj/jl_gs.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/sort.c -o obj/jl_sort.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/sarray_transfer.c -o obj/jl_sarray_transfer.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/sarray_sort.c -o obj/jl_sarray_sort.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/gs_local.c -o obj/jl_gs_local.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/crystal.c -o obj/jl_crystal.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/comm.c -o obj/jl_comm.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/tensor.c -o obj/jl_tensor.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/fail.c -o obj/jl_fail.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/fcrystal.c -o obj/jl_fcrystal.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/findpts.c -o obj/jl_findpts.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/findpts_local.c -o obj/jl_findpts_local.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/obbox.c -o obj/jl_obbox.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/poly.c -o obj/jl_poly.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/lob_bnd.c -o obj/jl_lob_bnd.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/findpts_el_3.c -o obj/jl_findpts_el_3.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/findpts_el_2.c -o obj/jl_findpts_el_2.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/sparse_cholesky.c -o obj/jl_sparse_cholesky.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/xxt.c -o obj/jl_xxt.o
+cc -mcmodel=medium -c  -O2  -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl -DPREFIX=jl_ /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/jl/fcrs.c -o obj/jl_fcrs.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(38): warning: variable "ie" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(39): warning: variable "xloc" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(40): warning: variable "yloc" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(41): warning: variable "zloc" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/particles-cuda.cu(237): warning: variable "gridSize" was set but never used
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(19): warning: variable "j" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(109): warning: variable "nnelnqq" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(345): warning: variable "lxd_3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(412): warning: variable "nab" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(413): warning: variable "nbb" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(472): warning: variable "nab" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cuda_helpers.cu(473): warning: variable "nbb" was declared but never referenced
+
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/case_small_gpu/sod3.f  -o obj/sod3.o 
+ftn -mcmodel=medium -o nek5000 obj/sod3.o obj/drive.o obj/drive1.o obj/drive2.o obj/plan4.o obj/bdry.o obj/coef.o obj/conduct.o obj/connect1.o obj/connect2.o obj/dssum.o obj/edgec.o obj/eigsolv.o obj/gauss.o obj/genxyz.o obj/navier1.o obj/makeq.o obj/navier0.o obj/navier2.o obj/navier3.o obj/navier4.o obj/prepost.o obj/speclib.o obj/map2.o obj/turb.o obj/mvmesh.o obj/ic.o obj/ssolv.o obj/planx.o obj/math.o obj/mxm_wrapper.o obj/hmholtz.o obj/gfdm_par.o obj/gfdm_op.o obj/gfdm_solve.o obj/subs1.o obj/subs2.o obj/genbox.o obj/gmres.o obj/hsmg.o obj/convect.o obj/induct.o obj/perturb.o obj/navier5.o obj/navier6.o obj/navier7.o obj/navier8.o obj/loadbal.o obj/reptSubrt.o obj/fast3d.o obj/fasts.o obj/calcz.o obj/byte.o obj/chelpers.o obj/byte_mpi.o obj/postpro.o obj/cvode_driver.o obj/nek_comm.o obj/vprops.o obj/makeq_aux.o obj/papi.o obj/nek_in_situ.o obj/readat_new.o obj/reader_re2.o obj/finiparser.o obj/iniparser.o obj/dictionary.o obj/artvisc.o obj/cmtparticles.o obj/mxm_std.o obj/comm_mpi.o obj/singlmesh.o obj/blas.o obj/dsygv.o obj/ssygv.o obj/drive1_cmt.o obj/drive2_cmt.o obj/driver3_cmt.o obj/face.o obj/ausm.o obj/MixtPerf.o obj/intpdiff.o obj/diffusive_cmt.o obj/eqnsolver_cmt.o obj/surface_fluxes.o obj/bc.o obj/inflow_bc.o obj/outflow_bc.o obj/wall_bc.o obj/step.o obj/filters_cmt.o obj/diagnostics.o obj/drive1_cmt_gpu.o obj/cmtparticles_gpu.o obj/artvisc_gpu.o obj/step_gpu.o obj/driver3_cmt_gpu.o obj/diffusive_cmt_gpu.o obj/surface_fluxes_gpu.o obj/bc_gpu.o obj/eqnsolver_cmt_gpu.o obj/drive1_gpu.o obj/particles-cuda.o obj/artvisc_cuda.o obj/driver3_cmt_cuda.o obj/step_cuda.o obj/diffusive_cmt_cuda.o obj/surface_fluxes_cuda.o obj/bc_cuda.o obj/eqnsolver_cmt_cuda.o obj/cuda_helpers.o obj/jl_gs.o obj/jl_sort.o obj/jl_sarray_transfer.o obj/jl_sarray_sort.o obj/jl_gs_local.o obj/jl_crystal.o obj/jl_comm.o obj/jl_tensor.o obj/jl_fail.o obj/jl_fcrystal.o obj/jl_findpts.o obj/jl_findpts_local.o obj/jl_obbox.o obj/jl_poly.o obj/jl_lob_bnd.o obj/jl_findpts_el_3.o obj/jl_findpts_el_2.o obj/jl_sparse_cholesky.o obj/jl_xxt.o obj/jl_fcrs.o  -lcuda -lcudart -lcublas -Mcuda -lstdc++
+nvlink fatal   : Input file '/opt/nvidia/cudatoolkit9.1/9.1.85_3.10-1.0502.df1cc54.3.1/lib64/libcudadevrt.a:cuda_device_runtime.o' newer than toolkit
+pgacclnk: child process exit status 2: /opt/pgi/18.4.0/linux86-64/18.4/bin/pgnvd
+make: *** [nek5000] Error 2
