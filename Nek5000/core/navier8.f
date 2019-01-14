@@ -1824,14 +1824,14 @@ c-----------------------------------------------------------------------
       if (nid.eq.0) then
          eg0 = 0
          do ipass=1,npass
-       print *, "inside do ",ipass
+!       print *, "inside do ",ipass
             eg1 = min(eg0+ndw,neli)
             m   = 0
             do eg=eg0+1,eg1
-       print *, "inside do do  ",eg, ipass
+!       print *, "inside do do  ",eg, ipass
                m = m+1
-       print *, "inside do do m",m,eg,ipass
-       print *, "inside do do mdw",mdw,eg,ipass
+!       print *, "inside do do m",m,eg,ipass
+!       print *, "inside do do mdw",mdw,eg,ipass
                read(80,*,end=998) (wk(k,m),k=2,mdw)
                if(.not.ifgfdm .and. (gfirst .eq. 1)) then
                   gllnid(eg) = wk(2,m)  !proc map,  must still be divided

@@ -30,6 +30,21 @@ c     Solve the Euler equations
       nfldpart = ldim*npart
       if(istep.eq.1) then
          call cmt_ics
+!      if(nid.eq.15) then
+!      do i = 1, nelt
+!        do j = 1, toteq
+!           do k = 1, lz1
+!              do m = 1, ly1
+!              do n = 1,lx1
+!              write(6,*) "uarray", n, m, k, j, i, u(n,m,k,j,i)
+!              enddo
+!              enddo
+!           enddo
+!        enddo
+!      enddo
+!      endif
+
+
          if (ifrestart) then
             time_cmt=time
          else
@@ -70,11 +85,12 @@ c     Solve the Euler equations
              !print *,"cmt_nek_advance before to rhs_and_dt_gpu",nid
              if (stage.eq.1) call gpu_copy()
              
-              print *,"$$$ drive1_cmt.f cmt_nek_advance check gpu", nid
+!              print *,"$$$ drive1_cmt.f cmt_nek_advance check gpu", nid
               !do i=1,10
               !  print *, 'res3', i, d_res3(i)
               !enddo
               !print *,"$$$ drive1_cmt.f cmt_nek_advance check DONE", nid
+
 
              call compute_rhs_and_dt_gpu
          else
@@ -84,9 +100,9 @@ c     Solve the Euler equations
          endif
          timefortimestep = dnekclock() - rhst_dum
          rhst = rhst + timefortimestep
-         call nekgsync()
-         print *,"cmt_nek_advance after rhs_and_dt_gpu time is",rhst,
-     >      timefortimestep,stage,istep,nelt,lelt,lx1,lxd,nid
+!         call nekgsync()
+!         print *,"cmt_nek_advance after rhs_and_dt_gpu time is",rhst,
+!     >      timefortimestep,stage,istep,nelt,lelt,lx1,lxd,nid
        
 c particle equations of motion are solved (also includes forcing)
 c In future this subroutine may compute the back effect of particles
@@ -101,7 +117,18 @@ c compute_rhs_dt for the 5 conserved variables
 !        enddo
 !         print *,"cmt_nek_advance after usr_particles_solver",nid
          if(nid.eq.15) then
-            call update_u_gpu
+!           call printBm1("before")
+!           call printRes1("1st")
+!           call printRes3("1st")
+!           write(6,*) "debug tcoef:", tcoef(1,1),tcoef(1,2)
+!     $,tcoef(1,3),tcoef(2,1),tcoef(2,2),tcoef(2,3)
+!     $,tcoef(3,1),tcoef(3,2), tcoef(3,3)  
+       
+        call update_u_gpu
+ 
+         
+
+
          else 
          do e=1,nelt
             do eq=1,toteq
@@ -124,6 +151,22 @@ c-----------------------------------------------------------------------
          enddo
          endif
 !         print *,"cmt_nek_advance after 3 nested  for loop",nid
+  
+      if(nid.eq.15) then
+!      do i = 1, nelt
+!        do j = 1, toteq
+!           do k = 1, lz1
+!              do m = 1, ly1
+!              do n = 1,lx1
+!              write(6,*) "uarray222", n, m, k, j, i, u(n,m,k,j,i)
+!              enddo
+!              enddo
+!           enddo
+!        enddo
+!      enddo
+!      stop
+      endif
+      
       enddo
 
 !      print *,"cmt_nek_advance after stage for loop",nid
@@ -147,6 +190,7 @@ c dump out particle information.
 !     call print_cmt_timers ! NOT NOW
 !      print *,"cmt_nek_advance End for istep and nid ",istep,nid
  101  format(4(2x,e18.9))
+
       return
       end
 

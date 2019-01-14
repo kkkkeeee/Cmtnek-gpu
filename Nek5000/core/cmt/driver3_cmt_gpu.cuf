@@ -22,9 +22,9 @@
 !     need to copy device variables  by adeesha
 
       !following code is for testing only. delete later.
-      call copytocpu_gpu()
-      tocpucopy_gas(2)=1
-      call printUarray("before1")
+!      call copytocpu_gpu()
+!      tocpucopy_gas(2)=1
+!      call printUarray("before1")
 
 
       call compute_primitive_vars_gpu_wrapper(glbblockSize1,d_vx, d_vy, d_vz, d_u,nxyz, &
@@ -72,9 +72,9 @@
 ! I'm including 'DEALIAS' and calling set_convect_cons here
 
 !testing only. delete later
-      tocpucopy_gas(58)=1
-      call copytocpu_gpu()
-      call printCsound("before")
+!      tocpucopy_gas(58)=1
+!      call copytocpu_gpu()
+!      call printCsound("before")
 
 
 

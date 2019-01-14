@@ -186,7 +186,7 @@
       else
          icalld=1
       endif
-      print *,"GPU:  compute_grid_h_gpu glbblockSize1 nelt lx1 ly1 lz1  if3d",glbblockSize1,nelt,lx1,ly1,lz1,if3dgpu
+!      print *,"GPU:  compute_grid_h_gpu glbblockSize1 nelt lx1 ly1 lz1  if3d",glbblockSize1,nelt,lx1,ly1,lz1,if3dgpu
       call compute_grid_h_gpu_wrapper(glbblockSize1,d_gridh,d_xm1,d_ym1,d_zm1,nelt,lx1,ly1,lz1,if3dgpu)
 ! everything below is in the wrapper  function adeesha
 

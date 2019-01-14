@@ -161,7 +161,7 @@
  
       integer code
       
-      print *,"GPU: Start cmtparticles_gpu.cuf usr_particles_init ",nid
+!      print *,"GPU: Start cmtparticles_gpu.cuf usr_particles_init ",nid
 
 !     call initial values of jgl,jgt,d,dt,dgl,dgt
       call get_int_ptr (ip,lx1,lxd)
@@ -191,7 +191,7 @@
 
       code = cudaPeekAtLastError()
       
-      print *,"GPU: End cmtparticles_gpu.cuf usr_particles_init cuda status:",cudaGetErrorString(code)
+!      print *,"GPU: End cmtparticles_gpu.cuf usr_particles_init cuda status:",cudaGetErrorString(code)
 
 
       return
@@ -223,6 +223,21 @@
            istate = cudaMemcpy(d_res3, res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
 !      print *,"istate 1", cudaGetErrorString(istate)
       endif
+
+!      do i = 1, nelt
+!        do j = 1, toteq
+!           do k = 1, lz1
+!              do m = 1, ly1
+!              do n = 1,lx1
+!              write(6,*) "uarray", n, m, k, j, i, u(n,m,k,j,i)
+!              enddo
+!              enddo
+!           enddo
+!        enddo
+!     enddo
+
+
+
       if(togpucopy_gas(2).eq.1) then
            istate = cudaMemcpy(d_u,u, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
 !      priat *,"istate 2", cudaGetErrorString(istate)
@@ -257,15 +272,15 @@
 !      endif 
       if(togpucopy_gas(10).eq.1) then
            istate = cudaMemcpy(d_vx, vx, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
-!      print *,"istate 10", cudaGetErrorString(istate)
+      print *,"istate 10", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(11).eq.1) then
            istate = cudaMemcpy(d_vy, vy, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
-!      print *,"istate 11", cudaGetErrorString(istate)
+      print *,"istate 11", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(12).eq.1) then
            istate = cudaMemcpy(d_vz, vz, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
-!      print *,"istate 12", cudaGetErrorString(istate)
+      print *,"istate 12", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(13).eq.1) then
            istate = cudaMemcpy(d_vxd,vxd, lxd*lyd*lzd*lelv,cudaMemcpyHostToDevice)
@@ -397,7 +412,7 @@
 
      
            istate = cudaMemcpy(d_cbc,cbc_new,3*6*lelt*(ldimt1+1),cudaMemcpyHostToDevice)
-      print *,"istate 41", cudaGetErrorString(istate)
+!      print *,"istate 41", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(42).eq.1) then
            istate = cudaMemcpy(d_dxm1, dxm1, lx1*lx1,cudaMemcpyHostToDevice)
@@ -637,7 +652,7 @@
 
       integer :: a
       a=5
-      print *,"cmtparu.cuf par_in_nid_gpu temp0 a", nid, adeetemp(0),a
+!      print *,"cmtparu.cuf par_in_nid_gpu temp0 a", nid, adeetemp(0),a
       call particles_in_nid_wrapper(adeetemp,a,adee_d_temp)
 
       return
@@ -650,8 +665,8 @@
 
       call double_copy_gpu_wrapper(glbblockSize2,d_res3,0,d_u,0,lx1*ly1*lz1*lelt*toteq)
       !following code is for testing only. delete later.
-      tocpucopy_gas(1)=1
-      call copytocpu_gpu()
+!      tocpucopy_gas(1)=1
+!      call copytocpu_gpu()
      !print *,"$$$ cmtparu.cuf gpu_copy res3 check", nid
       !do i=1,10
       !     print *, 'res3, u', i, res3(i),u(i)
@@ -695,13 +710,18 @@
 !           enddo 
 !        enddo 
 !     enddo  
-!      call printUarray("before")
 
-      do i=1,100
-      print *, 'vtrans,vx,vy,vz,pr,t,csound,phig,vtrans,vdiff', &
-      i,vtrans(i),vx(i),vy(i),vz(i),pr(i),t(i),csound(i),phig(i), &
-      vtrans(i),vdiff(i)
-       enddo
+      tocpucopy_gas(2)=1
+      call copytocpu_gpu()
+
+
+      call printUarray("aabefore")
+
+!      do i=1,100
+!      print *, 'vtrans,vx,vy,vz,pr,t,csound,phig,vtrans,vdiff', &
+!      i,vtrans(i),vx(i),vy(i),vz(i),pr(i),t(i),csound(i),phig(i), &
+!      vtrans(i),vdiff(i)
+!       enddo
 
 
 
@@ -763,12 +783,29 @@
       endif
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before compute_primitive_vars_gpu", nid
 
+ !following code is for testing only. delete later.
+      tocpucopy_gas(10)=1
+      tocpucopy_gas(2)=1
+      tocpucopy_gas(58)=1
+      tocpucopy_gas(3)=1
+         call copytocpu_gpu()
+!       call printVx('computevars')
+         call printUarray('abcd')
+         call printRes1('before')
+      call printCsound("beforecompute")
 
-
+     print *,'start computevars',istep,stage
       call compute_primitive_vars_gpu
+     print *,'end computevars',istep,stage
 
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+      tocpucopy_gas(58)=1
+         call copytocpu_gpu()
+         call printCsound('aftercompute')
       
-      !following code is for testing only. delete later.
+     !following code is for testing only. delete later.
+      tocpucopy_gas(2)=1
       tocpucopy_gas(10)=1
       tocpucopy_gas(11)=1
       tocpucopy_gas(12)=1
@@ -782,8 +819,12 @@
       tocpucopy_gas(56)=1
       call copytocpu_gpu()
 
-
-!      print *,"$$$ cmtparu.cuf compute_primitive_vars_gpu check", nid
+         call printUarray('aftercompute')
+!         call printVx('before')
+         call printVy('before')
+!         call printVz('before')
+!         call printCsound('before')
+    print *,"$$$ cmtparu.cuf compute_primitive_vars_gpu check", nid
 !      do i=1,100
 !           print *, 'vx, vy, vz, vtrans,t,pr,csound,vxd,vyd,vzd', i, vx(i),vy(i),vz(i),vtrans(i),t(i),pr(i),csound(i),vxd(i),vyd(i),vzd(i)
 !      enddo
@@ -804,8 +845,9 @@
          tocpucopy_gas(56)=1
          tocpucopy_gas(48)=1
          call copytocpu_gpu()
-
+         print *,"our dt start"
          call setdtcmt
+         print *,"our dt end "
          call set_tstep_coef
       
          togpucopy_gas(5)=1
@@ -820,7 +862,7 @@
 
       call entropy_viscosity_gpu ! accessed through uservp. computes
                              ! entropy residual and max wave speed
-      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after entropy_viscosity_gpu", nid
+!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after entropy_viscosity_gpu", nid
 !only for testing. delete later.
 !      tocpucopy_gas(53)=1
 !      call copytocpu_gpu()
@@ -828,14 +870,16 @@
 
 
 
-      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before compute_transport_props_gpu", nid
+!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before compute_transport_props_gpu", nid
 
       call compute_transport_props_gpu ! everything inside rk stage
       
 
       call printVdiff("before")
+      call printUarray("aftercomputetrans")
 
-      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_transport_props_gpu", nid
+
+!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_transport_props_gpu", nid
 
       ntot = lx1*ly1*lz1*lelt*toteq
 
@@ -843,20 +887,31 @@
       call rzero_gpu_wrapper(glbblockSize2,d_flux,0,heresize );
       call rzero_gpu_wrapper(glbblockSize2,d_graduf,0,hdsize );
 
-      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before fluxes_full_filed_gpu", nid
+!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before fluxes_full_filed_gpu", nid
       call fluxes_full_field_gpu
-      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after fluxes_full_filed_gpu", nid
+!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after fluxes_full_filed_gpu", nid
+
+      !following code is for testing only. delete later.
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+       print *,"istate fatface", cudaGetErrorString(istate)
+      call printFatface("afterfull")
+
+
       nstate=nqq
       nfq=lx1*lz1*2*ldim*nelt
       iwm =1
       iwp =iwm+nstate*nfq
       iflx=iwp+nstate*nfq
       
-      call printRes1("before")
+!      call printRes1("before")
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+         call copytocpu_gpu()
+         call printRes1('afterfluxes')
    
        !only for testing. delete later.
-      tocpucopy_gas(21)=1
-      call copytocpu_gpu()
+!      tocpucopy_gas(21)=1
+!      call copytocpu_gpu()
      
 !      do mm=1,lx1*lz1*2*ldim*lelt
 !         print *,'iface_flux',mm,iface_flux(mm)
@@ -865,7 +920,7 @@
  
       do eq=1,toteq
          ieq=(eq-1)*ndg_face+iflx
-         print *,'ieq debug',ieq
+         print *,'111st debug',ieq,eq,stage,istep
          call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
 
       enddo
@@ -881,15 +936,19 @@
 !      do mm=1,lx1*ly1*lz1*lelt*toteq
 !         print *,'c_res1temp fortran',mm,c_res1temp(mm)
 !      enddo
-!      call printRes1("after")
+      call printRes1("afterfirstintegral")
  
-      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after surface_integral_full_gpu", nid
+!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after surface_integral_full_gpu", nid
 
       iuj=iflx ! overwritten with U -{{U}}
       ium=(iu1-1)*nfq+iwm
       iup=(iu1-1)*nfq+iwp
       call   imqqtu_gpu_wrapper(glbblockSize2,d_flux,iuj,ium,iup,lx1,ly1,lz1,ldim,nelt,lelt,toteq)
-      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after imqqtu_gpu_wrapper", nid
+!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after imqqtu_gpu_wrapper", nid
+
+!following code is for testing only. delete later.
+      tocpucopy_gas(2)=1
+         call printUarray('afterimqqtu')
 
 
 
@@ -900,15 +959,20 @@
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after imqqtu_dirichlet_gpu_wrapper and if3dgpu is", nid,if3dgpu
 
 
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+         call copytocpu_gpu()
+         call printRes1('afterimqqtud')
 	
 !only for testing. delete later.
- `     tocpucopy_gas(42)=1
- `     tocpucopy_gas(43)=1
-      call copytocpu_gpu()
+!      tocpucopy_gas(42)=1
+!      tocpucopy_gas(43)=1
+!      call copytocpu_gpu()
 
 !       do i = 1, lx1*lx1
 !                write(6,*) " inintint debug dxm1 dxtm1 first", i,dxm1(i), dxtm1(i)
 !       enddo
+
 
 
       call igtu_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_flux,d_gradu,d_graduf,d_iface_flux,&
@@ -918,6 +982,13 @@
 
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after igtu_cmt_gpu_wrapper", nid
 
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+         call copytocpu_gpu()
+         call printRes1('afterigtu')
+!following code is for testing only. delete later.
+      tocpucopy_gas(2)=1
+         call printUarray('afterigtucmt')
 
 
 !      do e=1,nelt  ! this is covered inside each function
@@ -932,6 +1003,12 @@
          call compute_gradients_gpu_wrapper(glbblockSize1,d_u,d_phig,d_dxm1,d_dxtm1,d_gradu,&
           d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,lx1,ly1,lz1,&
           nelt,lelt,toteq,lxd,lyd,lzd,if3dgpu)
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+      tocpucopy_gas(2)=1
+         call copytocpu_gpu()
+         call printRes1('aftercompute_gradients')
+         call printUarray('aftercompute_gradients')
 
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_gradients_gpu_wrapper", nid
 
@@ -954,6 +1031,14 @@
               d_vzd,d_totalh,d_rx,d_dg,d_dgt,d_res1,lx1,ly1,lz1,nelt,lelt,toteq,lxd,&
               lyd,lzd,ldim,if3dgpu,d_u,d_phig,d_pr,d_dt,d_d,d_jgl,d_jgt)        ! convh & totalh -> res1
 
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+         call copytocpu_gpu()
+         call printRes1('afterconvective')
+
+!following code is for testing only. delete later.
+      tocpucopy_gas(2)=1
+         call printUarray('afterconvective')
 
 
 
@@ -979,25 +1064,82 @@
 !      enddo
 
 
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+         call copytocpu_gpu()
+         call printRes1('forcing')
+
+
       call igu_cmt_gpu(flux(iwp),graduf,flux(iwm),iwp,iwm)  
-     
-      print *,"cmtparu.cuf igu_cmt_gpu end ****", nid
+    
+ !following code is for testing only. delete later.
+      tocpucopy_gas(3)=1
+         call copytocpu_gpu()
+         call printRes1('igucmt')
+!following code is for testing only. delete later.
+!      tocpucopy_gas(2)=1
+!         call printUarray('afterigucmt')
+
+ 
+!      print *,"cmtparu.cuf igu_cmt_gpu end ****", nid
 
       !following code is for testing only. delete later.
       istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-      call printFatface("after")
+       print *,"istate fatface", cudaGetErrorString(istate)
 
+!      tocpucopy_gas(3)=1
+!      tocpucopy_gas(21)=1
+      call copytocpu_gpu()
+         do mmm = 1, 20
+              print *,'cccres1111', res1(mmm,1,1,1,1)
+           enddo
+!      state = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!       print *,"istate fatface", cudaGetErrorString(istate)
+
+      
+      call printFatface("beforelastsurface")
+      call printIfaceflux("beforelastsurface")
       do eq=1,toteq
          ieq=(eq-1)*ndg_face+iwp
-          print *,'start full',eq,ieq
-         call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
-          print *,'end full',eq,ieq
+!          print *,'start full',eq,ieq
+      print *,'qqq start aaa',eq,ieq,stage,istep
+
+
+!         call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
+!          print *,'end full',eq,ieq
+           do mmm = 1, 20
+              print *,'res1111', res1(mmm,1,1,1,1)
+           enddo
+
+       call surface_integral_full(res1(1,1,1,1,eq),flux(ieq))
+      
+
       enddo
 !only for testing. delete later.
      tocpucopy_gas(3)=1
       call copytocpu_gpu()
-      call printRes1("after")
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu End ****", nid
+      call printRes1("aftersurfaceintegral")
+      print *,"cmtparu.cuf compute_rhs_and_dt_gpu End ****", nid
+
+
+
+!only for testing. delete later.
+      tocpucopy_gas(1)=1
+      tocpucopy_gas(3)=1
+      tocpucopy_gas(4)=1
+      tocpucopy_gas(5)=1
+      call copytocpu_gpu()
+
+ !following code is for testing only. delete later.
+      tocpucopy_gas(1)=1
+      tocpucopy_gas(2)=1
+      tocpucopy_gas(3)=1
+      tocpucopy_gas(4)=1
+!         call printUarray('last')
+!         call printBm1('last')
+         call printRes1('last')
+!         call printRes3('last')
+
 !      stop
       return
       end
@@ -1005,6 +1147,15 @@
 
       subroutine update_u_gpu
       use  glbvariable_gpu
+
+!only for testing. delete later.
+      tocpucopy_gas(5)=1
+      call copytocpu_gpu()
+
+      write(6,*) "debug tcoef222222:", tcoef(1,1),tcoef(1,2)&
+     ,tcoef(1,3),tcoef(2,1),tcoef(2,2),tcoef(2,3)&
+     ,tcoef(3,1),tcoef(3,2), tcoef(3,3)
+
 
       call update_u_gpu_wrapper(glbblockSize1, d_u, d_bm1, d_tcoef, d_res3, &
            d_res1, nelt, lelt, lx1, ly1, lz1, toteq, stage) 
@@ -1874,7 +2025,7 @@
       endif 
       if(tocpucopy_gas(3).eq.1) then
            istate = cudaMemcpy(res1, d_res1, lx1*ly1*lz1*lelt*toteq,cudaMemcpyDeviceToHost)
-!      print *,"istate 3", cudaGetErrorString(istate) 
+      print *,"istate 3", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(4).eq.1) then
            istate = cudaMemcpy(bm1, d_bm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
@@ -1902,15 +2053,15 @@
 !      endif 
       if(tocpucopy_gas(10).eq.1) then
            istate = cudaMemcpy(vx, d_vx, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
-!      print *,"istate 10", cudaGetErrorString(istate) 
+      print *,"istate 10", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(11).eq.1) then
            istate = cudaMemcpy(vy, d_vy, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
-!      print *,"istate 11", cudaGetErrorString(istate) 
+      print *,"istate 11", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(12).eq.1) then
            istate = cudaMemcpy(vz, d_vz, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
-!      print *,"istate 12", cudaGetErrorString(istate),lelt,lelv 
+      print *,"istate 12", cudaGetErrorString(istate),lelt,lelv 
       endif 
       if(tocpucopy_gas(13).eq.1) then
            istate = cudaMemcpy(vxd,d_vxd, lxd*lyd*lzd*lelv,cudaMemcpyDeviceToHost)
@@ -2053,7 +2204,7 @@
       endif 
       if(tocpucopy_gas(48).eq.1) then
            istate = cudaMemcpy(gridh,d_gridh,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
-      print *,"istate 48", cudaGetErrorString(istate) 
+!      print *,"istate 48", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(49).eq.1) then
            istate = cudaMemcpy(xm1,d_xm1,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
@@ -2237,15 +2388,17 @@
 
       integer isprint, i, geid, pn
       character (len=8):: fmt !format descriptor
-      character(5) x1, x2
+      character(5) x1, x2, x3
 
       fmt = '(I4.4)'
       isprint = 0
          do i = 1, nelt
             write(x1, fmt) i
             write(x2, fmt) istep
+            write(x3, fmt) stage
           OPEN(UNIT=9999+i,FILE='uarray.id.'//trim(x1)//'.' &
-             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+            trim(atype),FORM="FORMATTED", &
              STATUS="REPLACE",ACTION="WRITE")
               do j=1, toteq
                 do k=1, lz1
@@ -2310,7 +2463,7 @@
 
       integer i, geid, pn
       character (len=8):: fmt !format descriptor
-      character(5) x1, x2
+      character(5) x1, x2, x3
 
       fmt = '(I4.4)'
 
@@ -2319,8 +2472,10 @@
 !        geid = lglel(i)
          write(x1, fmt) i !geid
          write(x2, fmt) istep
+         write(x3, fmt) stage
          OPEN(UNIT=10799+i,FILE='vx.id.'//trim(x1)//'.' &
-             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED",&
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+            //trim(atype),FORM="FORMATTED",&
              STATUS="REPLACE",ACTION="WRITE")
          do j=1, lz1
          do k=1, ly1
@@ -2420,7 +2575,7 @@
 
       integer i, geid, pn
       character (len=8):: fmt !format descriptor
-      character(5) x1, x2
+      character(5) x1, x2, x3
 
       fmt = '(I4.4)'
 
@@ -2429,8 +2584,10 @@
 !        geid = lglel(i)
          write(x1, fmt) i !geid
          write(x2, fmt) istep
+         write(x3, fmt) stage
          OPEN(UNIT=11999+i,FILE='csound.id.'//trim(x1)//'.' &
-             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
              STATUS="REPLACE",ACTION="WRITE")
          do j=1, lz1
          do k=1, ly1
@@ -2575,7 +2732,7 @@
 
       integer i, geid, pn
       character (len=8):: fmt !format descriptor
-      character(5) x1, x2
+      character(5) x1, x2, x3
 
       fmt = '(I4.4)'
 
@@ -2584,8 +2741,10 @@
 !        geid = lglel(i)
          write(x1, fmt) i !geid
          write(x2, fmt) istep
+         write(x3, fmt) stage
          OPEN(UNIT=12299+i,FILE='res1.id.'//trim(x1)//'.' &
-              //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
              STATUS="REPLACE",ACTION="WRITE")
          do nn=1, toteq
          do j=1, lz1
@@ -2598,6 +2757,44 @@
          enddo
          enddo
          CLOSE(UNIT=12299+i)
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printRes3(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=14299+i,FILE='res3.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+              trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, toteq
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=14299+i, FMT = *) m,k,j, nn &
+       ,res3(m, k, j, nn, i)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=14299+i)
       enddo
       end
 
@@ -2619,7 +2816,7 @@
       common /CMTSURFLX/ flux(heresize),graduf(hdsize)
       integer i, geid, pn
       character (len=8):: fmt !format descriptor
-      character(5) x1, x2, x3
+      character(5) x1, x2, x3, x4
 
       fmt = '(I4.4)'
 
@@ -2628,9 +2825,11 @@
          write(x1, fmt) i !geid
          write(x2, fmt) j !geid
          write(x3, fmt) istep
+         write(x4, fmt) stage
          OPEN(UNIT=12399+i,FILE='fatface.nqq.'//trim(x1)//'.iwp.' &
              //trim(x2) &
-             //'step.'//trim(x3)//'.'//trim(atype),FORM="FORMATTED", &
+             //'.step.'//trim(x3)//'.stage.'//trim(x4)//'.'// &
+              trim(atype),FORM="FORMATTED", &
              STATUS="REPLACE",ACTION="WRITE")
          do nn=1, lfq
           WRITE(UNIT=12399+i, FMT = *) nn &
@@ -2763,3 +2962,115 @@
 
 
 !----------------------------------------------------------------------
+!---------------------------------------------------------------------
+      subroutine printBm1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' 
+      include 'MASS' !include bm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+         write(x1, fmt) i 
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13299+i,FILE='bm1.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=13299+i, FMT = *) m,k,j &
+       ,bm1(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13299+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printPhig(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'MASS' !include bm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13399+i,FILE='phig.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=13399+i, FMT = *) m,k,j &
+       ,phig(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13399+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printIfaceflux(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'DG' !include iface_flux
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=14499+i,FILE='ifaceflux.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1*lx1*2*ldim
+          WRITE(UNIT=14499+i, FMT = *) j &
+       ,iface_flux(j, i)
+         enddo
+         CLOSE(UNIT=14499+i)
+      enddo
+      end
+
+

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 
 __global__ void compute_entropy_gpu_kernel(double *tlag, double *pr, double *vtrans,int ntot, int irho, double ntol , double rgam, double gmaref,int ltot  ){
 

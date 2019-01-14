@@ -36,6 +36,14 @@ C> @file step.f time stepping and mesh spacing routines
          vtmp(i,1,1,1) = abs(vy(i,1,1,1))+csound(i,1,1,1)
          wtmp(i,1,1,1) = abs(vz(i,1,1,1))+csound(i,1,1,1)
       enddo
+  
+      
+!      if(nid.eq.15) then
+!         call printVx('before')
+!         call printVy('before')
+!         call printVz('before')
+!         call printCsound('before')
+!      endif
       !print *,"setdtcmt before glsqinvcolmin 1 ",nid
       if (ctarg .gt.0.0) then
          call compute_cfl (umax,utmp,vtmp,wtmp,1.0)
@@ -44,10 +52,10 @@ C> @file step.f time stepping and mesh spacing routines
          call glsqinvcolmin(dt2,vdiff(1,1,1,1,iknd),gridh,ntot,ctarg)
          call glsqinvcolmin(dt3,vdiff(1,1,1,1,inus),gridh,ntot,ctarg)
          dt_cmt=min(dt_cfl,dt1,dt2,dt3)
-      !print *,"setdtcmt before dt huge crashing ",nid
+      print *,"setdtcmt bef dt huge cg ",nid,dt_cmt,dt_cfl,dt1,dt2,dt3
 !         dt_cmt=2 !only for now remove later .adeesha.
          if (dt_cmt .gt. 10.0) then
-            if (nio.eq.0) write(6,*) 'dt huge. crashing cpu',istep,stage,
+            if (nio.eq.0) write(6,*) 'dt huge. crashig cpu',istep,stage,
      >         dt_cmt
             call exitt
          endif

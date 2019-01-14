@@ -1,5 +1,5 @@
 #include <stdio.h>
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 __global__ void compute_grid_h_kernel( double *gridh, double *xm1, double *ym1, double *zm1, int nelt, int lx1, int ly1, int lz1, int if3d,  int nnel,int lxy, int lxyz  ){    
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<nnel){

@@ -1,0 +1,21 @@
+nvcc -c  -O3 -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/sod3 -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu -o obj/surface_fluxes_cuda.o
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(18): warning: variable "j" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(108): warning: variable "nnelnqq" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(347): warning: variable "lxd_3" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(18): warning: variable "j" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(108): warning: variable "nnelnqq" was declared but never referenced
+
+/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/surface_fluxes_cuda.cu(347): warning: variable "lxd_3" was declared but never referenced
+
+ftn -mcmodel=medium -c  -O2 -r8 -Mpreprocess -DCMTNEK -DMPI -DUNDERSCORE -DTIMER -DMPITIMER -DGLOBAL_LONG_LONG -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/sod3 -I/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core -I./ -I /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/CMT/sod3/sod3.f  -o obj/sod3.o 
+ftn -mcmodel=medium -o nek5000 obj/sod3.o obj/drive.o obj/drive1.o obj/drive2.o obj/plan4.o obj/bdry.o obj/coef.o obj/conduct.o obj/connect1.o obj/connect2.o obj/dssum.o obj/edgec.o obj/eigsolv.o obj/gauss.o obj/genxyz.o obj/navier1.o obj/makeq.o obj/navier0.o obj/navier2.o obj/navier3.o obj/navier4.o obj/prepost.o obj/speclib.o obj/map2.o obj/turb.o obj/mvmesh.o obj/ic.o obj/ssolv.o obj/planx.o obj/math.o obj/mxm_wrapper.o obj/hmholtz.o obj/gfdm_par.o obj/gfdm_op.o obj/gfdm_solve.o obj/subs1.o obj/subs2.o obj/genbox.o obj/gmres.o obj/hsmg.o obj/convect.o obj/induct.o obj/perturb.o obj/navier5.o obj/navier6.o obj/navier7.o obj/navier8.o obj/loadbal.o obj/reptSubrt.o obj/fast3d.o obj/fasts.o obj/calcz.o obj/byte.o obj/chelpers.o obj/byte_mpi.o obj/postpro.o obj/cvode_driver.o obj/nek_comm.o obj/vprops.o obj/makeq_aux.o obj/papi.o obj/nek_in_situ.o obj/readat_new.o obj/reader_re2.o obj/finiparser.o obj/iniparser.o obj/dictionary.o obj/artvisc.o obj/cmtparticles.o obj/mxm_std.o obj/comm_mpi.o obj/singlmesh.o obj/blas.o obj/dsygv.o obj/ssygv.o obj/drive1_cmt.o obj/drive2_cmt.o obj/driver3_cmt.o obj/face.o obj/ausm.o obj/MixtPerf.o obj/intpdiff.o obj/diffusive_cmt.o obj/eqnsolver_cmt.o obj/surface_fluxes.o obj/bc.o obj/inflow_bc.o obj/outflow_bc.o obj/wall_bc.o obj/step.o obj/filters_cmt.o obj/diagnostics.o obj/drive1_cmt_gpu.o obj/cmtparticles_gpu.o obj/artvisc_gpu.o obj/step_gpu.o obj/driver3_cmt_gpu.o obj/diffusive_cmt_gpu.o obj/surface_fluxes_gpu.o obj/bc_gpu.o obj/eqnsolver_cmt_gpu.o obj/drive1_gpu.o obj/particles-cuda.o obj/artvisc_cuda.o obj/driver3_cmt_cuda.o obj/step_cuda.o obj/diffusive_cmt_cuda.o obj/surface_fluxes_cuda.o obj/bc_cuda.o obj/eqnsolver_cmt_cuda.o obj/cuda_helpers.o obj/jl_gs.o obj/jl_sort.o obj/jl_sarray_transfer.o obj/jl_sarray_sort.o obj/jl_gs_local.o obj/jl_crystal.o obj/jl_comm.o obj/jl_tensor.o obj/jl_fail.o obj/jl_fcrystal.o obj/jl_findpts.o obj/jl_findpts_local.o obj/jl_obbox.o obj/jl_poly.o obj/jl_lob_bnd.o obj/jl_findpts_el_3.o obj/jl_findpts_el_2.o obj/jl_sparse_cholesky.o obj/jl_xxt.o obj/jl_fcrs.o  -lcuda -lcudart -lcublas -Mcuda -lstdc++
+
+#############################################################
+#                  Compilation successful!                  #
+#############################################################
+
+

@@ -253,6 +253,11 @@ c     ! save velocity on fine mesh for dealiasing
             u(i,j,k,irpv,e)= phi*rho*uy
             u(i,j,k,irpw,e)= phi*rho*uz
             u(i,j,k,iret,e)= phi*rho*(cv*temp+0.5*(ux**2+uy**2+uz**2))
+!            if(nid.eq.15) then
+!               write(6,*) "debug u arr:", e, i, j, k, u(i,j,k,irg,e),
+!     $ u(i,j,k,irpu,e), u(i,j,k,irpv,e), u(i,j,k,irpw,e), 
+!     $u(i,j,k,iret,e), phi, rho, ux, uy, uz, cv, temp
+!            endif
             vdiff(i,j,k,e,imu) = mu
             vdiff(i,j,k,e,iknd)= udiff
             vdiff(i,j,k,e,ilam)= lambda

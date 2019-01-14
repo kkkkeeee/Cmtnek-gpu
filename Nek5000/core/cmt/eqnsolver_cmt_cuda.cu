@@ -5,7 +5,7 @@
 #include "nvml.h"
 #include "cuda_helpers.h"
 //#include "cuda_helpers.h"
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 
 __global__ void igtu_cmt_gpu_kernel1(double *flux, int nfq, int toteq,int toteqlxz2ldimlelt,int lxz2ldimlelt,int iuj,double *graduf,double *area,double *unx, double *uny, double *unz,int if3d,int ldim){
 
@@ -30,7 +30,7 @@ __global__ void igtu_cmt_gpu_kernel1(double *flux, int nfq, int toteq,int toteql
 
 			}
 		}
-		//printf(" graduf[id] = %.20lf id = %d\n", graduf[id],id);
+	//	printf(" graduf[id] = %.20lf id = %d\n", graduf[id],id);
 	}
 }
 
@@ -595,7 +595,7 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 		usrf[e*5*nxyz+4*nxyz+iz*(lxy)+iy*lx1+ix] = qvol;
 
 
-		printf("ix =%d iy= %d iz= %d e = %d usrf[0] = %.20lf usrf[1] = %.20lf  usrf[2] = %.20lf  usrf[3] = %.20lf  usrf[4] = %.20lf  \n",ix,iy,iz,e,usrf[e*5*nxyz+0*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+1*nxyz+iz*(lxy)+iy*lx1+ix],usrf[e*5*nxyz+2*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+3*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+4*nxyz+iz*(lxy)+iy*lx1+ix])  ;
+//		printf("ix =%d iy= %d iz= %d e = %d usrf[0] = %.20lf usrf[1] = %.20lf  usrf[2] = %.20lf  usrf[3] = %.20lf  usrf[4] = %.20lf  \n",ix,iy,iz,e,usrf[e*5*nxyz+0*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+1*nxyz+iz*(lxy)+iy*lx1+ix],usrf[e*5*nxyz+2*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+3*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+4*nxyz+iz*(lxy)+iy*lx1+ix])  ;
 
 
 	}
@@ -731,46 +731,46 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 
 		if(if3d[0]){
 
-			if(eq==0){
-				double *cpu_dxm1;
-				cpu_dxm1= (double*)malloc(lx1[0]*lx1[0]*sizeof(double));
-				cudaMemcpy(cpu_dxm1,d_dxm1,lx1[0]*lx1[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-				for(int i=0;i<lx1[0]*lx1[0];i++){
-					//   printf("debug d_dxm1 %d %.30lf \n ",i,cpu_dxm1[i]);
-				}
+//			if(eq==0){
+////				double *cpu_dxm1;
+//				cpu_dxm1= (double*)malloc(lx1[0]*lx1[0]*sizeof(double));
+//				cudaMemcpy(cpu_dxm1,d_dxm1,lx1[0]*lx1[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+//				for(int i=0;i<lx1[0]*lx1[0];i++){
+//					//   printf("debug d_dxm1 %d %.30lf \n ",i,cpu_dxm1[i]);
+//				}
 
-				double *cpu_dxtm1;
-				cpu_dxtm1= (double*)malloc(lx1[0]*lx1[0]*sizeof(double));
-				cudaMemcpy(cpu_dxtm1,d_dxtm1,lx1[0]*lx1[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-				for(int i=0;i<lx1[0]*lx1[0];i++){
-					//  printf("debug d_dxtm1 %d %.30lf \n ",i,cpu_dxtm1[i]);
-				}
+//				double *cpu_dxtm1;
+//				cpu_dxtm1= (double*)malloc(lx1[0]*lx1[0]*sizeof(double));
+//				cudaMemcpy(cpu_dxtm1,d_dxtm1,lx1[0]*lx1[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+//				for(int i=0;i<lx1[0]*lx1[0];i++){
+//					//  printf("debug d_dxtm1 %d %.30lf \n ",i,cpu_dxtm1[i]);
+//				}
 
 
-				double *cpu_dud;
-				cpu_dud= (double*)malloc(ndlel*sizeof(double));
-				cudaMemcpy(cpu_dud,d_ud,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
-				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
+//				double *cpu_dud;
+//				cpu_dud= (double*)malloc(ndlel*sizeof(double));
+//				cudaMemcpy(cpu_dud,d_ud,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
+//				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
 					// printf("debug d_ud %d %d %d %.30lf \n ",eq,i%(lx1[0]*lx1[0]*lx1[0]),i/(lx1[0]*lx1[0]*lx1[0]),cpu_dud[i]);
-				}
-			}
+//				}
+//			}
 
 			gpu_local_grad3(d_ur,d_us,d_ut,d_ud,lx1[0],d_dxm1,d_dxtm1,nelt[0]);// why define  d_ur .. to ldd if only using lx1. check with Dr.Tania. adeesha.
-			if(eq==0){
-				double *cpu_dur;
-				cpu_dur= (double*)malloc(ndlel*sizeof(double));
-				cudaMemcpy(cpu_dur,d_ur,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
-				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
+//			if(eq==0){
+//				double *cpu_dur;
+//				cpu_dur= (double*)malloc(ndlel*sizeof(double));
+//				cudaMemcpy(cpu_dur,d_ur,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
+//				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
 					//  printf("debug d_ur %d %d %d %.30lf \n ",eq,i%(lx1[0]*lx1[0]*lx1[0]),i/(lx1[0]*lx1[0]*lx1[0]),cpu_dur[i]);
-				}
+//				}
 
-				double *cpu_dus;
-				cpu_dus= (double*)malloc(ndlel*sizeof(double));
-				cudaMemcpy(cpu_dus,d_us,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
-				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
+//				double *cpu_dus;
+//				cpu_dus= (double*)malloc(ndlel*sizeof(double));
+//				cudaMemcpy(cpu_dus,d_us,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
+//				for(int i=0;i<lx1[0]*lx1[0]*lx1[0]*nelt[0];i++){
 					//printf("debug d_us %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dus[i]);
-				}
-			}
+//				}
+//			}
 			compute_gradients_gpu_kernel2<<<gridSize, blockSize>>>(d_ur,d_us,d_ut,d_gradu,d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,lx1[0],ly1[0],lz1[0],lxy,nxyz,toteqlxyz,eq,nnel,toteqlxyzlelt,nxyzlelt);
 
 		}
@@ -784,12 +784,12 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 
 	}
 
-	double *cpu_gradu;
-	cpu_gradu= (double*)malloc(toteq[0]*3*nlel*sizeof(double));
-	cudaMemcpy(cpu_gradu,d_gradu,toteq[0]*3*nlel*sizeof(double) , cudaMemcpyDeviceToHost);
-	for(int i=0;i<toteq[0]*nlel;i++){
+//	double *cpu_gradu;
+//	cpu_gradu= (double*)malloc(toteq[0]*3*nlel*sizeof(double));
+//	cudaMemcpy(cpu_gradu,d_gradu,toteq[0]*3*nlel*sizeof(double) , cudaMemcpyDeviceToHost);
+//	for(int i=0;i<toteq[0]*nlel;i++){
 		//    printf("debug d_gradu %d %d %d %.30lf %.30lf %.30lf \n ",i/nlel,i%(lx1[0]*lx1[0]*lx1[0]),i/(lx1[0]*lx1[0]*lx1[0]),cpu_gradu[i],cpu_gradu[1*toteq[0]*nlel+i],cpu_gradu[2*toteq[0]*nlel+i]);
-	}
+//	}
 
 
 	cudaFree(d_ur);
@@ -1074,15 +1074,15 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 			}
 
 
-			//				if(eq==4){
-			//				double *cpu_convh;
-			//                              cpu_convh= (double*)malloc(3*ldd*lelt[0]*sizeof(double));
-			//                            cudaMemcpy(cpu_convh,d_convh,3*ldd*lelt[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-			//                            for(int i=0;i<ldd*nelt[0];i++){
-			//                                    printf("debug d_convh %d %d %d %.30lf %.30lf %.30lf \n ",i/ldd,i%ldd,eq,cpu_convh[i],cpu_convh[1*ldd*lelt[0]+i],cpu_convh[2*ldd*lelt[0]+i]);
-			//                           }
-			//				}
-
+/*						if(eq==0){
+							double *cpu_convh;
+			                              cpu_convh= (double*)malloc(3*ldd*lelt[0]*sizeof(double));
+			                            cudaMemcpy(cpu_convh,d_convh,3*ldd*lelt[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+			                            for(int i=0;i<ldd*nelt[0];i++){
+			                                    printf("debug d_convh %d %d %d %.30lf %.30lf %.30lf \n ",i/ldd,i%ldd,eq,cpu_convh[i],cpu_convh[1*ldd*lelt[0]+i],cpu_convh[2*ldd*lelt[0]+i]);
+			                           }
+							}
+*/
 
 #ifdef DEBUGPRINT
 			cudaDeviceSynchronize();
@@ -1113,42 +1113,42 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 #endif
 
-			double *cpu_dur;
-			cpu_dur= (double*)malloc( nelt[0]*ldd*sizeof(double));
-			cudaMemcpy(cpu_dur,d_ur ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
-			for(int i=0;i< nelt[0]*ldd;i++){
+//			double *cpu_dur;
+//			cpu_dur= (double*)malloc( nelt[0]*ldd*sizeof(double));
+//			cudaMemcpy(cpu_dur,d_ur ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+//			for(int i=0;i< nelt[0]*ldd;i++){
 				//                        printf("debug 2d_ur %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dur[i]);
-			}
+//			}
 
-			double *cpu_dus;
-			cpu_dus= (double*)malloc( nelt[0]*ldd*sizeof(double));
-			cudaMemcpy(cpu_dus,d_us ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
-			for(int i=0;i< nelt[0]*ldd;i++){
+//			double *cpu_dus;
+//			cpu_dus= (double*)malloc( nelt[0]*ldd*sizeof(double));
+//			cudaMemcpy(cpu_dus,d_us ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+//			for(int i=0;i< nelt[0]*ldd;i++){
 				//                      printf("debug 2d_us %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dus[i]);
-			}
+//			}
+
+//
+//			double *cpu_dut;
+//			cpu_dut= (double*)malloc( nelt[0]*ldd*sizeof(double));
+//			cudaMemcpy(cpu_dut,d_ut ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+//			for(int i=0;i< nelt[0]*ldd;i++){
+//				//                    printf("debug 2d_ut %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dut[i]);
+//			}
 
 
-			double *cpu_dut;
-			cpu_dut= (double*)malloc( nelt[0]*ldd*sizeof(double));
-			cudaMemcpy(cpu_dut,d_ut ,nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
-			for(int i=0;i< nelt[0]*ldd;i++){
-				//                    printf("debug 2d_ut %d %d %d %.30lf \n ",eq,i%(lxd[0]*lxd[0]*lxd[0]),i/(lxd[0]*lxd[0]*lxd[0]),cpu_dut[i]);
-			}
-
-
-			double *cpu_dg;
-			cpu_dg= (double*)malloc(ldd*sizeof(double));
-			cudaMemcpy(cpu_dg,d_dg ,ldd*sizeof(double) , cudaMemcpyDeviceToHost);
-			for(int i=0;i< ldd;i++){
+//			double *cpu_dg;
+//			cpu_dg= (double*)malloc(ldd*sizeof(double));
+//			cudaMemcpy(cpu_dg,d_dg ,ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+//			for(int i=0;i< ldd;i++){
 				//                  printf("debug d_dg %d %d %.30lf \n ",eq,i,cpu_dg[i]);
-			}
+//			}
 
-			double *cpu_dgt;
-			cpu_dgt= (double*)malloc(ldd*sizeof(double));
-			cudaMemcpy(cpu_dgt,d_dgt ,ldd*sizeof(double) , cudaMemcpyDeviceToHost);
-			for(int i=0;i< ldd;i++){
+//			double *cpu_dgt;
+//			cpu_dgt= (double*)malloc(ldd*sizeof(double));
+//			cudaMemcpy(cpu_dgt,d_dgt ,ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+//			for(int i=0;i< ldd;i++){
 				//                printf("debug 2d_dgt %d %d %.30lf \n ",eq,i,cpu_dgt[i]);
-			}
+//			}
 
 
 
@@ -1169,12 +1169,12 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 
 
-			double *cpu_ud;
-			cpu_ud= (double*)malloc( nelt[0]*ldd*sizeof(double));
-			cudaMemcpy(cpu_ud,d_ud, nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
-			for(int i=0;i< nelt[0]*ldd;i++){
+//			double *cpu_ud;
+//			cpu_ud= (double*)malloc( nelt[0]*ldd*sizeof(double));
+//			cudaMemcpy(cpu_ud,d_ud, nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
+//			for(int i=0;i< nelt[0]*ldd;i++){
 				//                            printf("debug 2d_ud %d %d %d %.30lf \n ",i/ldd,i%ldd,eq,cpu_ud[i]);
-			}
+//			}
 
 
 
@@ -1183,15 +1183,18 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 			//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
 			gpu_specmpn(d_tu,lx1[0],d_ud,lxd[0],d_jgt,d_jgl,if3d[0],d_w,ldw,nelt[0],1,eq,false);
 
-			double *cpu_tu;
+/*			double *cpu_tu;
 			cpu_tu= (double*)malloc( nelt[0]*ldd*sizeof(double));
+                        double *cpu_res1;
+                        cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
+
 			cudaMemcpy(cpu_tu,d_tu, nelt[0]*ldd*sizeof(double) , cudaMemcpyDeviceToHost);
-			//                              cudaMemcpy(cpu_res1,d_res1, nnel*sizeof(double) , cudaMemcpyDeviceToHost);
-			//                             for(int i=0;i< nelt[0]*lx1[0]*lx1[0]*lx1[0];i++){
-			//                        printf("debug 2d_tu %d %d %d %.30lf %.30lf %.30lf \n ",i/(lx1[0]*lx1[0]*lx1[0]),i%(lx1[0]*lx1[0]*lx1[0]),eq,cpu_tu[i],cpu_res1[i],cpu_res1[i]-cpu_tu[i]);
-			//                               }
+			                              cudaMemcpy(cpu_res1,d_res1, nnel*sizeof(double) , cudaMemcpyDeviceToHost);
+			                             for(int i=0;i< nelt[0]*lx1[0]*lx1[0]*lx1[0];i++){
+			                        printf("debug 2d_tu %d %d %d %.30lf %.30lf %.30lf \n ",i/(lx1[0]*lx1[0]*lx1[0]),i%(lx1[0]*lx1[0]*lx1[0]),eq,cpu_tu[i],cpu_res1[i],cpu_res1[i]-cpu_tu[i]);
+			                               }
 
-
+*/
 
 
 
@@ -1242,14 +1245,14 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 #endif
 	}
 
-			double *cpu_res1;
-			cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
-			cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-			for(int j=0;j<toteq[0];j++){
-				for(int i=0;i<nnel;i++){
-				printf("debug 2d_res1 %d %d %d %.30lf \n ",j,i/lxyz,i%(lxyz),cpu_res1[j*lxyzlelt+i]);
-				}
-			}
+//			double *cpu_res1;
+//			cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
+//			cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+//			for(int j=0;j<toteq[0];j++){
+//				for(int i=0;i<nnel;i++){
+//				printf("debug 2d_res1 %d %d %d %.30lf \n ",j,i/lxyz,i%(lxyz),cpu_res1[j*lxyzlelt+i]);
+//				}
+//			}
 	cudaFree(d_ur);
 	cudaFree(d_us);
 	cudaFree(d_ut);
@@ -1671,10 +1674,10 @@ __global__ void viscous_cmt_gpu_kernel3( double *ur, double *us, double *ut, dou
 			us[id] =  jacmi[id] *( sxm1[id]*diffh[0*lxyzlelt+id]+ sym1[id]*diffh[1*lxyzlelt+id]+szm1[id]*diffh[2*lxyzlelt+id]);
 			ut[id] =  jacmi[id] *( txm1[id]*diffh[0*lxyzlelt+id]+ tym1[id]*diffh[1*lxyzlelt+id]+tzm1[id]*diffh[2*lxyzlelt+id]);
 
-			if(id<256){
-
-				printf("ur %d %.20lf \n",id,ur[id]);
-			}
+//			if(id<256){
+//
+//				printf("ur %d %.20lf \n",id,ur[id]);
+//			}
 
 
 		}
@@ -1766,14 +1769,14 @@ extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,d
 
 	}
 
- double *cpu_res1;
-                        cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
-                        cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-                        for(int j=0;j<toteq[0];j++){
-                                for(int i=0;i<nnel;i++){
-                                printf("debug 3d_res1 %d %d %d %.30lf \n ",j,i/nxyz,i%(nxyz),cpu_res1[j*lxyzlelt+i]);
-                                }
-                        }
+// double *cpu_res1;
+ //                       cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
+  //                      cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+  //                      for(int j=0;j<toteq[0];j++){
+   //                             for(int i=0;i<nnel;i++){
+    //                            printf("debug 3d_res1 %d %d %d %.30lf \n ",j,i/nxyz,i%(nxyz),cpu_res1[j*lxyzlelt+i]);
+     //                           }
+      //                  }
 
 
 	cudaFree(d_ur);
@@ -1871,15 +1874,15 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)nnel/blockSize);
 
- double *cpu_d;
-                                cpu_d= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
-                                cudaMemcpy(cpu_d,d_d,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
- double *cpu_dt;
-                                cpu_dt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
-                                cudaMemcpy(cpu_dt,d_dt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-                                for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
-                                           printf("d*g d_d d_dt %d %.30lf  %.30lf\n ",i,cpu_d[i],cpu_dt[i]);
-                                }
+// double *cpu_d;
+ //                               cpu_d= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+  //                              cudaMemcpy(cpu_d,d_d,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+ //double *cpu_dt;
+  //                              cpu_dt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+   //                             cudaMemcpy(cpu_dt,d_dt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+   //                             for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
+    //                                       printf("d*g d_d d_dt %d %.30lf  %.30lf\n ",i,cpu_d[i],cpu_dt[i]);
+     //                           }
 
 
 	for(int eq=0; eq<toteq[0];eq++){
@@ -1987,14 +1990,14 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 
 	}
 
-	 double *cpu_res1;
-                        cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
-                        cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-                        for(int j=0;j<toteq[0];j++){
-                                for(int i=0;i<nnel;i++){
-                                printf("debug 6d_res1 %d %d %d %.30lf \n ",j,i/nxyz,i%(nxyz),cpu_res1[j*lxyzlelt+i]);
-                                }
-                        }
+//	 double *cpu_res1;
+ //                       cpu_res1= (double*)malloc(lxyzlelt*toteq[0]*sizeof(double));
+  //                      cudaMemcpy(cpu_res1,d_res1,lxyzlelt*toteq[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+  //                      for(int j=0;j<toteq[0];j++){
+   //                             for(int i=0;i<nnel;i++){
+    //                            printf("debug 6d_res1 %d %d %d %.30lf \n ",j,i/nxyz,i%(nxyz),cpu_res1[j*lxyzlelt+i]);
+ //                               }
+  //                      }
 
 
 

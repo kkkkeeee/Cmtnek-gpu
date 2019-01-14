@@ -60,7 +60,7 @@
       n=lx1*ly1*lz1
       ntot=n*nelt
 
-      print *,"artvisc.f entropy_viscosity_gpu start", nid,ntot
+!      print *,"artvisc.f entropy_viscosity_gpu start", nid,ntot
 ! entropy at this and lorder prior steps
       call compute_entropy(tlag)
 ! compute maxval(|S-<S>|)
@@ -85,7 +85,7 @@
       savg    = -savg/volvm1
       call cadd2(scrent,tlag,savg,ntot)
       maxdiff =     glamax(scrent,ntot)
-      print *,"artvisc.f entropy_visc_gpu $$$ savg2 MD",savg,maxdiff,nid
+!      print *,"artvisc.f entropy_visc_gpu $$$ savg2 MD",savg,maxdiff,nid
 !      print *,"artvisc.f entropy_visc_gpu $$$ maxdiff",maxdiff, nid
       if (maxdiff.le.0.0) then
          write(deathmessage,*) 'zero maxdiff usually means NAN$'
@@ -97,7 +97,7 @@
    
       call entropy_residual(tlag) ! fill res2
       call copy(res2(1,1,1,1,2),res2,ntot) ! raw residual in res2
-      print *,"artvisc.f entropy_visc_gpu after entropy_residual", nid
+!      print *,"artvisc.f entropy_visc_gpu after entropy_residual", nid
 
 !      if(nid.eq.15) then 
 !      do i=1,100

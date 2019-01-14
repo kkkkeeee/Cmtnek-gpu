@@ -1,5 +1,5 @@
 #include <stdio.h>
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 
 __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, double *vz, double *u, int nelt, int nxyz,int nnel,int irpu, int irpv, int irpw, int iret, int irg, int toteq,int if3d,double *vtrans, int irho, double *phig, int lx1, int ly1, int lz1, int *lglel, double *xm1, double *ym1, double *zm1, double *t,int ldimt, int npscal, double *pr, double p0th, double *sii, double *siii, double *vdiff, int ifield,char *cb, int icv, int icp, double *csound, int imu,int ilam, double cpgref, double cvgref, double gmaref, double rgasref, int *gllel, double *res2, int iknd, int inus, int lxy,int nlel ){
 
@@ -64,9 +64,9 @@ __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, doubl
 		int uservpe = gllel[ieg-1];
 		mu=rho*res2[(uservpe-1)*nxyz+k*lxy+j*lx1+newi] ;//! finite c_E;
 		double nu_s=0.75*mu/rho;
-		if(e==7){
-			printf("mu in compute transport is %lf rho = %lf uservpe =  %d ieg=%d \n", mu,rho,uservpe,ieg);
-		}
+//		if(e==7){
+//			printf("mu in compute transport is %lf rho = %lf uservpe =  %d ieg=%d \n", mu,rho,uservpe,ieg);
+///		}
 		mu=0.5*mu ;
 		lambda=0.0;
 		udiff=0.0;  // uservp makes these to zero. vdiff get zeros. Check with Dr. Tania. adeesha
@@ -301,9 +301,9 @@ __global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, 
 				for(int ivar=0;ivar<toteq;ivar++){
 					flux[(iuj-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1] = flux[(iwm-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1]-flux[(iwp-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1];
 				}
-						if(id<500){
-							printf("iuj = %d, iwm = %d, iwp = %d, lxz2ldimlelt = %d, lxz2ldim = %d, lxz = %d, iface= %d id %d l = %d ix = %d, iy =%d, iz = %d, i1 = %d, i2=%d,lx1=%d, ly1=%d,lz1=%d, cb1= %d \n",iuj,iwm,iwp,lxz2ldimlelt,lxz2ldim,lxz,iface,id ,l,ix,iy,iz,i1,i2,lx1,ly1,lz1,cb1);
-						}
+//						if(id<500){
+//							printf("iuj = %d, iwm = %d, iwp = %d, lxz2ldimlelt = %d, lxz2ldim = %d, lxz = %d, iface= %d id %d l = %d ix = %d, iy =%d, iz = %d, i1 = %d, i2=%d,lx1=%d, ly1=%d,lz1=%d, cb1= %d \n",iuj,iwm,iwp,lxz2ldimlelt,lxz2ldim,lxz,iface,id ,l,ix,iy,iz,i1,i2,lx1,ly1,lz1,cb1);
+//						}
 
 		}
 

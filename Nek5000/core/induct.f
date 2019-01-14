@@ -977,6 +977,13 @@ c        print *, "came to compute_cfl"
  
                cflm = cflr + cfls + cflt
                cfl  = max(cfl,cflm)
+!               if(nid.eq.15) then
+!      print *,'cflm',dt,ur,us,ut,u(i,j,k,e), v(i,j,k,e), w(i,j,k,e)
+!     $,rxm1(i,j,k,e),rym1(i,j,k,e),rzm1(i,j,k,e),sxm1(i,j,k,e),
+!     $sym1(i,j,k,e),szm1(i,j,k,e),txm1(i,j,k,e),tym1(i,j,k,e)
+!     $,tzm1(i,j,k,e), jacmi(l,1)
+!     $ ,i,j,k,e
+!              endif
 
                cflf(i,j,k,e) = cflm
  
@@ -1008,7 +1015,9 @@ c        print *, "came to compute_cfl"
          enddo
       endif
 c
+      print *,'print cfl',nid,cfl
       cfl = glmax(cfl,1)
+     
 c
       return
       end

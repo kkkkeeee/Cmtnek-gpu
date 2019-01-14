@@ -6,7 +6,7 @@
 // includes, project
 //#include "magma.h"
 #include "cuda_multi_gemm_unif.cu"
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 
 __global__ void nekadd2(double *a, double*b, int n){
 
@@ -233,9 +233,9 @@ void gpu_local_grad3_t(double *u, double *ur, double *us, double *ut, int nx1, d
 	cudaDeviceSynchronize();
 	cudaError_t code5 = cudaPeekAtLastError();
 	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
-#endif
 
                               cudaMemcpy(cpu_dw,u, nel*nx1*nx1*nx1*sizeof(double) , cudaMemcpyDeviceToHost);
+#endif
 //                               for(int i=0;i<nel*nx1*nx1*nx1;i++){
  //                                       printf("debug 4du %d %d %.30lf \n ",i/(nx1*nx1*nx1),i%(nx1*nx1*nx1),cpu_dw[i]);
   //                              }
@@ -493,10 +493,10 @@ void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double
 
 			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,na*nb , d_ab,na,0, beta,d_w+na*na*nb*nel ,nb,nb*nb,na*nel);
 
-                              cudaMemcpy(cpu_dw,d_w, (nel*nb*na*na+nel*nb*nb*na)*sizeof(double) , cudaMemcpyDeviceToHost);
-                               for(int i=0;i<  nel*nb*nb*na;i++){
+//                              cudaMemcpy(cpu_dw,d_w, (nel*nb*na*na+nel*nb*nb*na)*sizeof(double) , cudaMemcpyDeviceToHost);
+//                               for(int i=0;i<  nel*nb*nb*na;i++){
 //                                        printf("debug 2d_w %d %d %d %.30lf \n ",i/(nb*nb*na),i%(nb*nb*na),eq,cpu_dw[nel*na*na*nb+i]);
-                                }
+//                                }
 
 
 

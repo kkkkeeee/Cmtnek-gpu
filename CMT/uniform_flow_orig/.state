@@ -1,0 +1,6 @@
+SOURCE_ROOT=/ccs/home/adeesha/research/latestNek5000/Nek5000
+FC=ftn
+FFLAGS= -r8 -Mpreprocess
+CC=cc
+CFLAGS=
+PPLIST=CMTNEK MPI UNDERSCORE TIMER

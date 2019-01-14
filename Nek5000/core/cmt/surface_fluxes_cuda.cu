@@ -8,7 +8,6 @@
 //#include "magma.h"
 #include "cuda_multi_gemm_unif.cu"
 #include "cuda_helpers.h"
-
 #define DEBUGPRINT 0
 __global__ void fluxes_full_field_gpu_kernel_fillq(double *vtrans, double *vx, double *vy, double *vz, double *pr, double *t, double *csound, double *phig, double *vdiff, double *fatface,int irho, int iux, int iuy, int iuz, int ipr, int ithm, int isnd, int iph, int icvf, int icpf, int imuf, int ikndf, int ilamf, int iwm, int iwp, int icv, int icp, int imu, int iknd, int ilam,int *iface_flux, int nnel, int nxz2ldim, int lxyz,int lxz, int ivarcoef,int leltlxyz ){
 
@@ -51,6 +50,7 @@ __global__ void fluxes_full_field_gpu_kernel_fillq(double *vtrans, double *vx, d
 		fatface[(iwp-1)+id] = vtrans[(icp-1)*leltlxyz+e*lxyz+i]; 
 		fatface[(iwm-1)+(icpf-1)*ivarcoef+id] = fatface[(iwp-1)+id]; 
 		//fillq vdiff imu
+//below one has the error for sod3 test case
 		fatface[(iwp-1)+id] = vdiff[(imu-1)*leltlxyz+e*lxyz+i]; 
 		fatface[(iwm-1)+(imuf-1)*ivarcoef+id] = fatface[(iwp-1)+id]; 
 		//fillq vdiff iknd
@@ -210,6 +210,8 @@ __global__ void Ausm_flux(int neq, int ntotd, double *nx, double *ny, double *nz
 		ql = ul[i]*nx[i] + vl[i]*ny[i] + wl[i]*nz[i] - fs[i];
 		qr = ur[i]*nx[i] + vr[i]*ny[i] + wr[i]*nz[i] - fs[i];
 
+//                printf("ql  %.30lf  qr  %.30lf  Hl  %.30lf  Hr  %.30lf  cpl  %.30lf  cpr  %.30lf  rl  %.30lf  tl  %.30lf  ul   %.30lf vl  %.30lf  wl   %.30lf ur   %.30lf vr   %.30lf wr   %.30lf fs   %.30lf al   %.30lf ar   %.30lf pl   %.30lf pr   %.30lf phl  %.30lf  rr   %.30lf nm   %.30lf  \n",ql, qr, Hl, Hr, cpl[i],cpr[i], rl[i], tl[i], ul[i], vl[i], wl[i], ur[i], vr[i], wr[i], fs[i], al[i], ar[i], pl[i], pr[i], phl[i], rr[i], nm[i]);
+
 		af = 0.5*(al[i] + ar[i]);
 		ml = ql/af;
 		mla = abs(ml);
@@ -239,6 +241,7 @@ __global__ void Ausm_flux(int neq, int ntotd, double *nx, double *ny, double *nz
 		mfp = 0.5*(mf+mfa);
 		mfm = 0.5*(mf-mfa);
 
+
 		pf = wtl*pl[i] + wtr*pr[i];
 
 		//compute fluxes
@@ -247,6 +250,8 @@ __global__ void Ausm_flux(int neq, int ntotd, double *nx, double *ny, double *nz
 		flx[2*ntotd+i] = ((af*(mfp*rl[i]*vl[i] + mfm*rr[i]*vr[i])+pf*ny[i]) * nm[i])*phl[i];
 		flx[3*ntotd+i] = ((af*(mfp*rl[i]*wl[i] + mfm*rr[i]*wr[i])+pf*nz[i]) * nm[i])*phl[i];
 		flx[4*ntotd+i] = ((af*(mfp*rl[i]*Hl + mfm*rr[i]*Hr)+pf*fs[i]) * nm[i])*phl[i];
+
+
 
 
 	}
@@ -279,12 +284,13 @@ void map_faced(double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w,
 
 #endif
 
-			// 	double *cpu_dw;
-			//       cpu_dw= (double*)malloc(nelt*nfaces*nxd*nxd*sizeof(double));
-			//      cudaMemcpy(cpu_dw,d_w,nelt*nfaces*nxd*nxd*sizeof(double) , cudaMemcpyDeviceToHost);
-			//       for(int i=0;i<nelt*nfaces*nxd*nxd;i++){
-			//                printf("debug d_w %d %d %d %.30lf \n ",i%(nxd*nxd),(i/nelt)%nfaces,i/(nelt*nfaces),cpu_dw[i]);
-			//        }
+//			 	double *cpu_dw;
+//			       cpu_dw= (double*)malloc(nelt*nfaces*nxd*nxd*sizeof(double));
+//			      cudaMemcpy(cpu_dw,d_w,nelt*nfaces*nxd*nxd*sizeof(double) , cudaMemcpyDeviceToHost);
+//			       for(int i=0;i<nelt*nfaces*nxd*nxd;i++){
+//			                printf("debug d_w %d %d %d %.30lf \n ",i%(nxd*nxd),(i/nelt)%nfaces,i/(nelt*nfaces),cpu_dw[i]);
+//			        }
+
 
 
 
@@ -369,7 +375,7 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	double *d_ar;
 	double *d_cpr;
 	double *d_jaco_c;
-	double *d_jaco_f;
+double *d_jaco_f;
 	double *d_phl;
 	double *d_fs;
 	double *d_flx;
@@ -408,20 +414,27 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 	int blockSize = glbblockSize2[0], gridSize;
 
-	double *cpu_jgl,*cpu_jgt;
-	cpu_jgl= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
-	cpu_jgt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
-	cudaMemcpy(cpu_jgl,d_jgl,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-	cudaMemcpy(cpu_jgt,d_jgt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-	for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
-		printf("debug jgl first %d %lf %lf \n ",i,cpu_jgl[i],cpu_jgt[i]);
-	}
+//	double *cpu_jgl,*cpu_jgt;
+//	cpu_jgl= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+//	cpu_jgt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+//	cudaMemcpy(cpu_jgl,d_jgl,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+//	cudaMemcpy(cpu_jgt,d_jgt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+//	for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
+//		printf("debug jgl first %d %lf %lf \n ",i,cpu_jgl[i],cpu_jgt[i]);
+//	}
 	if(lxd[0]>lx1[0]){
 		map_faced(d_jgl, d_jgt, d_nx, d_unx, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		//	cudaMemset(d_w, 0.0, ntotd*sizeof(double));
 		map_faced(d_jgl, d_jgt, d_ny, d_uny, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_nz, d_unz, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
+//          printf("start our map_faced rl \n");
+
+ //                                double *cpu_ff;
+//			   cpu_ff= (double*)malloc(5*sizeof(double));
+ //                             cudaMemcpy(cpu_ff, d_fatface+iwm[0]-1+(irho[0]-1)*totpts,5*sizeof(double) , cudaMemcpyDeviceToHost);
+   //                                     printf("debug ff %.30lf %.30lf  %.30lf  %.30lf  %.30lf  \n ",cpu_ff[0],cpu_ff[1],cpu_ff[2],cpu_ff[3],cpu_ff[4]);
 		map_faced(d_jgl, d_jgt, d_rl, d_fatface+iwm[0]-1+(irho[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
+          printf("end our map_faced rl \n");
 		map_faced(d_jgl, d_jgt, d_ul, d_fatface+iwm[0]-1+(iux[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_vl, d_fatface+iwm[0]-1+(iuy[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_wl, d_fatface+iwm[0]-1+(iuz[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
@@ -449,16 +462,16 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 		// for testing only
 
-		double *cpu_nx;
-		cpu_nx= (double*)malloc(ntotd*sizeof(double));
-		cudaMemcpy(cpu_nx,d_nx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+//		double *cpu_nx;
+//		cpu_nx= (double*)malloc(ntotd*sizeof(double));
+//		cudaMemcpy(cpu_nx,d_nx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
 //		for(int i=0;i<ntotd;i++){
 //			printf("nx value %.30lf for i= %d f= %d e= %d  \n ",cpu_nx[i],i,(i/144)%6,i/(144*6));
 //		}
 
-		double *cpu_ny;
-		cpu_ny= (double*)malloc(ntotd*sizeof(double));
-		cudaMemcpy(cpu_ny,d_ny,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+//		double *cpu_ny;
+//		cpu_ny= (double*)malloc(ntotd*sizeof(double));
+//		cudaMemcpy(cpu_ny,d_ny,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
 //		for(int i=0;i<ntotd;i++){
 //			printf("ny value %.30lf for i= %d f= %d e= %d  \n ",cpu_ny[i],i,(i/144)%6,i/(144*6));
 //		}
@@ -484,20 +497,57 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 	}
 
+/*
+	double *cpu_rl;
+        cpu_rl= (double*)malloc(ntotd*sizeof(double));
+        cudaMemcpy(cpu_rl,d_rl,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+        for(int i=0;i<ntotd;i++){
+                printf("rl value %.30lf for i= %d f= %d e= %d  \n ",cpu_rl[i],i,(i/144)%6,i/(144*6));
+        }
+
+        double *cpu_rr;
+        cpu_rr= (double*)malloc(ntotd*sizeof(double));
+        cudaMemcpy(cpu_rr,d_rr,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+        for(int i=0;i<ntotd;i++){
+                printf("rr value %.30lf for i= %d f= %d e= %d  \n ",cpu_rr[i],i,(i/144)%6,i/(144*6));
+        }
+
+        double *cpu_nm;
+        cpu_nm= (double*)malloc(ntotd*sizeof(double));
+        cudaMemcpy(cpu_nm,d_jaco_f,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+        for(int i=0;i<ntotd;i++){
+                printf("nm value %.30lf for i= %d f= %d e= %d  \n ",cpu_nm[i],i,(i/144)%6,i/(144*6));
+        }
+
+        double *cpu_nx;
+        cpu_nx= (double*)malloc(ntotd*sizeof(double));
+        cudaMemcpy(cpu_nx,d_nx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+        for(int i=0;i<ntotd;i++){
+                printf("nx value %.30lf for i= %d f= %d e= %d  \n ",cpu_nx[i],i,(i/144)%6,i/(144*6));
+        }
+
+
+        double *cpu_ul;
+        cpu_ul= (double*)malloc(ntotd*sizeof(double));
+        cudaMemcpy(cpu_ul,d_ul,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+        for(int i=0;i<ntotd;i++){
+                printf("ul value %.30lf for i= %d f= %d e= %d  \n ",cpu_ul[i],i,(i/144)%6,i/(144*6));
+        }
+
+*/
 	gridSize = (int)ceil((float)ntotd/blockSize);
 	Ausm_flux<<<gridSize, blockSize>>>(toteq[0],ntotd, d_nx, d_ny, d_nz, d_jaco_f, d_fs, d_rl, d_ul, d_vl, d_wl, d_pl, d_al, d_tl, d_rr, d_ur, d_vr, d_wr, d_pr, d_ar, d_tr, d_flx, d_cpl, d_cpr,d_phl);
 
 
 	// for testing only
-
+/*
 	double *cpu_flx;
 	cpu_flx= (double*)malloc(ntotd*sizeof(double));
 	cudaMemcpy(cpu_flx,d_flx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
-//	for(int i=0;i<ntotd;i++){
-		//printf("flx value %.30lf for i= %d f= %d e= %d  \n ",cpu_flx[i],i,(i/144)%6,i/(144*6));
-//		printf("flx value   %.16e\n ",cpu_flx[i]);
-//	}
-
+	for(int i=0;i<ntotd;i++){
+		printf("flx value %.30lf for i= %d f= %d e= %d  \n ",cpu_flx[i],i,(i/144)%6,i/(144*6));
+	}
+*/
 
 	if(lxd[0]>lx1[0]){
 		for(int j=0; j<toteq[0];j++){
@@ -592,7 +642,7 @@ __global__ void surface_integral_full_gpu_kernel(int *iface_flux, double *res1, 
 		atomicAdd1(&res1[eq*lxyzlelt+e*lxyz+newi-1],flux[id]);
 
 		//	res1[eq*lxyzlelt+e*lxyz+newi-1]=  res1[eq*lxyzlelt+e*lxyz+newi-1]+flux[id];
-//		                 if(newi<10){
+//		                 if(newi<100){
 //					printf("newi from gpu %d id = %d res1 = %.16e flux = %.16e %d %d\n", newi, id,  res1[eq*lxyzlelt+e*lxyz+newi-1],flux[id],eq,e);
 //				}
 	}

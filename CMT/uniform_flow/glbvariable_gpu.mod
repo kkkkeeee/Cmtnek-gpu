@@ -1,6 +1,6 @@
 V33 :0x34 glbvariable_gpu
 92 /ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000/core/cmt/cmtparticles_gpu.cuf S624 0
-10/30/2018  10:22:22
+11/05/2018  14:26:22
 enduse
 D 62 21 9 1 11 114 0 0 0 0 0
  0 114 11 11 114 114

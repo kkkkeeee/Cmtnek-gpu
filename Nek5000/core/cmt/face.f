@@ -201,6 +201,13 @@ c-----------------------------------------------------------------------
       do ie=1,nel
       do j=1,n
          i=iface(j,ie)
+
+      if(nid.eq.15) then
+      if(i.eq.1.and.ie.eq.1) then
+        write(6,*)  "vols i, ie", i, ie, vols(i,1,1,ie), faces(j,1,ie)
+      endif
+      endif 
+
          vols(i,1,1,ie) = vols(i,1,1,ie)+faces(j,1,ie)
       enddo
       enddo

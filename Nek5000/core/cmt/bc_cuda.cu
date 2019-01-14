@@ -1,5 +1,5 @@
 #include <stdio.h>
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 __global__ void InviscidBC_gpu_kernel1(int *lglel, double *fatface,char *cbc, double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *u,double *phig,double *csound,double *unx,double *uny,double *unz,double molarmass,int iwm,int iwp,int irho,int iux,int iuy,int iuz,int iph,int ipr,int isnd,int ithm,int icpf,int icvf,int iu1,int iu2,int iu3,int iu4,int iu5,int lx1,int lz1,int lxz,int ldim,int lxz2ldim,int nxyz,int lxy,int lxz2ldimlelt,int ntot,int toteq,int e_offset,int p0th,int ifield,int ltot,int icv,int icp,int imu,int ilam,double molmass,int nlel,int npscal,int if3d,int ly1,int outflsub,double pinfty){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
@@ -301,7 +301,7 @@ __global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, do
 
 			}
 
-			printf("inviscid  iu1 %d iu2 %d iu3 %d iu4 %d iu5 %d iph %d ipr %d e %d lxz2ldimlelt %d iface %d lxz2ldim %d rhob %lf phi %lf rhoub %lf rhovb %lf rhowb %lf rhoeb %lf pres %lf l= %d \n",iu1,iu2,iu3,iu4,iu5,iph,ipr,e,lxz2ldimlelt,iface,lxz2ldim,rhob,phi,rhoub,rhovb,rhowb,rhoeb,pres,l);
+//			printf("inviscid  iu1 %d iu2 %d iu3 %d iu4 %d iu5 %d iph %d ipr %d e %d lxz2ldimlelt %d iface %d lxz2ldim %d rhob %lf phi %lf rhoub %lf rhovb %lf rhowb %lf rhoeb %lf pres %lf l= %d \n",iu1,iu2,iu3,iu4,iu5,iph,ipr,e,lxz2ldimlelt,iface,lxz2ldim,rhob,phi,rhoub,rhovb,rhowb,rhoeb,pres,l);
 
 
 			fatfaceiwp[(irho-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l ] = rhob;
