@@ -4,7 +4,8 @@
 #-------------------------------------------------------------------------------
 
 # installation path 
- SOURCE_ROOT="/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000" 
+#SOURCE_ROOT="/ccs/home/adeesha/research/newlatestnek5000/Cmtnek-gpu/Nek5000" 
+SOURCE_ROOT="/ccs/home/kekezhai/GPUCMTnek-012019/Cmtnek-gpu/Nek5000"
 #SOURCE_ROOT="/ccs/home/kekezhai/GPUCMTnek-072018/latestNek5000/Nek5000" 
 
 # Fortran/C compiler

@@ -30,21 +30,6 @@ c     Solve the Euler equations
       nfldpart = ldim*npart
       if(istep.eq.1) then
          call cmt_ics
-!      if(nid.eq.15) then
-!      do i = 1, nelt
-!        do j = 1, toteq
-!           do k = 1, lz1
-!              do m = 1, ly1
-!              do n = 1,lx1
-!              write(6,*) "uarray", n, m, k, j, i, u(n,m,k,j,i)
-!              enddo
-!              enddo
-!           enddo
-!        enddo
-!      enddo
-!      endif
-
-
          if (ifrestart) then
             time_cmt=time
          else
@@ -61,17 +46,15 @@ c     Solve the Euler equations
          call entropy_viscosity      ! for high diffno
          call compute_transport_props! at t=0
 
-         if(nid.eq.15) then
+c        if(nid.eq.15) then
 !            call printVdiff("before")
-         endif
+c        endif
 
          if(nid.eq.15) then
-          !   print *,"cmt_nek_advance before to init_gpu",nid
-!      do i=1,100
-!          print *, 'vtrans22,vx,vy,vz,pr,t,csound,phig,vtrans,vdiff', 
-!     > i,vtrans(i),vx(i),vy(i),vz(i),pr(i),t(i),csound(i),phig(i), 
-!     > vtrans(i),vdiff(i)
-!      enddo
+            !call printMeshh("before")
+            !call printXm1("before")
+            !call printYm1("before")
+            !call printZm1("before")
             call usr_particles_init_gpu()
          endif
 
@@ -85,13 +68,6 @@ c     Solve the Euler equations
              !print *,"cmt_nek_advance before to rhs_and_dt_gpu",nid
              if (stage.eq.1) call gpu_copy()
              
-!              print *,"$$$ drive1_cmt.f cmt_nek_advance check gpu", nid
-              !do i=1,10
-              !  print *, 'res3', i, d_res3(i)
-              !enddo
-              !print *,"$$$ drive1_cmt.f cmt_nek_advance check DONE", nid
-
-
              call compute_rhs_and_dt_gpu
          else
               if (stage.eq.1) call copy(res3(1,1,1,1,1),U(1,1,1,1,1),n)
@@ -117,18 +93,11 @@ c compute_rhs_dt for the 5 conserved variables
 !        enddo
 !         print *,"cmt_nek_advance after usr_particles_solver",nid
          if(nid.eq.15) then
-!           call printBm1("before")
-!           call printRes1("1st")
-!           call printRes3("1st")
-!           write(6,*) "debug tcoef:", tcoef(1,1),tcoef(1,2)
-!     $,tcoef(1,3),tcoef(2,1),tcoef(2,2),tcoef(2,3)
-!     $,tcoef(3,1),tcoef(3,2), tcoef(3,3)  
-       
-        call update_u_gpu
- 
-         
-
-
+c           write(6,*) "debug tcoef:", tcoef(1,1),tcoef(1,2)
+c     $,tcoef(1,3),tcoef(2,1),tcoef(2,2),tcoef(2,3)
+c     $,tcoef(3,1),tcoef(3,2), tcoef(3,3)  
+            call update_u_gpu
+             stop
          else 
          do e=1,nelt
             do eq=1,toteq

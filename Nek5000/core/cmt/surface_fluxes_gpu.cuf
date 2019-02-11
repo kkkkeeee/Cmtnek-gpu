@@ -32,22 +32,25 @@
 
 !      print *,"surface_fluxes.cuf fluxes_full_field_gpu 1 values iwm,iwp",iwm,iwp
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
       !following code is for testing only. delete later.
 !      tocpucopy_gas(53)=1
 !      tocpucopy_gas(58)=1
-!      tocpucopy_gas(56)=1
+      tocpucopy_gas(56)=1 !vdiff
       tocpucopy_gas(58)=1
       tocpucopy_gas(19)=1
       call copytocpu_gpu()
 !      call printPhig("before")
 !      call printCsound("before1")
-      
-!      call printVdiff("before")
+      call printVdiff("beforeFluxFull")
 
 
 !following code is for testing only. delete later.
 !      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
 !      call printFatface("beforefull")
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
        
 
@@ -60,30 +63,26 @@
 
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
       !following code is for testing only. delete later.
- 
-
-
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu before face_state_commo_gpu", nid
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu values lx1,lz1,ldim,nelt,nqq,iwp,iwm,nfq,nstate",lx1,lz1,ldim,nelt,nqq, iwp,iwm,nfq,nstate
-
-
-!following code is for testing only. delete later.
-!      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!      call printFatface("beforeface")
+      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!     call printFatface("afterFillq")
+      call printFatface("afterFaceu")
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
       call face_state_commo_gpu(iwm,iwp,fatface(iwm),fatface(iwp),nfq,nstate&
                          ,dg_hndl,fatface)
       
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after face_state_commo_gpu", nid,ly1
-   
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
-
-!following code is for testing only. delete later.
-!      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!      call printFatface("beforeinviscidbc")
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+       !following code is for testing only. delete later.
+       istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+       call printFatface("afterStateCommo")
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
       call inviscidbc_gpu_wrapper(glbblockSize2,d_lglel,d_flux,d_cbc,d_xm1,d_ym1,d_zm1,&
@@ -93,29 +92,29 @@
        imu,ilam,molmass,npscal,if3dgpu,outflsub,pinfty,ly1)
 
 
-!following code is for testing only. delete later.
-!      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!      call printFatface("afterinviscidbc")
-
-
-!      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidBC_gpu", nid
-  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+       !following code is for testing only. delete later.
+       istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+       call printFatface("afterInviscidBC")
+       !call printCbc("afterInviscidBC") !print cpu part since gpu is different one
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
 
 !    DO NOT COMMENT get_int_ptr because ip will be not correct
       call get_int_ptr(ip,lx1,lxd)    
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
 !      tocpucopy_gas(67)=1
 !      tocpucopy_gas(68)=1
 !      tocpucopy_gas(38)=1
 !      tocpucopy_gas(18)=1
 !      tocpucopy_gas(36)=1
 !      call copytocpu_gpu()
-
-
 !       call printUnx("before")
 !       call printUny("before")
- 
 !      print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
-
 !      do i=1,lx1*lz1
 !           print *, 'wghtc ', i, wghtc(i)
 !      enddo
@@ -128,11 +127,12 @@
 !                write(6,*) " inint debug jgl first", i,jgl(i), jgt(i)
 !       enddo
 
-
 !        call get_int_ptr (i,lx1,lxd)
 !          do i=1,lxd*lxd*lxd
 !            print *, 'jgl first ',  i,jgl(i),jgt(i)
 !           enddo
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
       print *,'start our inviscd', istep, stage
@@ -140,12 +140,24 @@
  
       print *,'end our inviscd', istep, stage
 
-  !following code is for testing only. delete later.
-!      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!      call printFatface("afterinviscidflux")
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+       !following code is for testing only. delete later.
+       istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+       !call printFatface("afterInviscidFlux")
+       !call printFlx('')
+       call printNx('')
+       !tocpucopy_gas(18)=1
+       !tocpucopy_gas(36)=1
+       !tocpucopy_gas(37)=1
+       !call copytocpu_gpu()
+       !call printArea('afterInviscidFlux')
+       !call printWghtc('afterInviscidFlux')
 
 !      print *,"surface_fluxes.cuf fluxes_full_field_gpu after InviscidFlux_gpu", nid
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 

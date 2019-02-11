@@ -310,7 +310,7 @@ __global__ void wavevisc_gpu_kernel(double *t,double *csound, double *vx, double
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
-		wavespeed[id]= csound [id] +sqrtf(vx[id]*vx[id]+vy[id]*vy[id]+vz[id]*vz[id]  )	;
+		wavespeed[id]= csound [id] +sqrt(vx[id]*vx[id]+vy[id]*vy[id]+vz[id]*vz[id]  )	;
 		// find max of wavespeed using reduction
 		__syncthreads();
 		unsigned int i = lxyz/2;
@@ -319,15 +319,22 @@ __global__ void wavevisc_gpu_kernel(double *t,double *csound, double *vx, double
 		int startofcurrentelement = e*lxyz;
 		while(i != 0){
 			if(id-startofcurrentelement <= i){
-				wavespeed[id] = fmaxf(fabs(wavespeed[id]),fabs(wavespeed[startofcurrentelement + (id+i)%len]));
+				wavespeed[id] = fmax(fabs(wavespeed[id]),fabs(wavespeed[startofcurrentelement + (id+i)%len]));
 			}
 
 			__syncthreads();
+                        //added by Kk 02/05/2019 since the latter one may not correct when len is odd
+                        len = (len+1)/2;
+                        i = len/2;
+                        /* commented by Kk 02/05/2019
                         len = i;
-			i /= 2;
+			i /= 2;*/
 		}
 
 		double maxeig = wavespeed[e*lxyz];
+                /*if(id%lxyz == 0){
+                   printf("maxeig in wavevisc %d %.15lf %.15lf \n", id/lxyz, maxeig, c_max); 
+                }*/
 		// find max of vtrans using reduction. But never used? check with Dr.Tania
 		//i = lxyz/2;
 		//int e= id/(lx1*ly1*lz1);
@@ -420,6 +427,9 @@ __global__ void max_to_trilin_gpu_kernel(double *t,int ntot,int lxyz, int lx1, i
 		double deltaz=0.0;
 		if (if3d){ deltaz=rdz*(zm1[id]-zm1[e*lxyz]);}
 		t[2*ltot+id] =p000+c1*deltax+c2*deltay+c3*deltaz+ c4*deltax*deltay+c5*deltay*deltaz+ c6*deltaz*deltax+c7*deltay*deltaz*deltax;
+                /*if(id ==ntot-1){
+                  printf("debug max_to_trilin: %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %.30lf, %d\n", p000, c1, c2, c3, c4, c5, c6, c7, rdx, rdy, deltax, deltay, deltaz, t[2*ltot+id], if3d);
+                }*/
 	}
 
 }

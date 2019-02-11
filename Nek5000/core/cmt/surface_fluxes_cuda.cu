@@ -200,7 +200,7 @@ __global__ void Ausm_flux(int neq, int ntotd, double *nx, double *ny, double *nz
 	//ntotd = nel * nfaces * nxzd
 	if(i<ntotd){
 		cpl[i]=cpl[i]/rl[i];//invcol2
-		cpr[i]=cpr[i]/rl[i];//invcol2
+		cpr[i]=cpr[i]/rr[i];//invcol2 corrected by Kk 01/25/19
 
 		fs[i] = 0;// it is 0 in cmtbone but can be changed
 		double af,mf,mfa,mfm,mfp,ml,mla,mlp,mr,mra,mrm,pf,ql,qr,wtl,wtr,Hl,Hr;
@@ -251,7 +251,17 @@ __global__ void Ausm_flux(int neq, int ntotd, double *nx, double *ny, double *nz
 		flx[3*ntotd+i] = ((af*(mfp*rl[i]*wl[i] + mfm*rr[i]*wr[i])+pf*nz[i]) * nm[i])*phl[i];
 		flx[4*ntotd+i] = ((af*(mfp*rl[i]*Hl + mfm*rr[i]*Hr)+pf*fs[i]) * nm[i])*phl[i];
 
+                //just for debug
+                /*flx[i] = rl[i];
+                flx[1*ntotd+i] = rr[i];
+                flx[2*ntotd+i] = ul[i];
+                flx[3*ntotd+i] = ur[i];
+                flx[4*ntotd+i] = nx[i];*/
 
+                if(i == 1){
+                   printf("check NAN af: %.30lf, mfp: %.30lf, rl[i]:  %.30lf, rr[i]: %.30lf, nm[i]: %.30lf, phl[i]: %.30lf, ul[i]: %.30lf, ur[i]: %.30lf, pf: %.30lf, nx[i]: %.30lf, vl[i]: %.30lf, vr[i]: %.30lf, ny[i]: %.30lf, wl[i]: %.30lf,wr[i]: %.30lf, nz[i]: %.30lf, Hl: %.30lf, Hr: %.30lf, fs[i]: %.30lf\n", af, mfp, rl[i], rr[i], nm[i], phl[i], ul[i], ur[i], pf, nx[i],  vl[i], vr[i],  ny[i], wl[i], wr[i],  nz[i], Hl, Hr, fs[i]); 
+                  printf("check detal mf %.30lf, mfa %.30lf, mlp %.30lf, mrm %.30lf, mr %.30lf, mra %.30lf, ml %.30lf, mla %.30lf, ql %.30lf, af %.30lf, qr %.30lf, al %.30lf, ar %.30lf\n", mf, mfa, mlp, mrm, mr, mra, ml, mla, ql, af, qr, al, ar);
+                }
 
 
 	}
@@ -414,27 +424,29 @@ double *d_jaco_f;
 
 	int blockSize = glbblockSize2[0], gridSize;
 
-//	double *cpu_jgl,*cpu_jgt;
-//	cpu_jgl= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
-//	cpu_jgt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
-//	cudaMemcpy(cpu_jgl,d_jgl,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-//	cudaMemcpy(cpu_jgt,d_jgt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
-//	for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
-//		printf("debug jgl first %d %lf %lf \n ",i,cpu_jgl[i],cpu_jgt[i]);
-//	}
+/* 	double *cpu_jgl,*cpu_jgt;
+	cpu_jgl= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+	cpu_jgt= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
+	cudaMemcpy(cpu_jgl,d_jgl,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+	cudaMemcpy(cpu_jgt,d_jgt,lxd[0]*lxd[0]*lxd[0]*sizeof(double) , cudaMemcpyDeviceToHost);
+	for(int i=0;i<lxd[0]*lxd[0]*lxd[0];i++){
+		printf("debug jgl first %d %lf %lf \n ",i,cpu_jgl[i],cpu_jgt[i]);
+	}
+          printf("start our map_faced rl \n");
+
+                                 double *cpu_ff;
+			   cpu_ff= (double*)malloc(5*sizeof(double));
+                              cudaMemcpy(cpu_ff, d_fatface+iwm[0]-1+(irho[0]-1)*totpts,5*sizeof(double) , cudaMemcpyDeviceToHost);
+                                        printf("debug ff %.30lf %.30lf  %.30lf  %.30lf  %.30lf  \n ",cpu_ff[0],cpu_ff[1],cpu_ff[2],cpu_ff[3],cpu_ff[4]);
+			cudaMemset(d_w, 0.0, ntotd*sizeof(double));
+          printf("end our map_faced rl \n");
+*/
 	if(lxd[0]>lx1[0]){
 		map_faced(d_jgl, d_jgt, d_nx, d_unx, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
-		//	cudaMemset(d_w, 0.0, ntotd*sizeof(double));
 		map_faced(d_jgl, d_jgt, d_ny, d_uny, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_nz, d_unz, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
-//          printf("start our map_faced rl \n");
 
- //                                double *cpu_ff;
-//			   cpu_ff= (double*)malloc(5*sizeof(double));
- //                             cudaMemcpy(cpu_ff, d_fatface+iwm[0]-1+(irho[0]-1)*totpts,5*sizeof(double) , cudaMemcpyDeviceToHost);
-   //                                     printf("debug ff %.30lf %.30lf  %.30lf  %.30lf  %.30lf  \n ",cpu_ff[0],cpu_ff[1],cpu_ff[2],cpu_ff[3],cpu_ff[4]);
 		map_faced(d_jgl, d_jgt, d_rl, d_fatface+iwm[0]-1+(irho[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
-          printf("end our map_faced rl \n");
 		map_faced(d_jgl, d_jgt, d_ul, d_fatface+iwm[0]-1+(iux[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_vl, d_fatface+iwm[0]-1+(iuy[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_wl, d_fatface+iwm[0]-1+(iuz[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
@@ -451,6 +463,7 @@ double *d_jaco_f;
 		map_faced(d_jgl, d_jgt, d_tr, d_fatface+iwp[0]-1+(ithm[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_ar, d_fatface+iwp[0]-1+(isnd[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 		map_faced(d_jgl, d_jgt, d_cpr, d_fatface+iwp[0]-1+(icpf[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
+
 		map_faced(d_jgl, d_jgt, d_phl, d_fatface+iwp[0]-1+(iph[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
 
 #ifdef DEBUGPRINT
@@ -460,21 +473,22 @@ double *d_jaco_f;
 
 #endif
 
-		// for testing only
+/*		// for testing only
 
-//		double *cpu_nx;
-//		cpu_nx= (double*)malloc(ntotd*sizeof(double));
-//		cudaMemcpy(cpu_nx,d_nx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
-//		for(int i=0;i<ntotd;i++){
-//			printf("nx value %.30lf for i= %d f= %d e= %d  \n ",cpu_nx[i],i,(i/144)%6,i/(144*6));
-//		}
+		double *cpu_nx;
+		cpu_nx= (double*)malloc(ntotd*sizeof(double));
+		cudaMemcpy(cpu_nx,d_nx,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+		for(int i=0;i<ntotd;i++){
+			printf("nx value %.30lf for i= %d f= %d e= %d  \n ",cpu_nx[i],i,(i/144)%6,i/(144*6));
+		}
 
-//		double *cpu_ny;
-//		cpu_ny= (double*)malloc(ntotd*sizeof(double));
-//		cudaMemcpy(cpu_ny,d_ny,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
-//		for(int i=0;i<ntotd;i++){
-//			printf("ny value %.30lf for i= %d f= %d e= %d  \n ",cpu_ny[i],i,(i/144)%6,i/(144*6));
-//		}
+		double *cpu_ny;
+		cpu_ny= (double*)malloc(ntotd*sizeof(double));
+		cudaMemcpy(cpu_ny,d_ny,ntotd*sizeof(double) , cudaMemcpyDeviceToHost);
+		for(int i=0;i<ntotd;i++){
+			printf("ny value %.30lf for i= %d f= %d e= %d  \n ",cpu_ny[i],i,(i/144)%6,i/(144*6));
+		}
+*/
 		gridSize = (int)ceil((float)ntot/blockSize);
 		inviscidFlux_gpu_kernel1<<<gridSize, blockSize>>>(d_jaco_c,d_area,d_wghtc,ntot,lx1[0],lz1[0]);
 		map_faced(d_jgl, d_jgt, d_jaco_f, d_jaco_c, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0]);
@@ -535,6 +549,7 @@ double *d_jaco_f;
         }
 
 */
+        cudaMemset(&d_fs, 0.0, ntotd*sizeof(double)); //added by Kk 01/25/19
 	gridSize = (int)ceil((float)ntotd/blockSize);
 	Ausm_flux<<<gridSize, blockSize>>>(toteq[0],ntotd, d_nx, d_ny, d_nz, d_jaco_f, d_fs, d_rl, d_ul, d_vl, d_wl, d_pl, d_al, d_tl, d_rr, d_ur, d_vr, d_wr, d_pr, d_ar, d_tr, d_flx, d_cpl, d_cpr,d_phl);
 
@@ -551,9 +566,13 @@ double *d_jaco_f;
 
 	if(lxd[0]>lx1[0]){
 		for(int j=0; j<toteq[0];j++){
-			gridSize = (int)ceil((float)ntotd/blockSize);
-			map_faced(d_jgl, d_jgt,d_fatface+iflx[0]-1+j*totpts, d_flx+j*ntotd, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 1,ip[0]);
+			//gridSize = (int)ceil((float)ntotd/blockSize);
+			//map_faced(d_jgl, d_jgt,d_fatface+iflx[0]-1+j*totpts, d_flx+j*ntotd, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 1,ip[0]);
+
 		}
+                 //this following tow line is just for debug for flx and nx
+                //gpu_double_copy_gpu_wrapper(glbblockSize2[0],d_fatface+iflx[0]-1,0,d_flx,0,ntotd*toteq[0]);
+                gpu_double_copy_gpu_wrapper(glbblockSize2[0],d_fatface+iflx[0]-1,0,d_nx,0,ntotd);
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();

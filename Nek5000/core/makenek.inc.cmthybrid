@@ -15,6 +15,7 @@ if [ "$PPLIST" == "?" ]; then
   echo "  EXTBAR      add underscore to exit call (for BGQ)"
   echo "  NEKNEK      activate overlapping mesh solver (experimental)"
   echo "  CMTNEK      activate DG compressible-flow solver (experimental)"
+  echo "  DEBUG      output the debug statement"
   exit 1
 fi
 
@@ -219,6 +220,9 @@ do
    if [ "$i" == "CMTNEK" ]; then
      IFCMT=true
    fi
+   if [ "$i" == "DEBUG" ]; then
+     DEBUG=1
+   fi
 done
 export IFCMT
 
@@ -266,6 +270,7 @@ sed -e "s:^FC[ ]*=.*:FC\:=$F77:" \
 -e "s/^IFAMG[ ]*=.*/IFAMG:=$IFAMG/" \
 -e "s/^IFMPI[ ]*=.*/IFMPI:=$IFMPI/" \
 -e "s/^IFCMT[ ]*=.*/IFCMT:=$IFCMT/" \
+-e "s/^DEBUG[ ]*=.*/DEBUG:=$DEBUG/" \
 -e "s/^IFNEKNEK[ ]*=.*/IFNEKNEK:=$IFNEKNEK/" \
 -e "s:^USR[ ]*=.*:USR\:=$USR:" \
 -e "s:^USR_LFLAGS[ ]*=.*:USR_LFLAGS\:=$USR_LFLAGS:" \

@@ -57,7 +57,8 @@ __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, doubl
 		}
 		double asnd = csound [e*nxyz+k*lxy+j*lx1+newi];
 		double mu = vdiff[(imu-1)*nlel+e*nxyz+k*lxy+j*lx1+newi];
-		udiff = vdiff[(imu-1)*nlel+e*nxyz+k*lxy+j*lx1+newi];// this overrides the udiff in nekasgn (line 63 in this function). Need to check withDr.Tania
+		//udiff = vdiff[(imu-1)*nlel+e*nxyz+k*lxy+j*lx1+newi];// this overrides the udiff in nekasgn (line 63 in this function). Need to check withDr.Tania
+		udiff = vdiff[(iknd-1)*nlel+e*nxyz+k*lxy+j*lx1+newi];//correct by Kk 02/01/2019
 		double lambda = vdiff[(ilam-1)*nlel+e*nxyz+k*lxy+j*lx1+newi];
 
 		// uservp
@@ -70,7 +71,7 @@ __global__ void compute_transport_props_gpu_kernel(double *vx, double *vy, doubl
 		mu=0.5*mu ;
 		lambda=0.0;
 		udiff=0.0;  // uservp makes these to zero. vdiff get zeros. Check with Dr. Tania. adeesha
-		utrans=0.0;	
+		utrans=0.0; 	
 
 		vdiff[(imu-1)*nlel +e*nxyz+k*lxy+j*lx1+newi]=mu; // vidff [  + id] is same as this. check later . adeesha
 		vdiff[(ilam-1)*nlel +e*nxyz+k*lxy+j*lx1+newi]=lambda;

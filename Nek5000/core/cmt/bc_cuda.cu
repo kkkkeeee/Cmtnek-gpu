@@ -1,6 +1,6 @@
 #include <stdio.h>
-//#define DEBUGPRINT 0
-__global__ void InviscidBC_gpu_kernel1(int *lglel, double *fatface,char *cbc, double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *u,double *phig,double *csound,double *unx,double *uny,double *unz,double molarmass,int iwm,int iwp,int irho,int iux,int iuy,int iuz,int iph,int ipr,int isnd,int ithm,int icpf,int icvf,int iu1,int iu2,int iu3,int iu4,int iu5,int lx1,int lz1,int lxz,int ldim,int lxz2ldim,int nxyz,int lxy,int lxz2ldimlelt,int ntot,int toteq,int e_offset,int p0th,int ifield,int ltot,int icv,int icp,int imu,int ilam,double molmass,int nlel,int npscal,int if3d,int ly1,int outflsub,double pinfty){
+#define DEBUGPRINT 0
+__global__ void InviscidBC_gpu_kernel1(int *lglel, double *fatface,char *cbc, double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *u,double *phig,double *csound,double *unx,double *uny,double *unz,double molarmass,int iwm,int iwp,int irho,int iux,int iuy,int iuz,int iph,int ipr,int isnd,int ithm,int icpf,int icvf,int iu1,int iu2,int iu3,int iu4,int iu5,int lx1,int lz1,int lxz,int ldim,int lxz2ldim,int nxyz,int lxy,int lxz2ldimlelt,int ntot,int toteq,int e_offset,int p0th,int ifield,int ltot,int icv,int icp,int imu,int ilam,double molmass,int nlel,int npscal,int if3d,int ly1,int outflsub,double pinfty, int lelt){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
@@ -9,9 +9,9 @@ __global__ void InviscidBC_gpu_kernel1(int *lglel, double *fatface,char *cbc, do
 		int iface= ((id/lxz)%(2*ldim));
 		int e = id/lxz2ldim;
 
-		char cb1 = cbc[e*18+iface];
-		char cb2 = cbc[e*18+iface+1];
-		char cb3 = cbc[e*18+iface+2];
+		char cb1 = cbc[ifield*lelt*18+e*18+iface*3]; //corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
+		char cb2 = cbc[ifield*lelt*18+e*18+iface*3+1];
+		char cb3 = cbc[ifield*lelt*18+e*18+iface*3+2];
 		if(cb1 =='v'|| cb1=='V'){
 			int ieg=lglel[e];
 			int iy,iz,ix,l;
@@ -152,7 +152,7 @@ __global__ void InviscidBC_gpu_kernel1(int *lglel, double *fatface,char *cbc, do
 }
 
 
-__global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *u,double *phig,double *csound,double *unx,double *uny,double *unz,double molarmass,int iwm,int iwp,int irho,int iux,int iuy,int iuz,int iph,int ipr,int isnd,int ithm,int icpf,int icvf,int iu1,int iu2,int iu3,int iu4,int iu5,int lx1,int lz1,int lxz,int ldim,int lxz2ldim,int nxyz,int lxy,int lxz2ldimlelt,int ntot,int toteq,int e_offset,int p0th,int ifield,int ltot,int icv,int icp,int imu,int ilam,double molmass,int nlel,int npscal,int if3d,int ly1,int outflsub,double pinfty,double *fatfaceiwp){
+__global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *u,double *phig,double *csound,double *unx,double *uny,double *unz,double molarmass,int iwm,int iwp,int irho,int iux,int iuy,int iuz,int iph,int ipr,int isnd,int ithm,int icpf,int icvf,int iu1,int iu2,int iu3,int iu4,int iu5,int lx1,int lz1,int lxz,int ldim,int lxz2ldim,int nxyz,int lxy,int lxz2ldimlelt,int ntot,int toteq,int e_offset,int p0th,int ifield,int ltot,int icv,int icp,int imu,int ilam,double molmass,int nlel,int npscal,int if3d,int ly1,int outflsub,double pinfty,double *fatfaceiwp, int lelt){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
@@ -161,15 +161,16 @@ __global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, do
 		int iface= ((id/lxz)%(2*ldim));
 		int e = id/lxz2ldim;
 
-		char cb1 = cbc[e*18+iface];
-		char cb2 = cbc[e*18+iface+1];
-		char cb3 = cbc[e*18+iface+2];
+		char cb1 = cbc[ifield*lelt*18+e*18+iface*3];//corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
+		char cb2 = cbc[ifield*lelt*18+e*18+iface*3+1];
+		char cb3 = cbc[ifield*lelt*18+e*18+iface*3+2];
 
-		//if(id==0){
-		//	for(int i=0;i<5000;i++){
-		//		printf("cbc values cbc[%d]=%c \n",i,cbc[i]); 
-		//	}
-		//}
+		/*if(id==10){
+			for(int i=0;i<576;i++){
+				printf("cbc values cbc[%d]=%c \n",i,cbc[i+ifield*lelt*18]); 
+			}
+                        printf("debugggggg iface id %d %d\n", iface, id);
+		}*/
 		//		printf("cb1 =%c \n",cb1);
 		if(cb1 =='O'){
 			int ieg=lglel[e];
@@ -331,35 +332,38 @@ __global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, do
 
 
 
-__global__ void InviscidBC_gpu_kernel3(int *lglel, double *fatface,char *cbc, double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *u,double *phig,double *csound,double *unx,double *uny,double *unz,double molarmass,int iwm,int iwp,int irho,int iux,int iuy,int iuz,int iph,int ipr,int isnd,int ithm,int icpf,int icvf,int iu1,int iu2,int iu3,int iu4,int iu5,int lx1,int lz1,int lxz,int ldim,int lxz2ldim,int nxyz,int lxy,int lxz2ldimlelt,int ntot,int toteq,int e_offset,int p0th,int ifield,int ltot,int icv,int icp,int imu,int ilam,double molmass,int nlel,int npscal,int if3d,int ly1,int outflsub,double pinfty){
+__global__ void InviscidBC_gpu_kernel3(int *lglel, double *fatface,char *cbc, double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *u,double *phig,double *csound,double *unx,double *uny,double *unz,double molarmass,int iwm,int iwp,int irho,int iux,int iuy,int iuz,int iph,int ipr,int isnd,int ithm,int icpf,int icvf,int iu1,int iu2,int iu3,int iu4,int iu5,int lx1,int lz1,int lxz,int ldim,int lxz2ldim,int nxyz,int lxy,int lxz2ldimlelt,int ntot,int toteq,int e_offset,int p0th,int ifield,int ltot,int icv,int icp,int imu,int ilam,double molmass,int nlel,int npscal,int if3d,int ly1,int outflsub,double pinfty, int lelt){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
 		int i1 = id % lx1;
+		int l = id % lxz; //added by Kk 02/07/19
 		int i2 = (id/lx1)%lz1;
 		int iface= ((id/lxz)%(2*ldim));
 		int e = id/lxz2ldim;
 
-		char cb1 = cbc[e*18+iface];
-		char cb2 = cbc[e*18+iface+1];
-		char cb3 = cbc[e*18+iface+2];
+		char cb1 = cbc[ifield*lelt*18+e*18+iface*3];//corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
+		char cb2 = cbc[ifield*lelt*18+e*18+iface*3+1];
+		char cb3 = cbc[ifield*lelt*18+e*18+iface*3+2];
 
 
 		if(cb1 =='W'|| cb1=='I' || (cb1=='S' && cb2=='Y' && cb3=='M')){
 			int ieg=lglel[e];
 
-			int iy=0;
+			/* following 4 line is commented out by Kk 02/07/2019 since subroutine facind is not used in CPU part
+                        int iy=0;
 			int iz=i2;
 			int ix=i1;
 
-			int l=lx1*iz+ix; // this is the parallelized version of l = l+1 in every thread. Check with Dr.Tania . adeesha
+			int l=lx1*iz+ix;*/ // this is the parallelized version of l = l+1 in every thread. Check with Dr.Tania . adeesha
 
 			// ************************ e*lxz2ldim+(f-1)*lx1*lz1+l is same as id. change this later. ******
 
 
-			double nx = unx[e*6*lxz+(iface)*lxz+l];
-			double ny = uny[e*6*lxz+(iface)*lxz+l];
-			double nz = unz[e*6*lxz+(iface)*lxz+l];
+                           //printf("debug inviscidBc: lxz2ldimlelt %d, lxz2ldim %d, iface %d, l %d, fatface %.30lf , id %d, e %d, index1 %d, index2 %d\n", lxz2ldimlelt, lxz2ldim, iface, l, fatface[(iwm-1)+(irho-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l], id, e, (iwm-1)+(irho-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l, (irho-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l);
+			double nx = unx[e*lxz2ldim+(iface)*lxz+l];
+			double ny = uny[e*lxz2ldim+(iface)*lxz+l];
+			double nz = unz[e*lxz2ldim+(iface)*lxz+l];
 			double rl = fatface[(iwm-1)+(irho-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l];
 			double rr=rl;
 			double ul = fatface[(iwm-1)+(iux-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+l];
@@ -416,21 +420,24 @@ extern "C" void inviscidbc_gpu_wrapper_(int *glbblockSize2,int *d_lglel,double *
 	int blockSize = 256, gridSize;
 	gridSize = (int)ceil((float)ntot/blockSize);
 
-	InviscidBC_gpu_kernel1<<<gridSize, blockSize>>>(d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_csound,d_unx,d_uny,d_unz,molarmass[0],iwm[0],iwp[0],irho[0],iux[0],iuy[0],iuz[0],iph[0],ipr[0],isnd[0],ithm[0],icpf[0],icvf[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],lx1[0],lz1[0],lxz,ldim[0],lxz2ldim,nxyz,lxy,lxz2ldimlelt,ntot,toteq[0],e_offset,p0th[0],ifield[0],ltot, icv[0],icp[0],imu[0],ilam[0],molmass[0],nlel,npscal[0],if3d[0], ly1[0],outflsub[0], pinfty[0]);
+        //inflow
+	InviscidBC_gpu_kernel1<<<gridSize, blockSize>>>(d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_csound,d_unx,d_uny,d_unz,molarmass[0],iwm[0],iwp[0],irho[0],iux[0],iuy[0],iuz[0],iph[0],ipr[0],isnd[0],ithm[0],icpf[0],icvf[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],lx1[0],lz1[0],lxz,ldim[0],lxz2ldim,nxyz,lxy,lxz2ldimlelt,ntot,toteq[0],e_offset,p0th[0],ifield[0],ltot, icv[0],icp[0],imu[0],ilam[0],molmass[0],nlel,npscal[0],if3d[0], ly1[0],outflsub[0], pinfty[0], lelt[0]);
 #ifdef DEBUGPRINT	
 	cudaDeviceSynchronize();
 	code1 = cudaPeekAtLastError();
 	printf("CUDA:inviscidbc_gpu_wrapper after 1 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-	InviscidBC_gpu_kernel2<<<gridSize, blockSize>>>(d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_csound,d_unx,d_uny,d_unz,molarmass[0],iwm[0],iwp[0],irho[0],iux[0],iuy[0],iuz[0],iph[0],ipr[0],isnd[0],ithm[0],icpf[0],icvf[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],lx1[0],lz1[0],lxz,ldim[0],lxz2ldim,nxyz,lxy,lxz2ldimlelt,ntot,toteq[0],e_offset,p0th[0],ifield[0],ltot, icv[0],icp[0],imu[0],ilam[0],molmass[0],nlel,npscal[0],if3d[0], ly1[0],outflsub[0], pinfty[0],d_fatface+iwp[0]-1);
+        //outflow
+	InviscidBC_gpu_kernel2<<<gridSize, blockSize>>>(d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_csound,d_unx,d_uny,d_unz,molarmass[0],iwm[0],iwp[0],irho[0],iux[0],iuy[0],iuz[0],iph[0],ipr[0],isnd[0],ithm[0],icpf[0],icvf[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],lx1[0],lz1[0],lxz,ldim[0],lxz2ldim,nxyz,lxy,lxz2ldimlelt,ntot,toteq[0],e_offset,p0th[0],ifield[0],ltot, icv[0],icp[0],imu[0],ilam[0],molmass[0],nlel,npscal[0],if3d[0], ly1[0],outflsub[0], pinfty[0],d_fatface+iwp[0]-1, lelt[0]);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	code1 = cudaPeekAtLastError();
 	printf("CUDA:inviscidbc_gpu_wrapper after 2 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-	InviscidBC_gpu_kernel3<<<gridSize, blockSize>>>(d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_csound,d_unx,d_uny,d_unz,molarmass[0],iwm[0],iwp[0],irho[0],iux[0],iuy[0],iuz[0],iph[0],ipr[0],isnd[0],ithm[0],icpf[0],icvf[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],lx1[0],lz1[0],lxz,ldim[0],lxz2ldim,nxyz,lxy,lxz2ldimlelt,ntot,toteq[0],e_offset,p0th[0],ifield[0],ltot, icv[0],icp[0],imu[0],ilam[0],molmass[0],nlel,npscal[0],if3d[0], ly1[0],outflsub[0], pinfty[0]);
+        //wallbc_inviscid
+	InviscidBC_gpu_kernel3<<<gridSize, blockSize>>>(d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_csound,d_unx,d_uny,d_unz,molarmass[0],iwm[0],iwp[0],irho[0],iux[0],iuy[0],iuz[0],iph[0],ipr[0],isnd[0],ithm[0],icpf[0],icvf[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],lx1[0],lz1[0],lxz,ldim[0],lxz2ldim,nxyz,lxy,lxz2ldimlelt,ntot,toteq[0],e_offset,p0th[0],ifield[0],ltot, icv[0],icp[0],imu[0],ilam[0],molmass[0],nlel,npscal[0],if3d[0], ly1[0],outflsub[0], pinfty[0], lelt[0]);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code2 = cudaPeekAtLastError();

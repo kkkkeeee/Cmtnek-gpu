@@ -51,16 +51,6 @@
 !      call printRes2("before")
 
 
-      !following code is for testing only. delete later.
-      tocpucopy_gas(56)=1
- !     call copytocpu_gpu()
- !     print *,"$$$ cmtparu.cuf compute_rhs_and_dt_gpu mesh_h_gpu check", nid
- !     print *, 'imu,ilam,iknd,inus',imu,ilam,iknd,inus
- !     do i=1,100
- !          print *, 'vdiff imu,ilam,iknd,inus',i, vdiff(i,1,1,1,imu),&
- !          vdiff(i,1,1,1,ilam),vdiff(i,1,1,1,iknd),vdiff(i,1,1,1,inus)           
- !     enddo
-
       return
       end
 
