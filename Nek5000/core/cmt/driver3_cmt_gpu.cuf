@@ -90,6 +90,15 @@
       ltot = nxyz*lelt
       call double_copy_gpu_wrapper(glbblockSize2,d_t,ltot,d_vtrans,(irho-1)*ltot,ntot)
 
+      !added by Kk 03/21
+      !copy u & tlag back to cpu for later out_fld_nek & prepost (ifoutfld,'his') output 
+      tocpucopy_gas(2)=1 !u
+      tocpucopy_gas(44)=1 !tlag
+      tocpucopy_gas(10)=1 !vx
+      tocpucopy_gas(11)=1 !vy
+      tocpucopy_gas(45)=1 !pr
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
       return
       end
 
