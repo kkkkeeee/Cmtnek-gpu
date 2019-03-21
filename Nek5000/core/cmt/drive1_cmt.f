@@ -97,7 +97,7 @@ c           write(6,*) "debug tcoef:", tcoef(1,1),tcoef(1,2)
 c     $,tcoef(1,3),tcoef(2,1),tcoef(2,2),tcoef(2,3)
 c     $,tcoef(3,1),tcoef(3,2), tcoef(3,3)  
             call update_u_gpu
-             stop
+c            stop
          else 
          do e=1,nelt
             do eq=1,toteq
@@ -121,7 +121,7 @@ c-----------------------------------------------------------------------
          endif
 !         print *,"cmt_nek_advance after 3 nested  for loop",nid
   
-      if(nid.eq.15) then
+c     if(nid.eq.15) then
 !      do i = 1, nelt
 !        do j = 1, toteq
 !           do k = 1, lz1
@@ -134,7 +134,7 @@ c-----------------------------------------------------------------------
 !        enddo
 !      enddo
 !      stop
-      endif
+c     endif
       
       enddo
 

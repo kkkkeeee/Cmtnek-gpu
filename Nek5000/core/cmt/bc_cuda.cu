@@ -9,9 +9,9 @@ __global__ void InviscidBC_gpu_kernel1(int *lglel, double *fatface,char *cbc, do
 		int iface= ((id/lxz)%(2*ldim));
 		int e = id/lxz2ldim;
 
-		char cb1 = cbc[ifield*lelt*18+e*18+iface*3]; //corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
-		char cb2 = cbc[ifield*lelt*18+e*18+iface*3+1];
-		char cb3 = cbc[ifield*lelt*18+e*18+iface*3+2];
+		char cb1 = cbc[(ifield)*lelt*18+e*18+iface*3]; //corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3, ifield=1 no need to -1 since in cpu, cbc starting from 0 in the ifield entry
+		char cb2 = cbc[(ifield)*lelt*18+e*18+iface*3+1];
+		char cb3 = cbc[(ifield)*lelt*18+e*18+iface*3+2];
 		if(cb1 =='v'|| cb1=='V'){
 			int ieg=lglel[e];
 			int iy,iz,ix,l;
@@ -161,9 +161,9 @@ __global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, do
 		int iface= ((id/lxz)%(2*ldim));
 		int e = id/lxz2ldim;
 
-		char cb1 = cbc[ifield*lelt*18+e*18+iface*3];//corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
-		char cb2 = cbc[ifield*lelt*18+e*18+iface*3+1];
-		char cb3 = cbc[ifield*lelt*18+e*18+iface*3+2];
+		char cb1 = cbc[(ifield)*lelt*18+e*18+iface*3];//corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
+		char cb2 = cbc[(ifield)*lelt*18+e*18+iface*3+1];
+		char cb3 = cbc[(ifield)*lelt*18+e*18+iface*3+2];
 
 		/*if(id==10){
 			for(int i=0;i<576;i++){
@@ -171,7 +171,8 @@ __global__ void InviscidBC_gpu_kernel2(int *lglel, double *fatface,char *cbc, do
 			}
                         printf("debugggggg iface id %d %d\n", iface, id);
 		}*/
-		//		printf("cb1 =%c \n",cb1);
+                //if(id ==0) printf("debug ifield %d \n", ifield);
+		//printf("cb1 =%c \n",cb1);
 		if(cb1 =='O'){
 			int ieg=lglel[e];
 			int iy,iz,ix,l;
@@ -342,9 +343,9 @@ __global__ void InviscidBC_gpu_kernel3(int *lglel, double *fatface,char *cbc, do
 		int iface= ((id/lxz)%(2*ldim));
 		int e = id/lxz2ldim;
 
-		char cb1 = cbc[ifield*lelt*18+e*18+iface*3];//corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
-		char cb2 = cbc[ifield*lelt*18+e*18+iface*3+1];
-		char cb3 = cbc[ifield*lelt*18+e*18+iface*3+2];
+		char cb1 = cbc[(ifield)*lelt*18+e*18+iface*3];//corrected by Kk 02/07/2019 by adding ifield*lelt*18 and iface*3
+		char cb2 = cbc[(ifield)*lelt*18+e*18+iface*3+1];
+		char cb3 = cbc[(ifield)*lelt*18+e*18+iface*3+2];
 
 
 		if(cb1 =='W'|| cb1=='I' || (cb1=='S' && cb2=='Y' && cb3=='M')){

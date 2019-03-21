@@ -5,12 +5,6 @@
 !C> conserved unknowns U
       subroutine compute_primitive_vars_gpu
       use glbvariable_gpu
-!      include 'SIZE'
-!      include 'INPUT'
-!      include 'GEOM'
-!      include 'CMTDATA'
-!      include 'SOLN'
-!      include 'DEALIAS' ! until we are comfortable with setup_convect
 
       parameter (lxyz=lx1*ly1*lz1)
       common /ctmp1/ energy(lx1,ly1,lz1),scr(lx1,ly1,lz1)
@@ -33,31 +27,6 @@
       d_sii, d_siii, d_vdiff, ifield,d_cb, icv, icp, d_csound, imu,ilam, &
       cpgref,cvgref,gmaref, rgasref,ltot)
 !     above wrapper  includes up to enddo for e
-!      do e=1,nelt
-!         call invcol3(vx(1,1,1,e),u(1,1,1,irpu,e),u(1,1,1,irg,e),nxyz)
-!         call invcol3(vy(1,1,1,e),u(1,1,1,irpv,e),u(1,1,1,irg,e),nxyz)
-!!        if (if3d)
-!         call invcol3(vz(1,1,1,e),u(1,1,1,irpw,e),u(1,1,1,irg,e),nxyz)
-!! first kinetic energy
-!         if (if3d) then
-!            call vdot3(scr,&
-!                  u(1,1,1,irpu,e),u(1,1,1,irpv,e),u(1,1,1,irpw,e),&
-!                  u(1,1,1,irpu,e),u(1,1,1,irpv,e),u(1,1,1,irpw,e),nxyz)
-!         else
-!            call vdot2(scr,u(1,1,1,irpu,e),u(1,1,1,irpv,e),&
-!                          u(1,1,1,irpu,e),u(1,1,1,irpv,e),nxyz)
-!         endif
-!         call invcol2(scr,u(1,1,1,irg,e),nxyz)
-!         call cmult(scr,0.5,nxyz)
-!! then to internal energy
-!         call sub3(energy,u(1,1,1,iret,e),scr,nxyz)
-!! now mass-specific
-!         call invcol2(energy,u(1,1,1,irg,e),nxyz)
-!! don't forget to get density where it belongs
-!         call invcol3(vtrans(1,1,1,e,irho),u(1,1,1,irg,e),phig(1,1,1,e),&
-!                     nxyz)
-!         call tdstate(e,energy)
-!      enddo
 
 ! setup_convect has the desired effect
 ! if IFPART=F
@@ -71,10 +40,14 @@
 ! to make life easier until we master this stuff and harmonize even better with nek,
 ! I'm including 'DEALIAS' and calling set_convect_cons here
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!#ifdef DEBUG
 !testing only. delete later
 !      tocpucopy_gas(58)=1
 !      call copytocpu_gpu()
 !      call printCsound("before")
+!#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 

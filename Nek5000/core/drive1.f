@@ -290,70 +290,71 @@ c           resetFindpts = 1
 c           call reinitialize
 c        endif 
 
-         adaptivelb = param(77)
-c        if(nid .eq. 0) print *, 'adaptivelb', adaptivelb
-         if (adaptivelb .eq. 0) then
-             stepvalue = param(78)
-             modstep = mod(kstep, stepvalue)
-             if (modstep .eq. 0) then
-                resetFindpts = 1
-                call computeRatio
-                call reinitialize
-                !call printVerify
-             endif
-         else if(adaptivelb .eq. 1) then 
-c           auto load balancing
-            if(nid .eq. 0) then
-               if(kstep .le. reinit_step+10) then !for the first 10 step after
-                                            !rebalance, pick the minimum
-                                            !one as the init_time
-                  if((INIT_TIME .gt. TTIME_STP) 
-     $                           .and. (TTIME_STP .ne. 0)) then
-                      INIT_TIME = TTIME_STP
-                  endif
-               else if(kstep .gt. reinit_step+100) then
-                  diff_time = (TTIME_STP-INIT_TIME)/INIT_TIME
-                  if(nid .eq. 0) then
-                     print *, "nid:", nid, "ttime_stp:", TTIME_STP, 
-     $                                INIT_TIME, diff_time
-                  endif
-               endif
-            endif
+c         adaptivelb = param(77)
+cc        if(nid .eq. 0) print *, 'adaptivelb', adaptivelb
+c         if (adaptivelb .eq. 0) then
+c             stepvalue = param(78)
+c             modstep = mod(kstep, stepvalue)
+c             if (modstep .eq. 0) then
+c                resetFindpts = 1
+c                call computeRatio
+c                call reinitialize
+c                !call printVerify
+c             endif
+c         else if(adaptivelb .eq. 1) then 
+cc           auto load balancing
+c            if(nid .eq. 0) then
+c               if(kstep .le. reinit_step+10) then !for the first 10 step after
+c                                            !rebalance, pick the minimum
+c                                            !one as the init_time
+c                  if((INIT_TIME .gt. TTIME_STP) 
+c     $                           .and. (TTIME_STP .ne. 0)) then
+c                      INIT_TIME = TTIME_STP
+c                  endif
+c               else if(kstep .gt. reinit_step+100) then
+c                  diff_time = (TTIME_STP-INIT_TIME)/INIT_TIME
+c                  if(nid .eq. 0) then
+c                     print *, "nid:", nid, "ttime_stp:", TTIME_STP, 
+c     $                                INIT_TIME, diff_time
+c                  endif
+c               endif
+c            endif
+c
+c            call bcast(diff_time, 8)
+c            if (diff_time .gt. 0.3) then
+c               if (last_kstep .eq. 0) then
+c                   counter = counter + 1
+c               else if((counter .le. 2) .and.
+c     $                     (last_kstep .eq. kstep-1))then
+c                   counter = counter + 1
+c               else
+c                   counter = 0
+c               endif
+c               last_kstep = kstep
+c               if (counter .gt. 2) then
+c                   !print *, "into the reinit, nid:", nid, "diff_time:",
+c     $            !diff_time
+c                   resetFindpts = 1
+c                   call computeRatio
+c                   call reinitialize
+c                   !call printVerify
+c                   reinit_step = kstep
+c                   if(nid .eq. 0) then
+c                      print *, "reintilize, reinit_step:", reinit_step
+c                   endif
+c                   diff_time = 0
+c                   INIT_TIME = 100
+c                   counter = 0
+c               endif
+c            endif
+c         else if (adaptivelb .eq. 2) then !for the new adaptive lb algorithm
+c            call adaptive_loadbalanceP2(kstep)
+c         else if (adaptivelb .eq. 3) then
+c            call adaptive_loadbalance(kstep) 
+c         else if (adaptivelb .eq. 4) then
+c            call adaptive_loadbalanceP4(kstep) 
+c         endif 
 
-            call bcast(diff_time, 8)
-            if (diff_time .gt. 0.3) then
-               if (last_kstep .eq. 0) then
-                   counter = counter + 1
-               else if((counter .le. 2) .and.
-     $                     (last_kstep .eq. kstep-1))then
-                   counter = counter + 1
-               else
-                   counter = 0
-               endif
-               last_kstep = kstep
-               if (counter .gt. 2) then
-                   !print *, "into the reinit, nid:", nid, "diff_time:",
-     $            !diff_time
-                   resetFindpts = 1
-                   call computeRatio
-                   call reinitialize
-                   !call printVerify
-                   reinit_step = kstep
-                   if(nid .eq. 0) then
-                      print *, "reintilize, reinit_step:", reinit_step
-                   endif
-                   diff_time = 0
-                   INIT_TIME = 100
-                   counter = 0
-               endif
-            endif
-         else if (adaptivelb .eq. 2) then !for the new adaptive lb algorithm
-            call adaptive_loadbalanceP2(kstep)
-         else if (adaptivelb .eq. 3) then
-            call adaptive_loadbalance(kstep) 
-         else if (adaptivelb .eq. 4) then
-            call adaptive_loadbalanceP4(kstep) 
-         endif 
       enddo
  1001 lastep=1
 

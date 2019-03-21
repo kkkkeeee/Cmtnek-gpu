@@ -37,13 +37,13 @@
       !following code is for testing only. delete later.
 !      tocpucopy_gas(53)=1
 !      tocpucopy_gas(58)=1
-      tocpucopy_gas(56)=1 !vdiff
-      tocpucopy_gas(58)=1
-      tocpucopy_gas(19)=1
-      call copytocpu_gpu()
+       tocpucopy_gas(56)=1 !vdiff
+!      tocpucopy_gas(58)=1
+!      tocpucopy_gas(19)=1
+       call copytocpu_gpu()
 !      call printPhig("before")
 !      call printCsound("before1")
-      call printVdiff("beforeFluxFull")
+       call printVdiff("beforeFluxFull")
 
 
 !following code is for testing only. delete later.
@@ -67,7 +67,7 @@
 #ifdef DEBUG
       !following code is for testing only. delete later.
       istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-!     call printFatface("afterFillq")
+      !call printFatface("afterFillq")
       call printFatface("afterFaceu")
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -79,8 +79,10 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
        !following code is for testing only. delete later.
+       if(istep .ge. 105) then
        istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
        call printFatface("afterStateCommo")
+       endif
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -95,8 +97,10 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
        !following code is for testing only. delete later.
+       if(istep.ge. 105) then
        istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
        call printFatface("afterInviscidBC")
+       endif
        !call printCbc("afterInviscidBC") !print cpu part since gpu is different one
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
@@ -108,29 +112,23 @@
 #ifdef DEBUG
 !      tocpucopy_gas(67)=1
 !      tocpucopy_gas(68)=1
-!      tocpucopy_gas(38)=1
-!      tocpucopy_gas(18)=1
-!      tocpucopy_gas(36)=1
+!      tocpucopy_gas(38)=1 !unx
+!      tocpucopy_gas(39)=1 !uny
+!      tocpucopy_gas(40)=1 !unz
+!      tocpucopy_gas(18)=1 !area
+!      tocpucopy_gas(36)=1 !d_wghtc
+!      tocpucopy_gas(67)=1 !jgl
+!      tocpucopy_gas(68)=1 !jgt
 !      call copytocpu_gpu()
-!       call printUnx("before")
-!       call printUny("before")
+!      call printUnx("afterInviscidBC")
+!      call printUny("afterInviscidBC")
+!      call printUnz("afterInviscidBC")
+!      call printJglt("afterInviscidBC")
+!      call printArea("afterInviscidBC")
 !      print *,"surface_fluxes.cuf fluxes_full_field_gpu after get_int_ptr", nid
 !      do i=1,lx1*lz1
 !           print *, 'wghtc ', i, wghtc(i)
 !      enddo
-
-!      do i=1,lx1*lz1*6*nelt
-!           print *, 'area ', i, area(i)
-!      enddo
-
-!       do i = 1, lxd*lxd*lxd
-!                write(6,*) " inint debug jgl first", i,jgl(i), jgt(i)
-!       enddo
-
-!        call get_int_ptr (i,lx1,lxd)
-!          do i=1,lxd*lxd*lxd
-!            print *, 'jgl first ',  i,jgl(i),jgt(i)
-!           enddo
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -144,10 +142,12 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
        !following code is for testing only. delete later.
+       if(istep.ge. 105) then
        istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
-       !call printFatface("afterInviscidFlux")
+       call printFatface("afterInviscidFlux")
+       endif
        !call printFlx('')
-       call printNx('')
+       !call printNx('')
        !tocpucopy_gas(18)=1
        !tocpucopy_gas(36)=1
        !tocpucopy_gas(37)=1
@@ -422,18 +422,11 @@
       call igu_cmt_gpu_wrapper1(glbblockSize2,d_flux,d_graduf,toteq,iwp,lx1,ly1,lz1,ldim,nelt,lelt)
 
 !      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu before copy"
-      
-!      tocpucopy_gas(6)=1
-!      call copytocpu_gpu()
 
       istate = cudaMemcpy(gdudxk, d_graduf, lx1*lz1*2*ldim*nelt*toteq,cudaMemcpyDeviceToHost)
-
 !      print *,"istate igtucmt", cudaGetErrorString(istate)
 
-!      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu after copy"
-!      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu before gs"
       call gs_op_fields(dg_hndl,gdudxk,nfq,toteq,1,1,0)
-!      print *,"$$$ surfaceflx_cmt.f igu_cmt_gpu after gs"
 
       istate = cudaMemcpy(d_graduf,gdudxk,  lx1*lz1*2*ldim*nelt*toteq,cudaMemcpyHostToDevice)
 !      togpucopy_gas(6)=1

@@ -6,9 +6,8 @@
 
       real ntol
       integer e
-      !data icalld /0/ !added by Kk 02/01/19
-      !save icalld  !added by Kk 02/01/19
-      icalld =0
+      data icalld1 /0/ !added by Kk 03/16/19
+      save icalld1  !added by Kk 03/16/19
 
       t_n_a=lx1*ly1*lz1
       ntot=t_n_a*nelt
@@ -17,8 +16,8 @@
 
 !      print *,"artvisc_gpu.cuf compute_entropy_gpu start", nid
 
-      if (icalld .eq. 0) then
-         icalld=1
+      if (icalld1 .eq. 0) then
+         icalld1=1
          call rzero_gpu_wrapper(glbblockSize2,d_tlag,0,ntot)
          call rzero_gpu_wrapper(glbblockSize2,d_tlag,lx1*ly1*lz1*lelt*(lorder-1),ntot)
          call rzero_gpu_wrapper(glbblockSize2,d_tlag,lx1*ly1*lz1*lelt,ntot)
@@ -58,6 +57,15 @@
 ! entropy at this and lorder prior steps
       call compute_entropy_gpu
 ! compute maxval(|S-<S>|)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!#ifdef DEBUG
+!!!only for testing. delete later.
+!      tocpucopy_gas(44)=1 !tlag
+!      call copytocpu_gpu()
+!      call printTlag("afterCompEntropy")
+!#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 !     OPEN(UNIT=9999,FILE='tlagbm1.txt',&
 !             FORM="FORMATTED", &
@@ -85,16 +93,27 @@
 !      endif
      
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+!!only for testing. delete later.
+      tocpucopy_gas(44)=1 !tlag
+      call copytocpu_gpu()
+      call printTlag("beforeEntropyR")
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       call entropy_residual_gpu ! fill res2
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!#ifdef DEBUG
-!      tocpucopy_gas(20)=1 !res2
-!      tocpucopy_gas(53)=1 !t
-!      call copytocpu_gpu()
-!      call printRes2("afterEntropyR")
-!      call printTArray("afterEntropyR")
-!#endif
+#ifdef DEBUG
+      tocpucopy_gas(20)=1 !res2
+      tocpucopy_gas(53)=1 !t
+      tocpucopy_gas(44)=1 !tlag
+      call copytocpu_gpu()
+      call printRes2("afterEntropyR")
+      call printTArray("afterEntropyR")
+      call printTlag("afterEntropyR")
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after entropy_residual_gpu", nid
@@ -102,25 +121,25 @@
       call double_copy_gpu_wrapper(glbblockSize2,d_res2,lx1*ly1*lz1*lelt,d_res2,0,ntot)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!#ifdef DEBUG
-!      tocpucopy_gas(20)=1 !res2
-!      tocpucopy_gas(53)=1 !t
-!      tocpucopy_gas(58)=1 !csound
-!      tocpucopy_gas(10)=1 !vx
-!      tocpucopy_gas(11)=1 !vy
-!      tocpucopy_gas(12)=1 !vz
-!      tocpucopy_gas(46)=1 !vtrans
-!      tocpucopy_gas(47)=1 !meshh
-!      call copytocpu_gpu()
-!      call printRes2("afterCopy")
-!      call printTArray("afterCopy")
-!      call printCsound("afterCopy")
-!      call printVx("afterCopy")
-!      call printVy("afterCopy")
-!      call printVz("afterCopy")
-!      call printVtrans("afterCopy")
-!      call printMeshh("afterCopy")
-!#endif
+#ifdef DEBUG
+      tocpucopy_gas(20)=1 !res2
+      tocpucopy_gas(53)=1 !t
+      tocpucopy_gas(58)=1 !csound
+      tocpucopy_gas(10)=1 !vx
+      tocpucopy_gas(11)=1 !vy
+      tocpucopy_gas(12)=1 !vz
+      tocpucopy_gas(46)=1 !vtrans
+      tocpucopy_gas(47)=1 !meshh
+      call copytocpu_gpu()
+      call printRes2("afterCopy")
+      call printTArray("afterCopy")
+      call printCsound("afterCopy")
+      call printVx("afterCopy")
+      call printVy("afterCopy")
+      call printVz("afterCopy")
+      call printVtrans("afterCopy")
+      call printMeshh("afterCopy")
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before wavevisc_gpu", nid
@@ -143,16 +162,13 @@
       call resvisc_gpu ! overwrite res2
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!#ifdef DEBUG
-!      tocpucopy_gas(20)=1 !res2
-!      call copytocpu_gpu()
-!      call printRes2("afterResvisc")
-!#endif
+#ifdef DEBUG
+      tocpucopy_gas(20)=1 !res2
+      call copytocpu_gpu()
+      call printRes2("afterResvisc")
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after resvisc_gpu", nid
-
-!      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before evmsmooth_gpu", nid
 
       call evmsmooth_gpu(.true.) ! endpoints=.false.
                                                ! is intended to
@@ -162,13 +178,13 @@
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after evmsmooth_gpu", nid
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!#ifdef DEBUG
-!      tocpucopy_gas(20)=1 !res2
-!      tocpucopy_gas(53)=1 !t
-!      call copytocpu_gpu()
-!      call printRes2("afterEvm")
-!      call printTArray("afterEvm")
-!#endif
+#ifdef DEBUG
+      tocpucopy_gas(20)=1 !res2
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
+      call printRes2("afterEvm")
+      call printTArray("afterEvm")
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before dsavg", nid
@@ -205,6 +221,7 @@
       !if(DT_cmt.eq.0) DT_cmt=0.01 ! only for now remove later. adeesha.
 
       rdt=1.0/(dsdtcoef(stage)*DT_cmt)
+      write(6,*) "debug dsdtcoef(stage)", dsdtcoef(stage), DT_cmt
 
 !      print *,"artvisc.cuf entropy_residual_gpu start",istep,stage,DT_cmt,rdt,nid
       
@@ -215,17 +232,8 @@
 
       call entropy_residual_gpu_wrapper(glbblockSize1,d_tlag,d_res2,ntot,rdt,stage,lorder-1,ltot,&
        lxd,lyd,lzd,d_vx, d_vy, d_vz, lx1,ly1, lz1, d_jacmi, d_rxm1, d_sxm1, d_txm1,d_rym1,&
-        d_sym1, d_tym1,d_rzm1,d_szm1, d_tzm1,if3dgpu,nelt,d_dxm1, d_dxtm1 )
+        d_sym1, d_tym1,d_rzm1,d_szm1, d_tzm1,if3dgpu,nelt,d_dxm1, d_dxtm1, lelt)!added parameter lelt by Kk 03/16
 
-      !following code is for testing only. delete later.
-!      tocpucopy_gas(20)=1
-!      tocpucopy_gas(22)=1
-!      call copytocpu_gpu()
-
-!      print *,"$$$ artvisc.cuf entropy_residual_gpu check", nid
-!      do i=1,10
-!           print *, 'res2, totalh', i,res2(i),totalh(i)
-!     enddo
 
 
       return

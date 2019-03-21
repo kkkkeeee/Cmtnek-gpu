@@ -122,6 +122,10 @@ __global__ void imqqtu_gpu_kernel(double *flux, int nf, int lf, int iuj, int ium
 		flux[(iuj-1)+id] =flux[(iuj-1)+id] * -0.5; //cmult
 		flux[(iuj-1)+id] =  flux[(iuj-1)+id] + flux[(ium-1)+id] ;// add 2
 		//above 3 can be simplified iuj= (ium-iup) /2 check with Dr.Tania adeesha
+                /*if(id ==0) {
+                    printf("debug imqqtu %25.16E %25.16E %25.16E %25.16E %25.16E\n", flux[(ium-1)+id], flux[(iup-1)+id], (flux[(ium-1)+id] + flux[(iup-1)+id])*(-0.5),  (flux[(ium-1)+id] + flux[(iup-1)+id])*(-0.5)+flux[(ium-1)+id], flux[(iuj-1)+id]);
+
+                }*/
 
 
 	}
@@ -169,9 +173,9 @@ __global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, 
 		int e = id/lxz2ldim;
 
 
-		char cb1 = cbc[e*18+iface];
-		char cb2 = cbc[e*18+iface+1];
-		char cb3 = cbc[e*18+iface+2];
+		char cb1 = cbc[e*18+iface*3];
+		char cb2 = cbc[e*18+iface*3+1];
+		char cb3 = cbc[e*18+iface*3+2]; //iface -> iface*3 by Kk 03/18
 		if(cb1!='E' &&  cb1!='P'){
 			int iy,iz,ix,l;
 			if(cb1 =='W'|| cb1=='I'){
