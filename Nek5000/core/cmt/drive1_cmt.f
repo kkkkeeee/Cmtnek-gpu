@@ -149,11 +149,19 @@ c     endif
       endif
       ftime = ftime + dnekclock() - ftime_dum
 
-      if (mod(istep,iostep).eq.0.or.istep.eq.1)then
-         call out_fld_nek
-         call mass_balance(if3d)
-c dump out particle information. 
-         call usr_particles_io(istep)
+      if (mod(istep,iostep).eq.0.or.istep.eq.1 .or. istep.eq.2)then
+c        call out_fld_nek
+c        call mass_balance(if3d)
+         !dump out particle information. 
+c        call usr_particles_io(istep)
+         !following to output vx/y/z/t/pr to see the diff between cpu and gpu
+         if(nid.eq.15) then
+            call printVx('debug')
+            call printVy('debug')
+            call printVz('debug')
+            call printTArray('debug')
+            call printPr('debug')
+         endif
       end if
 
 !     call print_cmt_timers ! NOT NOW

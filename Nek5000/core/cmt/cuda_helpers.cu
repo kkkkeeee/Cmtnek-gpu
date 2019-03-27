@@ -85,6 +85,14 @@ void gpu_double_copy_gpu_wrapper(int glbblockSize2,double *a1,int n1,double *a2,
 
 }
 
+//added by Kk 03/22 for use in artvisc_cuda.cu : entropy_residual_gpu_wrapper_
+void gpu_nekadd2(int glbblockSize2,double *a, double*b, int n){
+	int blockSize = glbblockSize2, gridSize;
+	gridSize = (int)ceil((float)n/blockSize);
+	nekadd2<<<gridSize, blockSize>>>(a,b,n);
+
+
+}
 void gpu_neksub2(int glbblockSize2,double *a, double*b, int n){
 	int blockSize = glbblockSize2, gridSize;
 	gridSize = (int)ceil((float)n/blockSize);
@@ -331,21 +339,21 @@ void gpu_local_grad3(double * ur, double *us, double *ut, double *u, int nx1, do
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code3 = cudaPeekAtLastError();
-	printf("CUDA: Start map_faced cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
+	printf("CUDA: Start gpu_local_grad3 cuda status after Dgemm: %s\n",cudaGetErrorString(code3));
 
 #endif
 	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1, nx1, nx1, alpha,u, nx1,nx1*nx1, dt,nx1,0, beta,us ,nx1,nx1*nx1,nel*nx1);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code4 = cudaPeekAtLastError();
-	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
+	printf("CUDA: Start gpu_local_grad3 cuda status after Dgemmstride: %s\n",cudaGetErrorString(code4));
 #endif
 
 	cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nx1*nx1, nx1, nx1, alpha,u, nx1*nx1,nx1*nx1*nx1, dt,nx1,0, beta,ut ,nx1*nx1,nx1*nx1*nx1,nel);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code5 = cudaPeekAtLastError();
-	printf("CUDA: Start map_faced cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
+	printf("CUDA: Start gpu_local_grad3 cuda status after Dgemmstride: %s\n",cudaGetErrorString(code5));
 #endif
         cublasDestroy(handle);
 

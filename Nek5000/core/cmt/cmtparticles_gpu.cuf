@@ -848,7 +848,7 @@
          tocpucopy_gas(11)=1
          tocpucopy_gas(12)=1
          tocpucopy_gas(58)=1
-         tocpucopy_gas(56)=1
+         tocpucopy_gas(56)=1 !vdiff
          tocpucopy_gas(48)=1
          call copytocpu_gpu()
          print *,"our dt start"
@@ -1106,6 +1106,9 @@
       tocpucopy_gas(23)=1 !rxm1
       tocpucopy_gas(26)=1 !rym1
       tocpucopy_gas(29)=1 !rzm1
+      tocpucopy_gas(42)=1 !d_dxm1
+      tocpucopy_gas(43)=1 !d_dxtm1
+      call copytocpu_gpu()
       call copytocpu_gpu()
       call printRes1('afterCompGrad')
       istate = cudaMemcpy(gradu_copy,d_gradu,toteq*3*lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
@@ -1234,7 +1237,7 @@
       call printVdiff("last")
       call printTArray("last")
        
-!      stop
+      !stop
    endif
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -3995,3 +3998,40 @@
          CLOSE(UNIT=13699+i)
        end
 
+
+!---------------------------------------------------------------------
+      subroutine printPr(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include pr
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=16199+i,FILE='pr.id.'//trim(x1)//'.'  & 
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+             //trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz2
+         do k=1, ly2
+         do m=1, lx2
+          WRITE(UNIT=16199+i, FMT = *) m,k,j &
+       ,pr(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=16199+i)
+      enddo
+      end

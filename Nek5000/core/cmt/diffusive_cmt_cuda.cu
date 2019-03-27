@@ -163,7 +163,7 @@ extern "C" void imqqtu_gpu_wrapper_(int *glbblockSize2,double *d_flux,int *iuj,i
 
 }
 
-__global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, int ltot, int ilam, int irho, int icv, int icp, int imu, double molmass, int iwp, int iwm, int iuj, int iux,int iuy,int iuz, int iph, int ithm, int iu1, int iu2, int iu3, int iu4, int iu5, int icvf,int toteq,int lx1,int ly1,int lz1,int lxy, int lxz,int nxyz, int lxz2ldim, int lxz2ldimlelt, int a2ldim, char *cbc, int *lglel, double *xm1,double *ym1, double *zm1, double *vx, double *vy, double *vz, double *t, double *pr, double *sii, double *siii, double *vdiff, double *vtrans, char *cb, double *u, double *phig, double *pres, double *csound,int npscal,double p0th,int e_offset,int nlel,int nqq){
+__global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, int ltot, int ilam, int irho, int icv, int icp, int imu, double molmass, int iwp, int iwm, int iuj, int iux,int iuy,int iuz, int iph, int ithm, int iu1, int iu2, int iu3, int iu4, int iu5, int icvf,int toteq,int lx1,int ly1,int lz1,int lxy, int lxz,int nxyz, int lxz2ldim, int lxz2ldimlelt, int a2ldim, char *cbc, int *lglel, double *xm1,double *ym1, double *zm1, double *vx, double *vy, double *vz, double *t, double *pr, double *sii, double *siii, double *vdiff, double *vtrans, char *cb, double *u, double *phig, double *pres, double *csound,int npscal,double p0th,int e_offset,int nlel,int nqq, int lelt){//added para lelt by Kk 03/26
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
@@ -173,9 +173,9 @@ __global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, 
 		int e = id/lxz2ldim;
 
 
-		char cb1 = cbc[e*18+iface*3];
-		char cb2 = cbc[e*18+iface*3+1];
-		char cb3 = cbc[e*18+iface*3+2]; //iface -> iface*3 by Kk 03/18
+		char cb1 = cbc[ifield*lelt*18+e*18+iface*3];
+		char cb2 = cbc[ifield*lelt*18+e*18+iface*3+1];
+		char cb3 = cbc[ifield*lelt*18+e*18+iface*3+2]; //iface -> iface*3 by Kk 03/18, added "ifield*lelt*18+" by Kk 03/25
 		if(cb1!='E' &&  cb1!='P'){
 			int iy,iz,ix,l;
 			if(cb1 =='W'|| cb1=='I'){
@@ -304,11 +304,12 @@ __global__ void imqqtu_dirichlet_gpu_kernel(double *flux, int ntot, int ifield, 
 			//				printf("iuj = %d, iwm = %d, iwp = %d, lxz2ldimlelt = %d, lxz2ldim = %d, lxz = %d, iface= %d id %d  \n",iuj,iwm,iwp,lxz2ldimlelt,lxz2ldim,lxz,iface,id );
 			//			}
 				for(int ivar=0;ivar<toteq;ivar++){
-					flux[(iuj-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1] = flux[(iwm-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1]-flux[(iwp-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1];
+                                        /*corrected by Kk 03/26 
+     call sub3(umubc(1,f,e,ivar),wminus(1,f,e,iu1+ivar-1), wplus(1,f,e,iu1+ivar-1),nxz)
+      flux(iwm ivar) -> iu1+ivar-1*/
+					//flux[(iuj-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1] = flux[(iwm-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1]-flux[(iwp-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1];
+					flux[(iuj-1)+ivar*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1] = flux[(iwm-1)+(iu1+ivar-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1]-flux[(iwp-1)+(iu1+ivar-1)*lxz2ldimlelt+e*lxz2ldim+(iface)*lxz+lx1*i2+i1];
 				}
-//						if(id<500){
-//							printf("iuj = %d, iwm = %d, iwp = %d, lxz2ldimlelt = %d, lxz2ldim = %d, lxz = %d, iface= %d id %d l = %d ix = %d, iy =%d, iz = %d, i1 = %d, i2=%d,lx1=%d, ly1=%d,lz1=%d, cb1= %d \n",iuj,iwm,iwp,lxz2ldimlelt,lxz2ldim,lxz,iface,id ,l,ix,iy,iz,i1,i2,lx1,ly1,lz1,cb1);
-//						}
 
 		}
 
@@ -342,7 +343,7 @@ extern "C" void imqqtu_dirichlet_gpu_wrapper_(int *glbblockSize2,double *d_flux,
 	gridSize = (int)ceil((float)ntot/blockSize);
 
 
-	imqqtu_dirichlet_gpu_kernel<<<gridSize, blockSize>>>(d_flux, ntot, ifield[0], ltot,ilam[0],irho[0],icv[0],icp[0],imu[0],molmass[0],iwp[0],iwm[0],iuj[0],iux[0],iuy[0],iuz[0],iph[0],ithm[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],icvf[0],toteq[0],lx1[0],ly1[0],lz1[0],lxy,lxz,nxyz,lxz2ldim,lxz2ldimlelt,a2ldim,d_cbc, d_lglel,d_xm1,d_ym1, d_zm1, d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans, d_cb,d_u, d_phig,d_pres,d_csound,npscal[0],p0th[0],e_offset,nlel,nqq[0] );
+	imqqtu_dirichlet_gpu_kernel<<<gridSize, blockSize>>>(d_flux, ntot, ifield[0], ltot,ilam[0],irho[0],icv[0],icp[0],imu[0],molmass[0],iwp[0],iwm[0],iuj[0],iux[0],iuy[0],iuz[0],iph[0],ithm[0],iu1[0],iu2[0],iu3[0],iu4[0],iu5[0],icvf[0],toteq[0],lx1[0],ly1[0],lz1[0],lxy,lxz,nxyz,lxz2ldim,lxz2ldimlelt,a2ldim,d_cbc, d_lglel,d_xm1,d_ym1, d_zm1, d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans, d_cb,d_u, d_phig,d_pres,d_csound,npscal[0],p0th[0],e_offset,nlel,nqq[0], lelt[0]);
 
 
 

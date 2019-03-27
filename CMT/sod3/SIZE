@@ -18,8 +18,8 @@
       parameter (lx1m=1)        ! polynomial order mesh solver; =1 no mesh motion
 
       parameter (lelg=500)     ! max total number of elements
-      parameter (lp=125)       ! max number of MPI ranks
-      parameter (lelt=125)       ! max number of elements per MPI rank 
+      parameter (lp=32)       ! max number of MPI ranks
+      parameter (lelt=35)       ! max number of elements per MPI rank 
       parameter (ldimt=6)       ! max number of auxiliary fields (temperature + scalars)
 
       ! OPTIONAL
@@ -36,7 +36,7 @@
       parameter (maxobj=4,maxmbr=lelt*6)        ! max number number of objects
       parameter (nsessmax=1,nmaxl=1,nfldmax=1,nmaxcom=1) ! multimesh parameters
 
-      parameter (llpart=400) ! max number of particles per mpi rank
+      parameter (llpart=4) ! max number of particles per mpi rank
 
       ! INTERNALS
       include 'SIZE.inc'

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "cuda_helpers.h"
 //#define DEBUGPRINT 0
 
 __global__ void compute_entropy_gpu_kernel(double *tlag, double *pr, double *vtrans,int ntot, int irho, double ntol , double rgam, double gmaref,int ltot  ){
@@ -66,29 +67,33 @@ __global__ void entropy_residual_flux_gpu_kernel(double *tlag, double *res2,int 
 
 }
 
-__global__ void flux_div_mini_gpu_kernel(double *tlag, double *res2,int ntot, double rdt, int stage, int lorder, int ltot, double *totalh, int lxyzd, double *ur1,double *us1, double *ut1, double *ur2, double *us2, double *ut2, double *ur3, double *us3, double *ut3,double *ud, int ldd, double *jacmi, double *rxm1, double *sxm1, double *txm1, double *rym1, double *sym1, double *tym1,double *rzm1, double *szm1, double *tzm1, int if3d ){
+__global__ void flux_div_mini_gpu_kernel1(double *tlag, double *res2,int ntot, double rdt, int stage, int lorder, int ltot, double *totalh, int lxyzd, double *ur1,double *us1, double *ut1, double *ur2, double *us2, double *ut2, double *ur3, double *us3, double *ut3,double *ud, int ldd, double *jacmi, double *rxm1, double *sxm1, double *txm1, double *rym1, double *sym1, double *tym1,double *rzm1, double *szm1, double *tzm1, int if3d ){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	int i= id % ldd;
 	if(id<ntot){
-		//something is wrong because ur us ut has only [i]. I think it should be [id] because I added *lelt later. Check again. adeesha
-		if(if3d){
-			ud[id] =  jacmi[id] *( rxm1[id]*ur1[i]+ sxm1[id]*us1[i]+txm1[id]*ut1[i]);
-			ud[id] =  ud[id]+ jacmi[id] *( rym1[id]*ur2[i]+ sym1[id]*us2[i]+txm1[id]*ut2[i]);
-			ud[id] =  ud[id] + jacmi[id] *( rzm1[id]*ur3[i]+ szm1[id]*us3[i]+tzm1[id]*ut3[i]);
-
-		}
-		else{
-			ud[id] =  jacmi[id] *( rxm1[id]*ur1[i]+ sxm1[id]*us1[i]);
-			ud[id] =  ud[id]+ jacmi[id] *( rym1[id]*ur2[i]+ sym1[id]*us2[i]);
-		}
-		//add 2 
-		res2[id] = res2[id] + ud[id];
-
-
+              //something is wrong because ur us ut has only [i]. I think it should be [id] because I added *lelt later. Check again. adeesha
+              // ur us ut [i] -> ur us ut[id] by Kk 03/22
+	      ud[id] =  jacmi[id] *( rxm1[id]*ur1[id]+ sxm1[id]*us1[id]+txm1[id]*ut1[id]);
+	      ud[id] =  ud[id]+ jacmi[id] *( rym1[id]*ur2[id]+ sym1[id]*us2[id]+txm1[id]*ut2[id]);
+	      ud[id] =  ud[id] + jacmi[id] *( rzm1[id]*ur3[id]+ szm1[id]*us3[id]+tzm1[id]*ut3[id]);
 	}
 
 }
+
+__global__ void flux_div_mini_gpu_kernel2(double *tlag, double *res2,int ntot, double rdt, int stage, int lorder, int ltot, double *totalh, int lxyzd, double *ur1,double *us1, double *ut1, double *ur2, double *us2, double *ut2, double *ur3, double *us3, double *ut3,double *ud, int ldd, double *jacmi, double *rxm1, double *sxm1, double *txm1, double *rym1, double *sym1, double *tym1,double *rzm1, double *szm1, double *tzm1, int if3d ){
+
+	int id = blockIdx.x*blockDim.x+threadIdx.x;
+	int i= id % ldd;
+	if(id<ntot){
+              //something is wrong because ur us ut has only [i]. I think it should be [id] because I added *lelt later. Check again. adeesha
+              // ur us ut [i] -> ur us ut[id] by Kk 03/22
+	      ud[id] =  jacmi[id] *(rxm1[id]*ur1[id]+ sxm1[id]*us1[id]);
+	      ud[id] =  ud[id]+ jacmi[id]*(rym1[id]*ur2[id]+ sym1[id]*us2[id]);
+	}
+
+}
+
 //mxm multiplication
 __global__ void mxm1(double *a, int n1, double *b, int n2, double *c, int n3, int nelt, int aSize, int bSize, int cSize, int extraEq){
 
@@ -154,7 +159,7 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 	cudaMalloc((void**)&d_us3,ldd *  nelt[0]*sizeof(double));
 	cudaMalloc((void**)&d_ut3,ldd *  nelt[0]*sizeof(double));
 	cudaMalloc((void**)&d_ud,nelt[0]*ldd *  sizeof(double));
-	cudaMemset(d_totalh_temp, 0.0, 3*lxyzd*nelt[0]*sizeof(double));
+	cudaMemset(d_totalh_temp, 0.0, 3*lxyzd*lelt[0]*sizeof(double)); //nelt[0] -> lelt[0] by Kk 03/22
 	cudaMemset(d_ur1, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_us1, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_ut1, 0.0, ldd*nelt[0]*sizeof(double));
@@ -165,8 +170,9 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 	cudaMemset(d_us3, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_ut3, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_ud, 0.0, ldd*nelt[0]*sizeof(double));
+
 	int blockSize = glbblockSize1[0], gridSize;
-	gridSize = (int)ceil((float)ntot[0]/blockSize);
+	gridSize = (int)ceil((float)ntot[0]/blockSize); //ntot[0] = lxyz * nelt
 
 
         //lxyzd -> lxyzdlelt by Kk 03/16
@@ -179,144 +185,108 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 
 
 #endif
-	int mdm1 = lx1[0]-1;
-	// Following is the local_grad3 function
 
-	int nx_2 = lx1[0]*lx1[0];
-	int nx_3 = nx_2*lx1[0];
-	int nxd_2 = nx_2;
-	int nxd_3 = nx_3;
-	//ur(nx,nx*nx) = D(nx,nx) * u(nx,nx*nx) fortran
-	//ur(nx*nx,nx) = u(nx*nx,nx) * D(nx,nx) C
+        //flux_div_mini(e)
+        cudaMemset(d_ur1, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_us1, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_ut1, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_ur2, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_us2, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_ut2, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_ur3, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_us3, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_ut3, 0.0, ldd*nelt[0]*sizeof(double));
+        cudaMemset(d_ud, 0.0, ldd*nelt[0]*sizeof(double));
 	if(if3d[0]){
+               gpu_local_grad3(d_ur1,d_us1,d_ut1,d_totalh_temp,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
 
-		blockSize=glbblockSize1[0], gridSize;
-		// for ur1 us1 and ut1
-		gridSize = (int)ceil((float)nelt[0]*nx_3/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_totalh_temp,nx_2, d_dxm1, lx1[0], d_ur1, lx1[0], nelt[0], nx_3, 0, nxd_3, 0);//ur,us, ut should be indexed by nxd
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
-		printf("CUDA: entropy_residual_gpu_wrapper after 1st mxm 1cuda status: %s\n",cudaGetErrorString(code1));
-
+		printf("CUDA: entropy_residual_gpu_wrapper after 1st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
-		for(int k = 0; k<lx1[0]; k++){
-			//usk(nx,nx) = uk(nx,nx) * dt(nx,nx) fortran
-			//usk(nx,nx) = dt(nx,nx) * uk(nx,nx) C
-			gridSize = (int)ceil((float)nelt[0]*nx_2/blockSize);
-			mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp+k*nx_2, lx1[0],d_us1+k*nx_2, lx1[0], nelt[0], 0, nx_3, nxd_3, 0);
-		}
+
+               gpu_local_grad3(d_ur2,d_us2,d_ut2,d_totalh_temp+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
-		printf("CUDA: entropy_residual_gpu_wrapper after for loop mxm 1cuda status: %s\n",cudaGetErrorString(code1));
-
+		printf("CUDA: entropy_residual_gpu_wrapper after 2st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
-		//ut(nx_2,nx) = u(nx_2,nx) * dt(nx,nx) fortran
-		//ut(nx,nx_2) = dt(nx,nx) * u(nx,nx_2) C
-		gridSize = (int)ceil((float)nelt[0]*nx_3/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp, lx1[0], d_ut1, nx_2, nelt[0], 0, nx_3, nxd_3, 0);
+
+               gpu_local_grad3(d_ur3,d_us3,d_ut3,d_totalh_temp+lxyzdlelt*2,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
-		printf("CUDA: entropy_residual_gpu_wrapper after 3rd mxm 1cuda status: %s\n",cudaGetErrorString(code1));
-
+		printf("CUDA: entropy_residual_gpu_wrapper after 3st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-		// for ur2 us2 and ut2
-		gridSize = (int)ceil((float)nelt[0]*nx_3/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_totalh_temp+lxyzd*nelt[0],nx_2, d_dxm1, lx1[0], d_ur2, lx1[0], nelt[0], nx_3, 0, nxd_3, 0);//ur,us, ut should be indexed by nxd
-		for(int k = 0; k<lx1[0]; k++){
-			//usk(nx,nx) = uk(nx,nx) * dt(nx,nx) fortran
-			//usk(nx,nx) = dt(nx,nx) * uk(nx,nx) C
-			gridSize = (int)ceil((float)nelt[0]*nx_2/blockSize);
-			mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp+lxyzd*nelt[0]+k*nx_2, lx1[0],d_us2+k*nx_2, lx1[0], nelt[0], 0, nx_3, nxd_3, 0);
-		}
-		//ut(nx_2,nx) = u(nx_2,nx) * dt(nx,nx) fortran
-		//ut(nx,nx_2) = dt(nx,nx) * u(nx,nx_2) C
-		gridSize = (int)ceil((float)nelt[0]*nx_3/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp+lxyzd*nelt[0], lx1[0], d_ut2, nx_2, nelt[0], 0, nx_3, nxd_3, 0);
+                flux_div_mini_gpu_kernel1<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh_temp, lxyzd, d_ur1,d_us1, d_ut1, d_ur2,d_us2, d_ut2, d_ur3, d_us3, d_ut3,d_ud, ldd, d_jacmi, d_rxm1, d_sxm1, d_txm1, d_rym1, d_sym1, d_tym1, d_rzm1, d_szm1, d_tzm1,if3d[0]);
 
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	code1 = cudaPeekAtLastError();
+	printf("CUDA: entropy_residual_gpu_wrapper after flux_div_mini_gpu_kernel1 cuda status: %s\n",cudaGetErrorString(code1));
+#endif
+	} 
+        else{
+               gpu_local_grad2(d_ur1,d_us1,d_totalh_temp,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
 
-		// for ur3 us3 and ut3
-		gridSize = (int)ceil((float)nelt[0]*nx_3/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_totalh_temp+2*lxyzd*nelt[0],nx_2, d_dxm1, lx1[0], d_ur3, lx1[0], nelt[0], nx_3, 0, nxd_3, 0);//ur,us, ut should be indexed by nxd
-		for(int k = 0; k<lx1[0]; k++){
-			//usk(nx,nx) = uk(nx,nx) * dt(nx,nx) fortran
-			//usk(nx,nx) = dt(nx,nx) * uk(nx,nx) C
-			gridSize = (int)ceil((float)nelt[0]*nx_2/blockSize);
-			mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp+2*lxyzd*nelt[0]+k*nx_2, lx1[0],d_us3+k*nx_2, lx1[0], nelt[0], 0, nx_3, nxd_3, 0);
-		}
-		//ut(nx_2,nx) = u(nx_2,nx) * dt(nx,nx) fortran
-		//ut(nx,nx_2) = dt(nx,nx) * u(nx,nx_2) C
-		gridSize = (int)ceil((float)nelt[0]*nx_3/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp+2*lxyzd*nelt[0], lx1[0], d_ut3, nx_2, nelt[0], 0, nx_3, nxd_3, 0);
+#ifdef DEBUGPRINT
+		cudaDeviceSynchronize();
+		code1 = cudaPeekAtLastError();
+		printf("CUDA: entropy_residual_gpu_wrapper after 1st gpu_local_grad2 cuda status: %s\n",cudaGetErrorString(code1));
+#endif
 
+               gpu_local_grad2(d_ur2,d_us2,d_totalh_temp+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
+#ifdef DEBUGPRINT
+		cudaDeviceSynchronize();
+		code1 = cudaPeekAtLastError();
+		printf("CUDA: entropy_residual_gpu_wrapper after 2st gpu_local_grad2 cuda status: %s\n",cudaGetErrorString(code1));
+#endif
 
-	}else{
-		// for ur1 us1 and ut1
-		gridSize = (int)ceil((float)nelt[0]*nx_2/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_totalh_temp,lx1[0], d_dxm1, lx1[0], d_ur1, lx1[0], nelt[0], nx_2, 0, nxd_2, 0);//ur,us, ut should be indexed by nxd
+                flux_div_mini_gpu_kernel2<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh_temp, lxyzd, d_ur1,d_us1, d_ut1, d_ur2,d_us2, d_ut2, d_ur3, d_us3, d_ut3,d_ud, ldd, d_jacmi, d_rxm1, d_sxm1, d_txm1, d_rym1, d_sym1, d_tym1, d_rzm1, d_szm1, d_tzm1,if3d[0]);
 
-		gridSize = (int)ceil((float)nelt[0]*nx_2/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp, lx1[0],d_us1, lx1[0], nelt[0], 0, nx_2, nxd_2, 0);
-
-		// for ur2 us2 and ut1
-		gridSize = (int)ceil((float)nelt[0]*nx_2/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_totalh_temp+lxyzd*nelt[0],lx1[0], d_dxm1, lx1[0], d_ur2, lx1[0], nelt[0], nx_2, 0, nxd_2, 0);//ur,us, ut should be indexed by nxd
-
-		gridSize = (int)ceil((float)nelt[0]*nx_2/blockSize);
-		mxm1<<<gridSize, blockSize>>>(d_dxtm1,lx1[0], d_totalh_temp+lxyzd*nelt[0], lx1[0],d_us2, lx1[0], nelt[0], 0, nx_2, nxd_2, 0);
-
-
-
+#ifdef DEBUGPRINT
+	cudaDeviceSynchronize();
+	code1 = cudaPeekAtLastError();
+	printf("CUDA: entropy_residual_gpu_wrapper after flux_div_mini_gpu_kernel2 cuda status: %s\n",cudaGetErrorString(code1));
+#endif
 	}
+
+        gpu_nekadd2(glbblockSize1[0], d_res2,d_ud, ntot[0]);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	code1 = cudaPeekAtLastError();
-	printf("CUDA: entropy_residual_gpu_wrapper before flux_div_mini_gpu_kernel cuda status: %s\n",cudaGetErrorString(code1));
-
+	printf("CUDA: entropy_residual_gpu_wrapper after nekadd2 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-	flux_div_mini_gpu_kernel<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh_temp, lxyzd, d_ur1,d_us1, d_ut1, d_ur2,d_us2, d_ut2, d_ur3, d_us3, d_ut3,d_ud, ldd, d_jacmi, d_rxm1, d_sxm1, d_txm1, d_rym1, d_sym1, d_tym1, d_rzm1, d_szm1, d_tzm1,if3d[0]);
-
-#ifdef DEBUGPRINT
-	cudaDeviceSynchronize();
-	code1 = cudaPeekAtLastError();
-	printf("CUDA: entropy_residual_gpu_wrapper after flux_div_mini_gpu_kernel cuda status: %s\n",cudaGetErrorString(code1));
-
-#endif
 	cudaFree(d_totalh_temp);
 
 	cudaFree(d_ur1);
 	cudaFree(d_ur2);
 	cudaFree(d_ur3);
-	cudaFree(d_us1);
 
+	cudaFree(d_us1);
 	cudaFree(d_us2);
 	cudaFree(d_us3);
+
 	cudaFree(d_ut1);
 	cudaFree(d_ut2);
-
 	cudaFree(d_ut3);
 
 	cudaFree(d_ud);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code2 = cudaPeekAtLastError();
-	// if (code2 != cudaSuccess){
 	printf("CUDA: End entropy residual_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code2));
 #endif
-	//}
-
-
 }
 
 __global__ void wavevisc_gpu_kernel(double *t,double *csound, double *vx, double *vy, double *vz, int ntot, double *wavespeed,int lxyz, int lx1, int ly1, int lz1, double *vtranstmp, double c_max,int ltot, double *meshh ){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
-		wavespeed[id]= csound [id] +sqrt(vx[id]*vx[id]+vy[id]*vy[id]+vz[id]*vz[id]  )	;
+		wavespeed[id]= csound [id] +sqrt(vx[id]*vx[id]+vy[id]*vy[id]+vz[id]*vz[id]  )	;//sqrtf -> sqrt, corrected by Kk 02/05
 		// find max of wavespeed using reduction
 		__syncthreads();
 		unsigned int i = lxyz/2;
@@ -325,7 +295,7 @@ __global__ void wavevisc_gpu_kernel(double *t,double *csound, double *vx, double
 		int startofcurrentelement = e*lxyz;
 		while(i != 0){
 			if(id-startofcurrentelement <= i){
-				wavespeed[id] = fmax(fabs(wavespeed[id]),fabs(wavespeed[startofcurrentelement + (id+i)%len]));
+				wavespeed[id] = fmax(fabs(wavespeed[id]),fabs(wavespeed[startofcurrentelement + (id+i)%len]));//fmaxf->fmax, corrected by Kk 02/05, fabs(double)
 			}
 
 			__syncthreads();

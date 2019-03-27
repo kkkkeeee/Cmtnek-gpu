@@ -1,5 +1,5 @@
 #/bin/bash
-
+rm dgdgt.step.*.afterIgtu
 rm zm1.id.00*
 rm ym1.id.00*
 rm xm1.id.00*
@@ -17,3 +17,17 @@ rm tlag.id.00*
 rm gridh.id.00*
 rm meshh.step.00*
 rm csound.id.00*
+rm unz.00*
+rm unx.00*
+rm uny.00*
+rm flx.f.00*
+rm nx.f.00*
+rm vxyzd.id.00*
+rm phig.id.00*
+rm jacmi.id.00*
+rm graduf.eq.00*
+rm gradu.id.00*
+rm rx.id.00*
+rm res3.id.00*
+rm rxm1.id.00*
+rm bm1.id.00*

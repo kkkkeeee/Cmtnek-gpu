@@ -96,6 +96,7 @@
       tocpucopy_gas(44)=1 !tlag
       tocpucopy_gas(10)=1 !vx
       tocpucopy_gas(11)=1 !vy
+      tocpucopy_gas(12)=1 !vz
       tocpucopy_gas(45)=1 !pr
       tocpucopy_gas(53)=1 !t
       call copytocpu_gpu()

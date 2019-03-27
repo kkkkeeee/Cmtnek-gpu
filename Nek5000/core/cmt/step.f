@@ -45,7 +45,9 @@ C> @file step.f time stepping and mesh spacing routines
 !         call printCsound('before')
 !      endif
       !print *,"setdtcmt before glsqinvcolmin 1 ",nid
+      if(nid.eq.15) write(6,*) "debug steps: ctarg", ctarg
       if (ctarg .gt.0.0) then
+         if(nid.eq.15) write(6,*) "debug compute_cfl, called ctarg>0"
          call compute_cfl (umax,utmp,vtmp,wtmp,1.0)
          dt_cfl=ctarg/umax
          call glsqinvcolmin(dt1,vdiff(1,1,1,1,imu ),gridh,ntot,ctarg)
@@ -87,6 +89,7 @@ C> @file step.f time stepping and mesh spacing routines
          endif
       endif
       !print *,"setdtcmt before compute_cfl ",nid
+      if(nid.eq.15) write(6,*) "debug compute_cfl, called second"
       call compute_cfl (courno,utmp,vtmp,wtmp,dt_cmt) ! sanity?
       dt=dt_cmt
 

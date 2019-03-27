@@ -1015,7 +1015,7 @@ c        print *, "came to compute_cfl"
          enddo
       endif
 c
-      print *,'print cfl',nid,cfl
+      print *,'print cfl', nid,cfl
       cfl = glmax(cfl,1)
      
 c

@@ -25,6 +25,7 @@ void gpu_gradl_rst(double *ur, double *us, double *ut, double *u, double *d, dou
 
 void gpu_double_copy_gpu_wrapper(int glbblockSize2,double *a1,int n1,double *a2,int n2,int n);
 
+void gpu_nekadd2(int glbblockSize2,double *a, double*b, int n);
 void gpu_neksub2(int glbblockSize2,double *a, double*b, int n);
 
 void gpu_nekcol2(int glbblockSize2,double *a, double*b, int n);
