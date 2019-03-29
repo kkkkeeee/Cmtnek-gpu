@@ -49,16 +49,9 @@ __global__ void igtu_cmt_gpu_kernel2(double *gradu,double *graduf, int eq, int n
 				int newi = iface_flux[id]-1;
 				gradu[j*toteqlxyzlelt+eq2*lxyzlelt+e*lxyz+newi ] =  gradu[j*toteqlxyzlelt+eq2*lxyzlelt+e*lxyz+newi ]  + graduf[j*toteqlxz2ldimlelt+eq2*lxz2ldimlelt+id]; 
 			}
-
-
-
 		}
-
 		//printf("e = %d eq= %d id=%d  gradu[id] = %.20lf\n",e,eq,id, gradu[id]);
-
-
 	}
-
 }
 
 // igtu_cmt_gpu_kernel3<<<gridSize3, blockSize1>>>(d_diffh,d_gradu, d_vtrans,d_vdiff,d_vx,d_vy,d_vz,d_u,d_viscscr,d_superhugeh, d_ur, d_us,d_ut, d_jacmi,d_rxm1,d_rym1, d_rzm1,d_sxm1, d_sym1,d_szm1,d_txm1, d_tym1,d_tzm1, lx1[0],ly1[0],lz1[0], lxy,nxyz,toteq[0], nnel,lxyzlelt,toteqlxyz, toteqlxyzlelt, irho[0], ilam[0],imu[0],icv[0], iknd[0],inus[0],eq,if3d[0],ldim[0] );
@@ -156,10 +149,7 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 				mu    =vdiff[(imu-1)*lxyzlelt+id];
 				u2    =vy[id];
 				u3    =vz[id];
-				diffh[2*lxyzlelt+id]=mu*(dU4y+dU3z-u2*dU1z-u3*dU1y)/rho;	
-
-
-
+				diffh[2*lxyzlelt+id]=mu*(dU4y+dU3z-u2*dU1z-u3*dU1y)/rho;
 			}
 			else if(eq==3){
 				//A41kldUldxk(flux(1,1),gradu,e)
@@ -241,10 +231,7 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 					gradu[2*toteqlxyzlelt+kfortoteq*lxyzlelt+id]=0;
 				}
 				vz[id]=0;
-
 			}
-
-
 		}
 		//a51kldUldxk(flux(1,1),gradu,e)
 		double dU1x=gradu[0*toteqlxyzlelt+0*lxyzlelt+id ];
@@ -306,13 +293,10 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 
 
 		//call fluxj_evm(flux,du,e,eq)
-
-
 		if(eq==0){
 			for(int jj=0;jj<ldim;jj++){
 				diffh[jj*lxyzlelt+id]=  diffh[jj*lxyzlelt+id]+vdiff[(inus-1)*lxyzlelt+id]*gradu[jj*toteqlxyzlelt+id];
 			}
-
 		}
 		else{
 			if(eq<toteq-1){
@@ -323,7 +307,6 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 				if(if3d){
 					diffh[2*lxyzlelt+id]=  diffh[2*lxyzlelt+id]+viscscr[id]*vz[id];
 				} 
-
 			}
 			else{
 				if(if3d){
@@ -345,9 +328,6 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 					}
 
 				} 
-
-
-
 			}
 		}
 		//		printf("e = %d eq= %d id=%d  diffh[id] = %.20lf,  diffh[1id] = %.20lf, diffh[2id] = %.20lf\n",e,eq,id, diffh[0*lxyzlelt+id],diffh[1*lxyzlelt+id],diffh[2*lxyzlelt+id]);
@@ -366,11 +346,6 @@ __global__ void igtu_cmt_gpu_kernel3(double *diffh,double *gradu, double *vtrans
 			ur[id] =  jacmi[id] *( rxm1[id]*superhugeh[0*lxyzlelt+id]+ rym1[id]*superhugeh[1*lxyzlelt+id]);
 			us[id] =  jacmi[id] *( sxm1[id]*superhugeh[0*lxyzlelt+id]+sym1[id]*superhugeh[1*lxyzlelt+id]);
 		}
-
-
-
-
-
 	}
 
 }
@@ -463,9 +438,6 @@ extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,doub
 			cudaMemset(d_ut, 0.0, nlel*sizeof(double));
 			cudaMemset(d_tmp, 0.0, nlel*sizeof(double));
 
-
-
-
 			gridSize2 = (int)ceil((float)nfq/blockSize2);
 			igtu_cmt_gpu_kernel2<<<gridSize2, blockSize2>>>(d_gradu,d_graduf,eq, nfq,d_iface_flux,toteqlxyzlelt,toteqlxz2ldimlelt,lxyzlelt,nf,ldim[0],toteq[0],nxyz,lxz2ldimlelt);
 
@@ -508,7 +480,6 @@ extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,doub
 			code1 = cudaPeekAtLastError();
 			printf("CUDA: igtu_cmt_gpu_wrapper after kernel4 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
-
 		}	
 	}
 	cudaFree(d_ur);
@@ -520,14 +491,10 @@ extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,doub
 
 #ifdef DEBUGPRINT
 	cudaError_t code2 = cudaPeekAtLastError();
-	//if (code2 != cudaSuccess){
 	printf("End igtu_cmt_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code2));
 #endif
-	// }
-
-
-
 }
+
 __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *zm1,double *vx,double *vy,double *vz,double *t,double *pr,double *sii,double *siii,double *vdiff,double *vtrans,char *cb,double *ptw,int *lglel,int *gllel,double *rhs_fluidp,double *u,double *phig,int nnel,int lx1,int ly1,int lz1,int lxy,int nxyz,int lxyzlelt,int toteqlxyz,int  istep,int  npscal,int two_way,int time_delay,int icmtp,int nlel,int p0th,int ifield){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
@@ -581,14 +548,12 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 				ffz = 0.0;
                                 qvol = 0.0; //added by Kk 03/06
 			}
-
 		}
 		else{
 			ffx = 0.0;
 			ffy = 0.0;
 			ffz = 0.0;
                         qvol = 0.0; //added by Kk 03/06
-
 		}			
 
                 /*if(id ==0){
@@ -601,8 +566,6 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 
 
 //		printf("ix =%d iy= %d iz= %d e = %d usrf[0] = %.20lf usrf[1] = %.20lf  usrf[2] = %.20lf  usrf[3] = %.20lf  usrf[4] = %.20lf  \n",ix,iy,iz,e,usrf[e*5*nxyz+0*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+1*nxyz+iz*(lxy)+iy*lx1+ix],usrf[e*5*nxyz+2*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+3*nxyz+iz*(lxy)+iy*lx1+ix] ,usrf[e*5*nxyz+4*nxyz+iz*(lxy)+iy*lx1+ix])  ;
-
-
 	}
 }
 
@@ -645,8 +608,6 @@ __global__ void compute_gradients_gpu_kernel1(double *ud, double *u, double *phi
 
 		ud[id] = u[e*toteqlxyz+eq*nxyz+iz*lxy+iy*lx1+ix]/phig[id];
 		//                printf("e = %d eq= %d id=%d  ud[id] = %.20lf \n",e,eq,id,ud[id]);
-
-
 	}
 }
 
@@ -663,9 +624,6 @@ __global__ void compute_gradients_gpu_kernel2(double *ur,double *us,double *ut,d
 		gradu[2*toteqlxyzlelt+eq*nxyzlelt+id] =  jacmi[id] *( rzm1[id]*ur[id]+ szm1[id]*us[id]+tzm1[id]*ut[id]);
 
 		//		printf("e = %d eq= %d id=%d  gradu[id] = %.20lf  gradu[1+id] = %.20lf gradu[2+id] = %.20lf\n",e,eq,id,gradu[0*toteqlxyzlelt+eq*nxyzlelt+id] ,gradu[1*toteqlxyzlelt+eq*nxyzlelt+id] ,gradu[2*toteqlxyzlelt+eq*nxyzlelt+id] );
-
-
-
 	}
 }
 
@@ -961,9 +919,6 @@ __global__ void convective_cmt_evaluate_aliased_conv_h_gpu_kernel1(double *ju1,d
 		totalh[id]=convh[id];
 		totalh[lxyzdlelt+id]=convh[lxyzdlelt+id];
 		totalh[2*lxyzdlelt+id]=convh[2*lxyzdlelt+id];
-
-
-
 	}
 }
 
@@ -986,11 +941,8 @@ __global__ void flux_div_integral_aliased_kernel1(double *d_ur, double *d_us, do
 			d_ut[id] = d_ut[id] + d_totalh[id] * d_rx[e*lxyzd*ldim*ldim + 6*lxyzd + iz*lxyd + iy*lxd + ix];
 			d_ut[id] = d_ut[id] + d_totalh[id+ndlel] * d_rx[e*lxyzd*ldim*ldim + 7*lxyzd + iz*lxyd + iy*lxd + ix];
 			d_ut[id] = d_ut[id] + d_totalh[id+2*ndlel] * d_rx[e*lxyzd*ldim*ldim + 8*lxyzd + iz*lxyd + iy*lxd + ix];
-
 		}
-
 	}
-
 }
 
 
@@ -2131,6 +2083,7 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 	cudaFree(d_ur);
 	cudaFree(d_us);
 	cudaFree(d_ut);
+        cudaFree(d_rdumz); //added by Kk 03/29
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();

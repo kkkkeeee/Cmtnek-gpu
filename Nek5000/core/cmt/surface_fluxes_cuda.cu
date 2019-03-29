@@ -609,6 +609,7 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 	}
 
+	cudaFree(d_w);//added by Kk 03/29	
 	cudaFree(d_nx);	
 	cudaFree(d_ny);	
 	cudaFree(d_nz);	
