@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <cuda_runtime_api.h>
 
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 
 __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *vz, double *u, int nelt, int nxyz,int ntot,int irpu, int irpv, int irpw, int iret, int irg, int toteq,int if3d,double *scr, double* energy, double *vtrans, int irho, double *phig, int lx1, int ly1, int lz1, int *lglel, double *xm1, double *ym1, double *zm1, double *t,int ldimt, int npscal, double *pr, double p0th, double *sii, double *siii, double *vdiff, int ifield,char *cb, int icv, int icp, double *csound, int imu,int ilam, double cpgref, double cvgref, double gmaref, double rgasref,  int ltot,int lxy){    
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
@@ -164,10 +164,10 @@ __global__ void update_u_gpu_kernel(double *u, double *bm1, double *tcoef, doubl
 
 	  u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1] = u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1] / bm1[ix + iy*lx1 + iz*lx1*ly1 + e*lxyz];
 
-          if(eq ==1 && e == 0 && id%lxyz==10){
+          /*if(eq ==1 && e == 0 && id%lxyz==10){
               printf("debug u here %25.16E %25.16E %25.16E %25.16E %25.16E %25.16E %25.16E %25.16E %25.16E %25.16E %d %d %d %d %d %d \n", bm1[ix + iy*lx1 + iz*lx1*ly1 + e*lxyz], tcoef[(stage-1)*3], res3[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1], tcoef[(stage-1)*3+1],  u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1], tcoef[(stage-1)*3+2], res1[eq*lxyzlelt + e*lxyz + ix+iy*lx1+iz*lx1*ly1], bm1[ix + iy*lx1 + iz*lx1*ly1 + e*lxyz] * tcoef[(stage-1)*3] * res3[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1], bm1[ix + iy*lx1 + iz*lx1*ly1 + e*lxyz] *  tcoef[(stage-1)*3+1] * u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1], tcoef[(stage-1)*3+2] * res1[eq*lxyzlelt + e*lxyz + ix+iy*lx1+iz*lx1*ly1], id, ix, iy, iz, e, eq);
 
-          }
+          }*/
 //	  printf("debug update_u u  : %.30lf %d %d %d %d %d %d %d %d %d\n",u[e*lxyz*toteq + eq*lxyz + ix + iy*lx1 + iz*lx1*ly1],id,e,eq,ix,iy,iz,blockDim.x,blockIdx.x,threadIdx.x );
 
 
@@ -177,8 +177,10 @@ __global__ void update_u_gpu_kernel(double *u, double *bm1, double *tcoef, doubl
 }
 extern "C" void update_u_gpu_wrapper_(int *glbblockSize1, double *d_u, double *d_bm1, double *d_tcoef, double *d_res3, double *d_res1, int *nelt, int *lelt, int *lx1, int *ly1, int *lz1, int *toteq, int *stage){
 
+#ifdef DEBUGPRINT
 	printf("stagem %d \n",stage[0]);
 	printf("values  %d %d %d %d %d %d %d \n",lx1[0],ly1[0],nelt[0],lelt[0],toteq[0],lz1[0],stage[0]);
+#endif
 
 	int lxyz = lx1[0]*ly1[0]*lz1[0];
 	int lxyznelt = lx1[0]*ly1[0]*lz1[0]*nelt[0];
@@ -186,19 +188,16 @@ extern "C" void update_u_gpu_wrapper_(int *glbblockSize1, double *d_u, double *d
 	int lxyznelttoteq = lx1[0]*ly1[0]*lz1[0]*nelt[0]*toteq[0];
 	int blockSize =glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)nelt[0]*lxyz*toteq[0]/blockSize);
-	printf("gridsize ddd %d %d \n",gridSize,blockSize);
+	//printf("gridsize ddd %d %d \n",gridSize,blockSize);
 
 	update_u_gpu_kernel<<<gridSize, blockSize>>>(d_u, d_bm1, d_tcoef, d_res3, d_res1, nelt[0], lelt[0], lx1[0], ly1[0], lz1[0], toteq[0], stage[0], lxyz, lxyznelttoteq, lxyznelt, lxyzlelt);
 
+
+#ifdef DEBUGPRINT
  cudaDeviceSynchronize();
        cudaError_t  code1 = cudaPeekAtLastError();
         printf("CUDA: update_u_gpu_wrapper: cuda status: %s\n",cudaGetErrorString(code1));
-
-
-
-#ifdef DEBUGPRINT
 	cudaError_t code2 = cudaPeekAtLastError();
-
 	printf("CUDA: End compute_primitive_vars_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code2));
 #endif
 

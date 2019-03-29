@@ -136,11 +136,8 @@ c     if (nxc.lt.2) nxc=2
 c
 c     Set SEM_to_GLOB
 c
-      print *,'navier8.f line 139 before g set_vert',nid 
       call get_vertex
-      print *,'navier8.f line 141 before set_vert',nid 
       call set_vert(se_to_gcrs,ngv,nxc,nelv,vertex,.true.)
-      print *,'navier8.f line 143 after set_vert',nid 
 
 c     Set mask
       z=0
@@ -1785,7 +1782,7 @@ c-----------------------------------------------------------------------
       character*1   mapfle1(132)
       equivalence  (mapfle,mapfle1)
 
-      starttime = dnekclock_sync()
+      !starttime = dnekclock_sync()
       if (gfirst .eq. 1) then
       iok = 0
       if (nid.eq.0) then
@@ -1819,19 +1816,14 @@ c-----------------------------------------------------------------------
       len = 4*mdw*ndw
       if (nid.gt.0.and.nid.lt.npass) msg_id=irecv(nid,wk,len)
       call nekgsync
-      print *, "before if readmap 1819 ",ipass
 
       if (nid.eq.0) then
          eg0 = 0
          do ipass=1,npass
-!       print *, "inside do ",ipass
             eg1 = min(eg0+ndw,neli)
             m   = 0
             do eg=eg0+1,eg1
-!       print *, "inside do do  ",eg, ipass
                m = m+1
-!       print *, "inside do do m",m,eg,ipass
-!       print *, "inside do do mdw",mdw,eg,ipass
                read(80,*,end=998) (wk(k,m),k=2,mdw)
                if(.not.ifgfdm .and. (gfirst .eq. 1)) then
                   gllnid(eg) = wk(2,m)  !proc map,  must still be divided
@@ -1844,8 +1836,8 @@ c-----------------------------------------------------------------------
          close(80)
          call icopy(mapdata, wk, mdw*ndw)
          ntuple = m
-         endtime = dnekclock()
-         print *, "read map file", endtime - starttime
+         !endtime = dnekclock()
+         !print *, "read map file", endtime - starttime
       elseif (nid.lt.npass) then
          call msgwait(msg_id)
          call icopy(mapdata, wk, mdw*ndw)
@@ -1854,7 +1846,6 @@ c-----------------------------------------------------------------------
          ntuple = 0
       endif
       else
-       print *, "else line 1853 "
           npass = 1 + (neli/ndw)
           !print *, "Debug nelgt", nid,  nelgt, mdw, ndw, neli, npass 
           if (nid .eq. 0) then 
@@ -1867,11 +1858,11 @@ c-----------------------------------------------------------------------
               ntuple = 0
           endif
       endif
-      print *, "after if readmap 1819 ",ipass
-      endtime = dnekclock_sync()
-!      if( mod(nid, np/2) .eq. np/2-2) then
-!         print *, 'copy_wk ', endtime-starttime
-!      endif
+      !print *, "after if readmap 1819 ",ipass
+      !endtime = dnekclock_sync()
+      !if( mod(nid, np/2) .eq. np/2-2) then
+      !   print *, 'copy_wk ', endtime-starttime
+      !endif
 
 c     Distribute and assign partitions
       if (.not.ifgfdm) then             ! gllnid is already assigned for gfdm
@@ -1884,7 +1875,6 @@ c     Distribute and assign partitions
             call bcast(gllnid,lng)
 c           call assign_gllnid(gllnid,gllel,nelgt,nelgv,np) ! gllel is used as scratch
          else
-      print *,'line 1884',np
             starttime = dnekclock_sync()
             distrib = param(80)
             if (distrib.eq.1) then
@@ -1896,7 +1886,7 @@ c           call assign_gllnid(gllnid,gllel,nelgt,nelgv,np) ! gllel is used as s
             endif
             lng = isize*neli
             call bcast(pload,lng)
-            endtime = dnekclock_sync()
+            !endtime = dnekclock_sync()
 !            if( mod(nid, np/2) .eq. np/2-2) then
 !               print *, 'recompute_partitions ', endtime-starttime,
 !     $    'distrib', distrib
@@ -1909,7 +1899,6 @@ c       endif
 c       call exitt
       endif
 
-      print *,'navier8.f 1909',nid 
       nelt=0 !     Count number of elements on this processor
       nelv=0
       do eg=1,neli
@@ -1918,7 +1907,6 @@ c       call exitt
             if (eg.le.nelgt) nelt=nelt+1
          endif
       enddo
-      print *,'navier8.f 1918',nid 
       if (np.le.64) write(6,*) nid,nelv,nelt,nelgv,nelgt,' NELV'
 
 c     NOW: crystal route vertex by processor id
@@ -1930,7 +1918,6 @@ c     NOW: crystal route vertex by processor id
 
       key = 2  ! processor id is in wk(2,:)
       call crystal_ituple_transfer(cr_h,wk,mdw,ntuple,ndw,key)
-      print *,'navier8.f 1930',nid 
 
       if (.not.ifgfdm) then            ! no sorting for gfdm?
          key = 1  ! Sort tuple list by eg := wk(1,:)
@@ -1938,7 +1925,6 @@ c     NOW: crystal route vertex by processor id
          call crystal_ituple_sort(cr_h,wk,mdw,nelt,key,nkey)
       endif
 
-      print *,'navier8.f 1938',nid 
       iflag = 0
       if (ntuple.ne.nelt) then
          write(6,*) nid,ntuple,nelv,nelt,nelgt,' NELT FAIL'
@@ -1950,7 +1936,6 @@ c     NOW: crystal route vertex by processor id
             call icopy(vertex(1,e),wk(3,e),nv)
          enddo
       endif
-      print *,'navier8.f 1950',nid 
 
       iflag = iglmax(iflag,1)
       if (iflag.gt.0) then
@@ -1963,7 +1948,6 @@ c     NOW: crystal route vertex by processor id
          call nekgsync
          call exitt
       endif
-      print *,'navier8.f 1963',nid 
 
       return
 

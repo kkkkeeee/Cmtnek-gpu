@@ -8,7 +8,7 @@
 // includes, project
 //#include "magma.h"
 #include "cuda_multi_gemm_unif.cu"
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 
 __global__ void nekadd2(double *a, double*b, int n){
 

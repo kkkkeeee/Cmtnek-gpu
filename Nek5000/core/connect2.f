@@ -17,7 +17,7 @@ C
       ierr = 0
       call flush_io
 
-      print *,'connect2.f start',nid 
+      !print *,'connect2.f start',nid 
       ! check if new rea file version exists
       if(nid.eq.0) inquire(file=parfle, exist=parfound)
       call bcast(parfound,lsize)
@@ -62,17 +62,17 @@ C     Read Mesh Info
       call chk_nel  ! make certain sufficient array sizes
       endif !endif for gfirst 
 
-      call nekgsync()
-      endtime = dnekclock()
-      if(nid .eq. 0) print *, "omit time 1", endtime-starttime
-      starttime = dnekclock()
-      print *,'connect2.f before mapelpr',nid 
+      !call nekgsync()
+      !endtime = dnekclock()
+      !if(nid .eq. 0) print *, "omit time 1", endtime-starttime
+      !starttime = dnekclock()
+      !print *,'connect2.f before mapelpr',nid 
       if (.not.ifgtp) call mapelpr  ! read .map file, est. gllnid, etc.
-      endtime = dnekclock()
-      if(nid .eq. 0) print *, "mapelpr time ", endtime-starttime
+      !endtime = dnekclock()
+      !if(nid .eq. 0) print *, "mapelpr time ", endtime-starttime
 
-      call nekgsync()
-      starttime = dnekclock()
+      !call nekgsync()
+      !starttime = dnekclock()
       if(gfirst .eq. 1) then
       if (ifre2) then
         call bin_rd1(ifbswap) ! rank0 will read mesh data + distribute
@@ -127,9 +127,9 @@ c     suffice for now.   5/6/10
      $ 'ABORT: IFCHAR curr. not supported w/ conj. ht transfer$',nelgv)
       endif !endif for if gfirst
 
-      call nekgsync()
-      endtime = dnekclock()
-      if(nid .eq. 0) print *, "omit time 2", endtime-starttime
+      !call nekgsync()
+      !endtime = dnekclock()
+      !if(nid .eq. 0) print *, "omit time 2", endtime-starttime
 
       return
       END

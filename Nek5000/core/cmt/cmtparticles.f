@@ -424,7 +424,7 @@ c     ! particle cfl, particles cant move due to velocity
          rdt_part = dt_part ! don't set if no collisions!
       endif
 
-      if (nid.eq.0) write(6,*) 'PART DT:', rdt_part,dt_part,dt_col
+      !if (nid.eq.0) write(6,*) 'PART DT:', rdt_part,dt_part,dt_col
 
  1234 continue
 

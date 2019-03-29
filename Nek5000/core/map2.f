@@ -32,12 +32,9 @@ c     Distributed memory processor mapping
       ENDIF
 c     endtime = dnekclock_sync()
 c     if(nid.eq.0) print *, "mapelpr before set_proc", endtime-starttime 
-      starttime1 = dnekclock_sync()
-      print *,'map2.f before set_proc_map'
+      !starttime1 = dnekclock_sync()
       call set_proc_map()
-      print *,'map2.f after set_proc_map'
-      call set_proc_map()
-      endtime = dnekclock_sync()
+      !endtime = dnekclock_sync()
 !      if( mod(nid, np/2) .eq. np/2-2) then
 !         print *, 'set_proc_map ', endtime-starttime1
 !      endif
@@ -80,7 +77,7 @@ c    &           write(6 ,1315) (lglel(ie,inid+1),ie=9,inelt)
            call csend(mtype,nelt,4,0,0)            ! nelt
         endif
       endif
-      endtime = dnekclock_sync()
+!      endtime = dnekclock_sync()
 !      if( mod(nid, np/2) .eq. np/2-2) then
 !         print *, 'mapelpr_output ', endtime-starttime1
 !      endif
@@ -163,11 +160,9 @@ c
 c        rsb element to processor mapping 
 c
          if (ifgfdm)       call gfdm_elm_to_proc(gllnid,np) ! gfdm w/ .map
-         starttime1 = dnekclock_sync() 
-         print *,"before get_map map2.f"
+         !starttime1 = dnekclock_sync() 
          call get_map
-         print *,"after get_map map2.f"
-         endtime = dnekclock_sync()
+         !endtime = dnekclock_sync()
 !         if( mod(nid, np/2) .eq. np/2-2) then
 !         print *, 'get_map ', endtime-starttime1
 !         endif
@@ -178,10 +173,9 @@ c
 
 c     compute global to local map (no processor info)
 c
-      starttime1 = dnekclock_sync() 
+      !starttime1 = dnekclock_sync() 
       IEL=0
       CALL IZERO(GLLEL,NELGT)
-         print *, 'map2.f line 184 ', endtime-starttime1
       DO IEG=1,NELGT
          IF (GLLNID(IEG).EQ.NID) THEN
             IEL = IEL + 1
@@ -218,30 +212,28 @@ c      enddo
             call mpi_allreduce (gllel(1),iwork2,nelgt,mpi_integer,
      >             mpi_sum ,nekcomm,ierr)
             call icopy(gllel(1),iwork2,nelgt)
-      endtime = dnekclock_sync()
+      !endtime = dnekclock_sync()
 !      if( mod(nid, np/2) .eq. np/2-2) then
 !      print *, 'gllel_comp ', endtime-starttime1
 !      endif
-         print *, 'map2.f line 225 ', endtime-starttime1
 c
 c     compute local to global map
 c     (i.e. returns global element number given local index and proc id)
 c
 c     starttime = dnekclock_sync()
-      starttime1 = dnekclock_sync() 
+      !starttime1 = dnekclock_sync() 
       do ieg=1,nelgt
          mid  =gllnid(ieg)
          ie   =gllel (ieg)
          if (mid.eq.nid) lglel(ie)=ieg
       enddo
-      endtime = dnekclock_sync()
+      !endtime = dnekclock_sync()
 !      if( mod(nid, np/2) .eq. np/2-2) then
 !      print *, 'lglel_comp ', endtime-starttime1
 !      endif
 
-         print *, 'map2.f line 242 ', endtime-starttime1
 c     added by keke to convert ipart(je0, i) to local element id
-      starttime1 = dnekclock_sync() 
+      !starttime1 = dnekclock_sync() 
       if ( gfirst .eq. 0) then
          ip=0
          do ip = 1, n
@@ -252,8 +244,8 @@ c     Sort by element number
           call crystal_tuple_sort(i_cr_hndl,n
      $              , ipart,ni,partl,nl,rpart,nr,je0,1)
       endif
-         print *, 'map2.f line 255 ', endtime-starttime1
-      endtime = dnekclock_sync()
+         !print *, 'map2.f line 255 ', endtime-starttime1
+      !endtime = dnekclock_sync()
 !      if( mod(nid, np/2) .eq. np/2-2) then
 !      print *, 'part_sort ', endtime-starttime1
 !      endif

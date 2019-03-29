@@ -8,7 +8,7 @@
 //#include "magma.h"
 #include "cuda_multi_gemm_unif.cu"
 #include "cuda_helpers.h"
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 __global__ void fluxes_full_field_gpu_kernel_fillq(double *vtrans, double *vx, double *vy, double *vz, double *pr, double *t, double *csound, double *phig, double *vdiff, double *fatface,int irho, int iux, int iuy, int iuz, int ipr, int ithm, int isnd, int iph, int icvf, int icpf, int imuf, int ikndf, int ilamf, int iwm, int iwp, int icv, int icp, int imu, int iknd, int ilam,int *iface_flux, int nnel, int nxz2ldim, int lxyz,int lxz, int ivarcoef,int leltlxyz ){
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
@@ -215,9 +215,9 @@ __global__ void Ausm_flux(int neq, int ntotd, double *nx, double *ny, double *nz
 		ql = ul[i]*nx[i] + vl[i]*ny[i] + wl[i]*nz[i] - fs[i];
 		qr = ur[i]*nx[i] + vr[i]*ny[i] + wr[i]*nz[i] - fs[i];
 
-                if(i==1){
+                /*if(i==1){
                 printf("ql  %.30lf  qr  %.30lf  Hl  %.30lf  Hr  %.30lf  cpl  %.30lf  cpr  %.30lf  rl  %.30lf  tl  %.30lf  ul   %.30lf vl  %.30lf  wl   %.30lf ur   %.30lf vr   %.30lf wr   %.30lf fs   %.30lf al   %.30lf ar   %.30lf pl   %.30lf pr   %.30lf phl  %.30lf  rr   %.30lf nm   %.30lf  \n",ql, qr, Hl, Hr, cpl[i],cpr[i], rl[i], tl[i], ul[i], vl[i], wl[i], ur[i], vr[i], wr[i], fs[i], al[i], ar[i], pl[i], pr[i], phl[i], rr[i], nm[i]);
-               }
+               }*/
 
 		af = 0.5*(al[i] + ar[i]);
 		ml = ql/af;

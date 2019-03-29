@@ -273,15 +273,15 @@
 !      endif 
       if(togpucopy_gas(10).eq.1) then
            istate = cudaMemcpy(d_vx, vx, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
-      print *,"istate 10", cudaGetErrorString(istate)
+      !print *,"istate 10", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(11).eq.1) then
            istate = cudaMemcpy(d_vy, vy, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
-      print *,"istate 11", cudaGetErrorString(istate)
+      !print *,"istate 11", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(12).eq.1) then
            istate = cudaMemcpy(d_vz, vz, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
-      print *,"istate 12", cudaGetErrorString(istate)
+      !print *,"istate 12", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(13).eq.1) then
            istate = cudaMemcpy(d_vxd,vxd, lxd*lyd*lzd*lelv,cudaMemcpyHostToDevice)
@@ -800,9 +800,9 @@
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-     print *,'start computevars',istep,stage
+     !print *,'start computevars',istep,stage
       call compute_primitive_vars_gpu
-     print *,'end computevars',istep,stage
+     !print *,'end computevars',istep,stage
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -851,9 +851,7 @@
          tocpucopy_gas(56)=1 !vdiff
          tocpucopy_gas(48)=1
          call copytocpu_gpu()
-         print *,"our dt start"
          call setdtcmt
-         print *,"our dt end "
          call set_tstep_coef
       
          togpucopy_gas(5)=1
@@ -974,7 +972,7 @@
       iflx=iwp+nstate*nfq
       do eq=1,toteq
          ieq=(eq-1)*ndg_face+iflx
-         print *,'111st debug',ieq,eq,stage,istep
+         !print *,'111st debug',ieq,eq,stage,istep
          call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
 
       enddo
@@ -998,7 +996,7 @@
       iuj=iflx ! overwritten with U -{{U}}
       ium=(iu1-1)*nfq+iwm
       iup=(iu1-1)*nfq+iwp
-      write(6,*) "debug ium, iup", iu1, ium, iup, iwm, iwp
+      !write(6,*) "debug ium, iup", iu1, ium, iup, iwm, iwp
       call   imqqtu_gpu_wrapper(glbblockSize2,d_flux,iuj,ium,iup,lx1,ly1,lz1,ldim,nelt,lelt,toteq)
 !      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after imqqtu_gpu_wrapper", nid
 
@@ -1212,7 +1210,7 @@
 
       do eq=1,toteq
          ieq=(eq-1)*ndg_face+iwp
-         print *,'qqq start aaa',eq,ieq,stage,istep
+         !print *,'qqq start aaa',eq,ieq,stage,istep
          call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
          !call surface_integral_full(res1(1,1,1,1,eq),flux(ieq))
       enddo
@@ -2170,15 +2168,15 @@
 !      endif 
       if(tocpucopy_gas(10).eq.1) then
            istate = cudaMemcpy(vx, d_vx, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
-      print *,"istate 10", cudaGetErrorString(istate) 
+      !print *,"istate 10", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(11).eq.1) then
            istate = cudaMemcpy(vy, d_vy, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
-      print *,"istate 11", cudaGetErrorString(istate) 
+      !print *,"istate 11", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(12).eq.1) then
            istate = cudaMemcpy(vz, d_vz, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
-      print *,"istate 12", cudaGetErrorString(istate),lelt,lelv 
+      !print *,"istate 12", cudaGetErrorString(istate),lelt,lelv 
       endif 
       if(tocpucopy_gas(13).eq.1) then
            istate = cudaMemcpy(vxd,d_vxd, lxd*lyd*lzd*lelv,cudaMemcpyDeviceToHost)

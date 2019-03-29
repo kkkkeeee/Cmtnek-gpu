@@ -133,10 +133,10 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-      print *,'start our inviscd', istep, stage
+      !print *,'start our inviscd', istep, stage
       call inviscidflux_gpu_wrapper(glbblockSize2,d_jgl,d_jgt,d_unx,d_uny,d_unz,d_area,d_flux,d_wghtc,d_wghtf,irho,iux,iuy,iuz,ipr,ithm,isnd,icpf,iph,iwm,iwp,iflx,ldim,lxd,lzd,nelt,lelt,toteq,lx1,ly1,lz1,ip)
  
-      print *,'end our inviscd', istep, stage
+      !print *,'end our inviscd', istep, stage
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

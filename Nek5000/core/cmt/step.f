@@ -45,16 +45,16 @@ C> @file step.f time stepping and mesh spacing routines
 !         call printCsound('before')
 !      endif
       !print *,"setdtcmt before glsqinvcolmin 1 ",nid
-      if(nid.eq.15) write(6,*) "debug steps: ctarg", ctarg
+      !if(nid.eq.15) write(6,*) "debug steps: ctarg", ctarg
       if (ctarg .gt.0.0) then
-         if(nid.eq.15) write(6,*) "debug compute_cfl, called ctarg>0"
+         !if(nid.eq.15) write(6,*) "debug compute_cfl, called ctarg>0"
          call compute_cfl (umax,utmp,vtmp,wtmp,1.0)
          dt_cfl=ctarg/umax
          call glsqinvcolmin(dt1,vdiff(1,1,1,1,imu ),gridh,ntot,ctarg)
          call glsqinvcolmin(dt2,vdiff(1,1,1,1,iknd),gridh,ntot,ctarg)
          call glsqinvcolmin(dt3,vdiff(1,1,1,1,inus),gridh,ntot,ctarg)
          dt_cmt=min(dt_cfl,dt1,dt2,dt3)
-      print *,"setdtcmt bef dt huge cg ",nid,dt_cmt,dt_cfl,dt1,dt2,dt3
+         !print *,"setdtcmt bef dt huge cg ",nid,dt_cmt,dt_cfl,dt1,dt2,dt3
 !         dt_cmt=2 !only for now remove later .adeesha.
          if (dt_cmt .gt. 10.0) then
             if (nio.eq.0) write(6,*) 'dt huge. crashig cpu',istep,stage,
@@ -89,7 +89,7 @@ C> @file step.f time stepping and mesh spacing routines
          endif
       endif
       !print *,"setdtcmt before compute_cfl ",nid
-      if(nid.eq.15) write(6,*) "debug compute_cfl, called second"
+      !if(nid.eq.15) write(6,*) "debug compute_cfl, called second"
       call compute_cfl (courno,utmp,vtmp,wtmp,dt_cmt) ! sanity?
       dt=dt_cmt
 

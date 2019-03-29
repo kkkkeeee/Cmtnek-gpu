@@ -5,7 +5,7 @@
 #include "nvml.h"
 #include "cuda_helpers.h"
 //#include "cuda_helpers.h"
-#define DEBUGPRINT 0
+//#define DEBUGPRINT 0
 
 __global__ void igtu_cmt_gpu_kernel1(double *flux, int nfq, int toteq,int toteqlxz2ldimlelt,int lxz2ldimlelt,int iuj,double *graduf,double *area,double *unx, double *uny, double *unz,int if3d,int ldim){
 
@@ -591,9 +591,9 @@ __global__ void cmtusrf_gpu_kernel(double *usrf,double *xm1,double *ym1,double *
 
 		}			
 
-                if(id ==0){
+                /*if(id ==0){
                 printf("debug cmtusrf, two_way %d \n", two_way);
-                }
+                }*/
 		usrf[e*5*nxyz+1*nxyz+iz*(lxy)+iy*lx1+ix] = ffx*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
 		usrf[e*5*nxyz+2*nxyz+iz*(lxy)+iy*lx1+ix] = ffy*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
 		usrf[e*5*nxyz+3*nxyz+iz*(lxy)+iy*lx1+ix] = ffz*u[e*toteqlxyz+iz*(lxy)+iy*lx1+ix]*phig[id];
@@ -1251,7 +1251,9 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 
 
+#ifdef DEBUGPRINT
 			printf("CUDA: convective_cmt_gpu_wrapper before gpu_local_grad if3d: %d\n",if3d[0]);
+#endif
 			if(if3d[0]){//corrected by Kk 02/25 if3d -> if3d[0]
 				//uncooment after fix gpu_local_grad3_t
 				gpu_local_grad3_t(d_ud, d_ur, d_us, d_ut, lxd[0], d_dg, d_dgt, d_w, nelt[0]);

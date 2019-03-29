@@ -18,7 +18,6 @@ c     call preSum(pload, psum, nelgt) !calculate the prefix sum of pload
 c      call ldblce(psum, nelgt, gllnid, np) !equally distribute the load to np processor, assigned to gllnid
       
 c     uniformally assign element
-      print *,'assignm mpafs',np
       nel = nelgt/np
       nmod  = mod(nelgt,np)  ! bounded between 1 ... np-1
       npp   = np - nmod      ! how many paritions of size nel
@@ -46,7 +45,6 @@ c        gllnid(i) = (i-1)/part
 c     enddo
 c      call printi(gllnid, nelgt)
 
-      print *,'assignm mpafs done',np
       end subroutine
 
 c----------------------------------------------------------------
