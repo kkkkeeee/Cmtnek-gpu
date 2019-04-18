@@ -988,7 +988,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 	cudaMalloc((void**)&d_ju1,nelt[0]*ldd*sizeof(double));
 	cudaMalloc((void**)&d_ju2,nelt[0]*ldd*sizeof(double));
-	cudaMalloc(&d_w, nelt[0]*ldw*sizeof(double));
+	cudaMalloc((void**)&d_w, nelt[0]*ldw*sizeof(double));
 
 
 	cudaMalloc((void**)&d_ur,nelt[0]*ldd*sizeof(double));

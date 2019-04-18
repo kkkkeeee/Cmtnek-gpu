@@ -16,6 +16,7 @@ if [ "$PPLIST" == "?" ]; then
   echo "  NEKNEK      activate overlapping mesh solver (experimental)"
   echo "  CMTNEK      activate DG compressible-flow solver (experimental)"
   echo "  DEBUG      output the debug statement"
+  echo "  MTIME      output the time statement"
   exit 1
 fi
 
@@ -223,6 +224,9 @@ do
    if [ "$i" == "DEBUG" ]; then
      DEBUG=1
    fi
+   if [ "$i" == "MTIME" ]; then
+     MTIME=1
+   fi
 done
 export IFCMT
 
@@ -271,6 +275,7 @@ sed -e "s:^FC[ ]*=.*:FC\:=$F77:" \
 -e "s/^IFMPI[ ]*=.*/IFMPI:=$IFMPI/" \
 -e "s/^IFCMT[ ]*=.*/IFCMT:=$IFCMT/" \
 -e "s/^DEBUG[ ]*=.*/DEBUG:=$DEBUG/" \
+-e "s/^MTIME[ ]*=.*/MTIME:=$MTIME/" \
 -e "s/^IFNEKNEK[ ]*=.*/IFNEKNEK:=$IFNEKNEK/" \
 -e "s:^USR[ ]*=.*:USR\:=$USR:" \
 -e "s:^USR_LFLAGS[ ]*=.*:USR_LFLAGS\:=$USR_LFLAGS:" \

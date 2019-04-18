@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cuda_runtime_api.h>
+#include "cuda_helpers.h" //for set_convect_cons_gpu_wrapper_ calling specmpn
 
 //#define DEBUGPRINT 0
 
@@ -10,39 +11,42 @@ __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *v
 		int e = id/nxyz;
 		int i = id%nxyz;
 		int e_offset = toteq*nxyz;
-		double c = u[e*e_offset+(irg-1)*nxyz+i];
+		/*double c = u[e*e_offset+(irg-1)*nxyz+i];
 		vx[id] = u[e*e_offset+(irpu-1)*nxyz+i]/c;//invcol3
 		vy[id] = u[e*e_offset+(irpv-1)*nxyz+i]/c;
-		vz[id] = u[e*e_offset+(irpw-1)*nxyz+i]/c;
-//               if(e<5){
-//                printf("u is %.20lf  %.20lf %.20lf %.20lf %.20lf e %d i %d  id %d \n",u[e*e_offset+(iret-1)*nxyz+i], u[e*e_offset+(irpu-1)*nxyz+i],u[e*e_offset+(irpv-1)*nxyz+i], u[e*e_offset+(irpw-1)*nxyz+i],u[e*e_offset+(irg-1)*nxyz+i],e,i,id);
-//		}
+		vz[id] = u[e*e_offset+(irpw-1)*nxyz+i]/c;*/
+
+                //added by Kk 04/09/19 for performance
+                double irg_c = u[e*e_offset+(irg-1)*nxyz+i];
+                double irpu_c = u[e*e_offset+(irpu-1)*nxyz+i];
+                double irpv_c = u[e*e_offset+(irpv-1)*nxyz+i];
+                double irpw_c = u[e*e_offset+(irpw-1)*nxyz+i];
+                vx[id] = irpu_c/irg_c;
+                vy[id] = irpv_c/irg_c;
+                vz[id] = irpw_c/irg_c;
+                //end add
 
 		if(if3d){
 			//Compute a Cartesian vector dot product. 3-d version  vdot3
-			scr[id] = u[e*e_offset+(irpu-1)*nxyz+i]*u[e*e_offset+(irpu-1)*nxyz+i]+u[e*e_offset+(irpv-1)*nxyz+i]*u[e*e_offset+(irpv-1)*nxyz+i]+u[e*e_offset+(irpw-1)*nxyz+i]*u[e*e_offset+(irpw-1)*nxyz+i];
-
+                        /* for performance replace with the following
+			scr[id] = u[e*e_offset+(irpu-1)*nxyz+i]*u[e*e_offset+(irpu-1)*nxyz+i]+u[e*e_offset+(irpv-1)*nxyz+i]*u[e*e_offset+(irpv-1)*nxyz+i]+u[e*e_offset+(irpw-1)*nxyz+i]*u[e*e_offset+(irpw-1)*nxyz+i];*/
+                       scr[id] = irpu_c*irpu_c + irpv_c*irpv_c + irpw_c*irpw_c;
 		}
 		else{
 			// compute vector dot product 2d version vdot2
-			scr[id] = u[e*e_offset+(irpu-1)*nxyz+i]*u[e*e_offset+(irpu-1)*nxyz+i]+u[e*e_offset+(irpv-1)*nxyz+i]*u[e*e_offset+(irpv-1)*nxyz+i];
-
-
+                        /* for performance replace with the following
+			scr[id] = u[e*e_offset+(irpu-1)*nxyz+i]*u[e*e_offset+(irpu-1)*nxyz+i]+u[e*e_offset+(irpv-1)*nxyz+i]*u[e*e_offset+(irpv-1)*nxyz+i];*/
+                        scr[id] = irpu_c*irpu_c + irpv_c*irpv_c;
 		}
 
-  //              if(isnan(c)||isnan(-1*c)){
-//		  printf("c is nan %.lf e %d i %d  id %d e_offset %d \n",c,e,i,id,e_offset);
-//		}
 
-		scr[id] = scr[id]/c; //invcol2
+		scr[id] = scr[id]/irg_c; //invcol2
+		//scr[id] = scr[id]/c; //invcol2
 		scr[id] = scr[id] * 0.5; //cmult
 
 		energy[id] =  u[e*e_offset+(iret-1)*nxyz+i] -scr[id];// sub3	
-		energy[id] = energy[id]/c;// invcol2
-//		if(isnan(energy[id])) {
-//		  printf("energy nan %.lf e %d i %d  id %d c %.30lf u %.30lf scr%.30lf \n",energy[id],e,i,id,c,u[e*e_offset+(iret-1)*nxyz+i],scr[id]);
-//		}
-		vtrans[(irho-1)*ltot+id ] = c / phig[id];  //invcol3
+		energy[id] = energy[id]/irg_c;// invcol2; replace c with irg_c by Kk 04/09/2019
+		vtrans[(irho-1)*ltot+id ] = irg_c / phig[id];  //invcol3; replace c with irg_c by Kk 04/09/2019
 
 		// subroutine tdstate
 
@@ -105,9 +109,6 @@ __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *v
 		// function MixtPerf_C_GRT
 		asnd=sqrt(gmaref*rgasref*temp);  //overrides
 		// function MixtPerf_P_DRT
-//		if(isnan(asnd)) {
-  //                printf("asnd nan %.30lf e_internal %.30lf e %d i %d  id %d j %d  k %d  newi %d cv %.30lf temp %.30lf gmaref %.30lf rgasref %.30lf sqrt %.30lf \n",asnd,e_internal,e,i,id,j,k,newi,cv,temp,gmaref,rgasref,gmaref*rgasref*temp);
-    //            }
 
 		pres=rho*rgasref*temp;//overrides
 
@@ -200,5 +201,58 @@ extern "C" void update_u_gpu_wrapper_(int *glbblockSize1, double *d_u, double *d
 	cudaError_t code2 = cudaPeekAtLastError();
 	printf("CUDA: End compute_primitive_vars_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code2));
 #endif
+
+}
+
+extern "C" void set_convect_cons_gpu_wrapper_(double *d_vxd, double *d_vyd, double *d_vzd, double *d_vx, double *d_vy, double *d_vz, int *lx1, int *lxd, double *d_jgl, double *d_jgt, int *if3d, int *ldim, int *nelt){
+
+        int ld = 2*lxd[0];
+        int ldw=2*pow(ld,ldim[0]);
+        double *d_w;
+        cudaMalloc((void**)&d_w, nelt[0]*ldw*sizeof(double));
+
+//#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code1 = cudaPeekAtLastError();
+        printf("CUDA: Start set_convect_cons_gpu_wrapper_ cuda status: %s\n",cudaGetErrorString(code1));
+
+        printf("CUDA: Start set_convect_cons_gpu_wrapper_ values lx1=%d , lxd=%d,if3d=%d,nelt=%d,ldim=%d \n", lx1[0],lxd[0],if3d[0], nelt[0],ldim[0]);
+//#endif
+
+        gpu_specmpn(d_vxd, lxd[0], d_vx, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
+
+//#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code3 = cudaPeekAtLastError();
+        printf("CUDA: set_convect_cons_gpu_wrapper_ first gpu_specmpn cuda status: %s\n",cudaGetErrorString(code3));
+//#endif
+
+        gpu_specmpn(d_vyd, lxd[0], d_vy, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
+
+//#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code4 = cudaPeekAtLastError();
+        printf("CUDA: set_convect_cons_gpu_wrapper_ second gpu_specmpn cuda status: %s\n",cudaGetErrorString(code4));
+//#endif
+
+        if(if3d[0]){
+           gpu_specmpn(d_vzd, lxd[0], d_vz, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
+
+//#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code5 = cudaPeekAtLastError();
+        printf("CUDA: set_convect_cons_gpu_wrapper_ third gpu_specmpn cuda status: %s\n",cudaGetErrorString(code5));
+//#endif
+
+        }
+        cudaFree(d_w);
+
+//#ifdef DEBUGPRINT
+        cudaDeviceSynchronize();
+        cudaError_t code2 = cudaPeekAtLastError();
+        printf("CUDA: End set_convect_cons_gpu_wrapper_ cuda status: %s\n",cudaGetErrorString(code2));
+//#endif
+        
+
 
 }

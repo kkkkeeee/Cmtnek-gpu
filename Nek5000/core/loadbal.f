@@ -13,9 +13,6 @@ c     This subroutine is used for update gllnid
 c     nw=200 
       
       call izero(pload, lelg)
-c      call randGenet(pload, nelgt, nw) !random assign pload
-c     call preSum(pload, psum, nelgt) !calculate the prefix sum of pload
-c      call ldblce(psum, nelgt, gllnid, np) !equally distribute the load to np processor, assigned to gllnid
       
 c     uniformally assign element
       nel = nelgt/np
@@ -39,11 +36,49 @@ c     uniformally assign element
         enddo
       endif
 
-c     part = nelgt/np
-c     do i=1, nelgt
-c        gllnid(i) = (i-1)/part
-c     enddo
-c      call printi(gllnid, nelgt)
+      end subroutine
+c-----------------------------------------------------------------------
+      subroutine assign_partitions_hybrid
+c     This subroutine is used for update gllnid for cpu and gpu           
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL' !these include contains gllnid, lelt, and np     
+
+      common /elementload/ gfirst, inoassignd, resetFindpts, pload(lelg)
+      integer gfirst, inoassignd, resetFindpts
+      integer pload
+      integer psum(lelg)
+      integer nw, k, nel, nmod, npp  !the number of particles
+      
+      call izero(pload, lelg)
+      
+      nelgt_cpu = nelgt * 0.9375 !0.8 !0.9375
+      
+c     uniformally assign element
+      nel = nelgt_cpu/(np-1)
+      nmod  = mod(nelgt_cpu,np-1)  ! bounded between 1 ... np-1
+      npp   = np-1 - nmod      ! how many paritions of size nel
+      ! setup partitions of size nel
+      k   = 0
+      do ip = 0,npp-1
+         do e = 1,nel
+            k = k + 1
+            gllnid(k) = ip
+         enddo
+      enddo
+      ! setup partitions of size nel+1
+      if(nmod.gt.0) then
+        do ip = npp,np-2
+           do e = 1,nel+1
+              k = k + 1
+              gllnid(k) = ip
+           enddo
+        enddo
+      endif
+
+      do mm = k+1, nelgt
+         gllnid(mm) = np-1
+      enddo
 
       end subroutine
 

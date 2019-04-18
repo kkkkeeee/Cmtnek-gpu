@@ -3,7 +3,6 @@
       module glbvariable_gpu
        
       include 'SIZE'
-!      include 'SIZE.inc'
       include 'CMTPART'
       include 'TSTEP'
       include 'INPUT'
@@ -267,32 +266,29 @@
            istate = cudaMemcpy(d_diffh,diffh,3*lx1*ly1*lz1,cudaMemcpyHostToDevice)
 !      print *,"istate 8", cudaGetErrorString(istate)
       endif 
-!      if(togpucopy_gas(1).eq.1) then
-!           istate = cudaMemcpy(d_res3, res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
-!      print *,"istate 9", cudaGetErrorString(istate)
-!      endif 
+
       if(togpucopy_gas(10).eq.1) then
-           istate = cudaMemcpy(d_vx, vx, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_vx, vx, lx1*ly1*lz1*nelt,cudaMemcpyHostToDevice)!changed lelv -> nelt by Kk 04/09/2019 togpucopy_gas(10-15)
       !print *,"istate 10", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(11).eq.1) then
-           istate = cudaMemcpy(d_vy, vy, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_vy, vy, lx1*ly1*lz1*nelt,cudaMemcpyHostToDevice)
       !print *,"istate 11", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(12).eq.1) then
-           istate = cudaMemcpy(d_vz, vz, lx1*ly1*lz1*lelv,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_vz, vz, lx1*ly1*lz1*nelt,cudaMemcpyHostToDevice)
       !print *,"istate 12", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(13).eq.1) then
-           istate = cudaMemcpy(d_vxd,vxd, lxd*lyd*lzd*lelv,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_vxd,vxd, lxd*lyd*lzd*nelt,cudaMemcpyHostToDevice)
 !      print *,"istate 13", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(14).eq.1) then
-           istate = cudaMemcpy(d_vyd,vyd, lxd*lyd*lzd*lelv,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_vyd,vyd, lxd*lyd*lzd*nelt,cudaMemcpyHostToDevice)
 !      print *,"istate 14", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(15).eq.1) then
-           istate = cudaMemcpy(d_vzd,vzd, lxd*lyd*lzd*lelv,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_vzd,vzd, lxd*lyd*lzd*nelt,cudaMemcpyHostToDevice)
 !      print *,"istate 15", cudaGetErrorString(istate)
       endif 
       if(togpucopy_gas(16).eq.1) then
@@ -692,6 +688,9 @@
       subroutine compute_rhs_and_dt_gpu
       use cudafor
       use  glbvariable_gpu
+#ifdef MTIME
+      include 'mpif.h'!for time measurement, dnekclock() just doesn't work, added by Kk 04/01
+#endif
 
       integer lfq,heresize,hdsize
       parameter (lfq=lx1*lz1*2*ldim*lelt, &
@@ -707,6 +706,7 @@
       !added by Kk to output gradu
       common /KekeDebug/ gradu_copy(lx1*ly1*lz1, lelt, toteq, 3)
       real gradu_copy
+      real*8 start, end, start1 
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -730,7 +730,7 @@
       !call compute_mesh_h_gpu()
       !call compute_grid_h_gpu() 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#ifdef DEBUG
+!#ifdef DEBUG
 !      tocpucopy_gas(47)=1 !meshh
 !      tocpucopy_gas(48)=1 !gridh
 !      tocpucopy_gas(49)=1 !d_xm1
@@ -744,7 +744,7 @@
 !      call printZm1("afterCompMeshh")
 !      call printMeshh("afterCompMeshh")
 !      call printGridh("afterCompMeshh")
-#endif
+!#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -780,8 +780,6 @@
          call copytogpu_gpu()
 
       endif
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before compute_primitive_vars_gpu", nid
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
  !following code is for testing only. delete later.
@@ -798,13 +796,20 @@
       call printTArray("beforecompute")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-     !print *,'start computevars',istep,stage
+#ifdef MTIME
+     start = mpi_wtime() ! dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       call compute_primitive_vars_gpu
-     !print *,'end computevars',istep,stage
 
-
+      !just for debug
+      !tocpucopy_gas(13)=1
+      !tocpucopy_gas(14)=1
+      !tocpucopy_gas(15)=1
+      !call copytocpu_gpu()
+      !call printVxyzd("afterCompNoWrapper")
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
 !     !following code is for testing only. delete later.
@@ -836,13 +841,17 @@
       call printTArray("afterPrimitiveVars")
     endif
 #endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Compute_primitive_vars_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_primitive_vars_gpu", nid
 
 !     need to do some work to parallelize using gpu  due to mpi reduce calls
       if(stage.eq.1) then
-         
          !copy arrays to cpu
          tocpucopy_gas(10)=1
          tocpucopy_gas(11)=1
@@ -856,12 +865,12 @@
       
          togpucopy_gas(5)=1
          call copytogpu_gpu()
-
       endif
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
-!!only for testing. delete later.
+!only for testing. delete later.
    if(istep .ge. 0) then
        tocpucopy_gas(56)=1 !vdiff
        tocpucopy_gas(20)=1 !res2
@@ -876,18 +885,20 @@
        call printVdiff("beforeEntropy")
    endif
 #endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Setdtcmt time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
-!     print *,"cmtparu.cuf compute_rhs_and_dt_gpu before entropy_viscosity_gpu", nid
 
       call entropy_viscosity_gpu ! accessed through uservp. computes
                              ! entropy residual and max wave speed
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
-!      !only for testing. delete later.
+   !only for testing. delete later.
    if(istep .ge. 0) then
       tocpucopy_gas(56)=1 !vdiff
       tocpucopy_gas(20)=1 !res2
@@ -902,11 +913,14 @@
       call printUnx("afterEntropy")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Entropy_viscosity_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before compute_transport_props_gpu", nid
 
       call compute_transport_props_gpu ! everything inside rk stage
       
@@ -923,10 +937,13 @@
       call printTArray("afterTransportProps")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_transport_props_gpu", nid
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Compute_transport_props_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ntot = lx1*ly1*lz1*lelt*toteq
 
@@ -944,14 +961,12 @@
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu before fluxes_full_filed_gpu", nid
       call fluxes_full_field_gpu
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after fluxes_full_filed_gpu", nid
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
-      !following code is for testing only. delete later.
+   !following code is for testing only. delete later.
    if(istep .ge. 0) then
       istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
       call printFatface("afterfluxes")
@@ -961,9 +976,13 @@
       call printRes1('afterfluxes')
    endif
 #endif
-         
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Fluxes_full_field_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  
       nstate=nqq
       nfq=lx1*lz1*2*ldim*nelt
@@ -974,13 +993,12 @@
          ieq=(eq-1)*ndg_face+iflx
          !print *,'111st debug',ieq,eq,stage,istep
          call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
-
       enddo
    
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
-!      !only for testing. delete later.
+   !only for testing. delete later.
    if(istep .ge. 0) then
       tocpucopy_gas(3)=1
       call copytocpu_gpu()
@@ -989,16 +1007,19 @@
       call printFatface("afterfirstintegral")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Surface_integral_full_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after surface_integral_full_gpu", nid
 
       iuj=iflx ! overwritten with U -{{U}}
       ium=(iu1-1)*nfq+iwm
       iup=(iu1-1)*nfq+iwp
-      !write(6,*) "debug ium, iup", iu1, ium, iup, iwm, iwp
       call   imqqtu_gpu_wrapper(glbblockSize2,d_flux,iuj,ium,iup,lx1,ly1,lz1,ldim,nelt,lelt,toteq)
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after imqqtu_gpu_wrapper", nid
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1014,7 +1035,13 @@
       call printFatface("afterImqqtu")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Imqqtu_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -1022,13 +1049,12 @@
        iwp,iwm,iuj,iux,iuy,iuz,iph,ithm,iu1,iu2,iu3,iu4,iu5,icvf,toteq,lx1,ly1,lz1,d_cbc,d_lglel,&
        d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,&
        d_pres,d_csound,ldim,lelt,nelt,npscal,p0th,nqq)
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after imqqtu_dirichlet_gpu_wrapper and if3dgpu is", nid,if3dgpu
 
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
- !following code is for testing only. delete later.
+   !following code is for testing only. delete later.
    if(istep .ge. 0) then
       tocpucopy_gas(3)=1
       call copytocpu_gpu()
@@ -1039,21 +1065,23 @@
       call printGraduf("afterImqqtud")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Imqqtu_dirichlet_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       call igtu_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_flux,d_gradu,d_graduf,d_iface_flux,&
        d_diffh,d_vtrans,d_vdiff,d_vx,d_vy,d_vz,d_u,d_viscscr,d_jacmi,&
        d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,d_dxm1,d_dxtm1,d_res1,toteq,&
        iuj,lx1,ly1,lz1,irho,ilam,imu,icv,iknd,inus,nelt,lelt,ldim,ifsip,d_area,d_unx,d_uny,d_unz,if3dgpu)
 
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after igtu_cmt_gpu_wrapper", nid
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
- !following code is for testing only. delete later.
+   !following code is for testing only. delete later.
    if(istep .ge. 0) then
       tocpucopy_gas(2)=1 !u
       tocpucopy_gas(3)=1 !res1
@@ -1078,7 +1106,14 @@
       
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Igtu_cmt_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+     start1 = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -1087,7 +1122,6 @@
           d_u,d_phig,lx1,ly1,lz1,toteq,istep,npscal,two_way,time_delay,icmtp,nelt,lelt,&
           p0th,ifield)
 
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after ccmtusrf_gpu_wrapper", nid
 
          call compute_gradients_gpu_wrapper(glbblockSize1,d_u,d_phig,d_dxm1,d_dxtm1,d_gradu,&
           d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,lx1,ly1,lz1,&
@@ -1119,7 +1153,13 @@
       call printJacmi('afterCompGrad')
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Cmtusrf_gpu_wrapper & compute_gradients time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
             call convective_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_wkd,d_convh,d_vxd,d_vyd,&
@@ -1136,11 +1176,14 @@
       call printRes1('afterConvective')
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Convective_cmt_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after convective_cmt_gpu_wrapper", nid
 
             call viscous_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_diffh,d_gradu,d_vtrans,&
               d_vdiff,d_vx,d_vy,d_vz,d_u,d_viscscr,d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,&
@@ -1157,18 +1200,18 @@
       call printRes1('afterViscousCMT')
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after viscous_cmt_gpu_wrapper", nid
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Viscous_cmt_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
             call compute_forcing_gpu_wrapper(glbblockSize1,d_phig,d_rxm1,d_sxm1,d_txm1,d_rym1,d_sym1,d_tym1,&
              d_rzm1,d_szm1,d_tzm1,d_jacm1,d_pr,d_res1,d_usrf,d_bm1,lx1,ly1,lz1,lelt,nelt,if3dgpu,&
              lxd,lyd,lzd,toteq,ldim,d_wkd,d_d,d_dt) !corrected by Kk 03/06 d_jacmi -> d-jacm1
-
-
-!      print *,"cmtparu.cuf compute_rhs_and_dt_gpu after compute_forcing_gpu_wrapper", nid
-
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1184,20 +1227,25 @@
       call printGraduf("afterCompForcing")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Compute_forcing_gpu_wrapper time", end - start
+     write(6,*) "Compute_forcing total time", end - start1
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       call igu_cmt_gpu(flux(iwp),graduf,flux(iwm),iwp,iwm)  
     
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
- !following code is for testing only. delete later.
+   !following code is for testing only. delete later.
    if(istep .ge. 0) then
       tocpucopy_gas(3)=1
       call copytocpu_gpu()
       call printRes1('afterIguCMT')
-      !tocpucopy_gas(2)=1
-      !call printUarray('afterIguCMT')
 
       istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
       call printFatface("afterIguCMT")
@@ -1205,12 +1253,17 @@
       call printGraduf("afterIguCMT")
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Igu_cmt_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
       do eq=1,toteq
          ieq=(eq-1)*ndg_face+iwp
-         !print *,'qqq start aaa',eq,ieq,stage,istep
          call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
          !call surface_integral_full(res1(1,1,1,1,eq),flux(ieq))
       enddo
@@ -1218,7 +1271,7 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef DEBUG
- !following code is for testing only. delete later.
+   !following code is for testing only. delete later.
    if(istep .ge. 0) then
       tocpucopy_gas(1)=1
       tocpucopy_gas(2)=1
@@ -1234,11 +1287,15 @@
       call printRes3('last')
       call printVdiff("last")
       call printTArray("last")
-       
       !stop
    endif
 #endif
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Surface_integral_full_gpu_wrapper time", end - start
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       return
       end
@@ -2167,27 +2224,27 @@
 !      print *,"istate 9", cudaGetErrorString(istate) 
 !      endif 
       if(tocpucopy_gas(10).eq.1) then
-           istate = cudaMemcpy(vx, d_vx, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
+           istate = cudaMemcpy(vx, d_vx, lx1*ly1*lz1*nelt,cudaMemcpyDeviceToHost) !changed lelv -> nelt for 10-15
       !print *,"istate 10", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(11).eq.1) then
-           istate = cudaMemcpy(vy, d_vy, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
+           istate = cudaMemcpy(vy, d_vy, lx1*ly1*lz1*nelt,cudaMemcpyDeviceToHost)
       !print *,"istate 11", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(12).eq.1) then
-           istate = cudaMemcpy(vz, d_vz, lx1*ly1*lz1*lelv,cudaMemcpyDeviceToHost)
+           istate = cudaMemcpy(vz, d_vz, lx1*ly1*lz1*nelt,cudaMemcpyDeviceToHost)
       !print *,"istate 12", cudaGetErrorString(istate),lelt,lelv 
       endif 
       if(tocpucopy_gas(13).eq.1) then
-           istate = cudaMemcpy(vxd,d_vxd, lxd*lyd*lzd*lelv,cudaMemcpyDeviceToHost)
+           istate = cudaMemcpy(vxd,d_vxd, lxd*lyd*lzd*nelt,cudaMemcpyDeviceToHost)
 !      print *,"istate 13", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(14).eq.1) then
-           istate = cudaMemcpy(vyd,d_vyd, lxd*lyd*lzd*lelv,cudaMemcpyDeviceToHost)
+           istate = cudaMemcpy(vyd,d_vyd, lxd*lyd*lzd*nelt,cudaMemcpyDeviceToHost)
 !      print *,"istate 14", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(15).eq.1) then
-           istate = cudaMemcpy(vzd,d_vzd, lxd*lyd*lzd*lelv,cudaMemcpyDeviceToHost)
+           istate = cudaMemcpy(vzd,d_vzd, lxd*lyd*lzd*nelt,cudaMemcpyDeviceToHost)
 !      print *,"istate 15", cudaGetErrorString(istate) 
       endif 
       if(tocpucopy_gas(16).eq.1) then

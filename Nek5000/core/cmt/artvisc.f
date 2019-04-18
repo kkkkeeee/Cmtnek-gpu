@@ -40,6 +40,14 @@
          call copy(s(1,1,2),s(1,2,1),ntot) ! s_{n-1}=s_n
          call copy(s(1,2,1),s(1,1,1),ntot) ! fill s_n
       endif
+c     if(nid.eq.15) then
+c       print *,"$$$ artvisc.f compute_entropy check", nid
+c       do i=1,10
+c           print *, 'tlag,vtrans(i,1,1,1,irho),pr,rgam,gmf', i,tlag(i),
+c    >      vtrans(i,1,1,1,irho),pr(i),rgam,gmaref
+c       enddo
+c     endif
+
 
       return
       end
@@ -54,39 +62,63 @@
       common /scrns/ scrent(lxyz,lelt)
       integer e
       character*132 deathmessage
-      character(5) x1, x2
+#ifdef MTIME
+      real*8 start, end
+#endif
+
       pi=4.0*atan(1.0)
 
       n=lx1*ly1*lz1
       ntot=n*nelt
 
-!      print *,"artvisc.f entropy_viscosity_gpu start", nid,ntot
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      !if(nid.eq.15) then
+      start = dnekclock_sync()
+      !endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+c     print *,"artvisc.f entropy_viscosity_gpu start", nid
 ! entropy at this and lorder prior steps
       call compute_entropy(tlag)
 ! compute maxval(|S-<S>|)
-!      fmt = '(I4.4)'
-!      write(x1, fmt) nid
-!      OPEN(UNIT=9999+nid,FILE='tlagbm1.txt'//'.nid.'//trim(x1),
-!     $        FORM="FORMATTED",
-!     $        STATUS="REPLACE",ACTION="WRITE")
-!             do i=1, ntot
-!                WRITE(UNIT=9999+nid, FMT=*) i,tlag(i),bm1(i)
-!             enddo 
-!            CLOSE(UNIT=9999+nid)
-!      if(nid.eq.15) then 
-!      print *,"$$$ avsc.f compute_entropy check", nid
-!      do i=1,100
-!           print *, 'tlag,bm1,volvm1', i,tlag(i),bm1(i),volvm1,nid
-!      enddo
-!      endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "compute_entropy time", end - start
+      endif
+      start = dnekclock_sync()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+c#ifdef DEBUG
+c      if(nid.eq.15) then
+c         call printTlag("afterCompEntropy")
+c      endif
+c#endif
+
+c     if(nid.eq.15) then
+c       print *,"$$$ artvisc.f entropy_viscosity check", nid
+c       do i=1,100
+c           print *, '$$$tlag bm1,volvm1', i,tlag(i),bm1(i),volvm1
+c       enddo
+c     endif
+
+c     OPEN(UNIT=9999,FILE='tlagbm1cpu.txt',
+c    $        FORM="FORMATTED",
+c    $        STATUS="REPLACE",ACTION="WRITE")
+c            do i=1, ntot
+c               WRITE(UNIT=9999, FMT=*) i,tlag(i),bm1(i)
+c            enddo 
+c           CLOSE(UNIT=9999)
 
       savg    =    glsc2(tlag,bm1,ntot)
-!      print *,"artvisc.f entropy_visc_gpu $$$ savg",savg, nid
+c      print *, '$$$savg ', savg
+
       savg    = -savg/volvm1
       call cadd2(scrent,tlag,savg,ntot)
       maxdiff =     glamax(scrent,ntot)
-!      print *,"artvisc.f entropy_visc_gpu $$$ savg2 MD",savg,maxdiff,nid
-!      print *,"artvisc.f entropy_visc_gpu $$$ maxdiff",maxdiff, nid
       if (maxdiff.le.0.0) then
          write(deathmessage,*) 'zero maxdiff usually means NAN$'
          call exittr(deathmessage,maxdiff,istep)
@@ -94,32 +126,122 @@
 !        if (nio .eq. 0) write (6,*) 'max(s-<s>)=',maxdiff, meshh(1)
       endif
 
-   
+#ifdef DEBUG
+      if(nid.eq.15) then
+         call printTlag("beforeEntropyR")
+      endif
+#endif
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "entropy_viscosity comm1 time", end - start
+      endif
+      start = dnekclock_sync()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       call entropy_residual(tlag) ! fill res2
-      call copy(res2(1,1,1,1,2),res2,ntot) ! raw residual in res2
-!      print *,"artvisc.f entropy_visc_gpu after entropy_residual", nid
 
-!      if(nid.eq.15) then 
-!      do i=1,100
-!           print *, 'res2',res2(i)
-!      enddo
-!      endif
+#ifdef DEBUG
+      if(nid.eq.15) then
+         call printRes2("afterEntropyR")
+         call printTArray("afterEntropyR")
+         call printTlag("afterEntropyR")
+      endif
+#endif
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "entropy_residual time", end - start
+      endif
+      start = dnekclock_sync()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      call copy(res2(1,1,1,1,2),res2,ntot) ! raw residual in res2
+c     print *,"artvisc.f entropy_visc_gpu after entropy_residual", nid
+#ifdef DEBUG
+      if(nid.eq.15) then
+         call printRes2("afterCopy")
+         call printTArray("afterCopy")
+         call printCsound("afterCopy")
+         call printVx("afterCopy")
+         call printVy("afterCopy")
+         call printVz("afterCopy")
+         call printVtrans("afterCopy")
+         call printMeshh("afterCopy")
+      endif
+#endif
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "entropy_viscosity double_copy time", end - start
+      endif
+      start = dnekclock_sync()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       call wavevisc(t(1,1,1,1,3))
-!      print *,"artvisc.f entropy_visc_gpu after wavevisc", nid
+c     print *,"artvisc.f entropy_visc_gpu after wavevisc", nid
+c#ifdef DEBUG
+c      if(nid.eq.15) then
+c         call printTArray("afterWavevisc")
+c      endif
+c#endif
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "wavevisc time", end - start
+      endif
+      start = dnekclock_sync()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       call resvisc(res2) ! overwrite res2
-!      print *,"artvisc.f entropy_visc_gpu after resvisc", nid
+c     print *,"artvisc.f entropy_visc_gpu after resvisc", nid
+#ifdef DEBUG
+      if(nid.eq.15) then
+         call printRes2("afterResvisc")
+      endif
+#endif
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "resvisc time", end - start
+      endif
+      start = dnekclock_sync()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       call evmsmooth(res2,t(1,1,1,1,3),.true.) ! endpoints=.false.
                                                ! is intended to
                                                ! preserve face states,
                                                ! but this is easier to
                                                ! test 1D
 !     call evmsmooth(res2,t(1,1,1,1,3),.true.) ! And again.
+#ifdef DEBUG
+      if(nid.eq.15) then
+         call printRes2("afterEvm")
+         call printTArray("afterEvm")
+      endif
+#endif
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "evmsmooth time", end - start
+      endif
+      start = dnekclock_sync()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!     print *,"artvisc.f entropy_visc_gpu after evmsmooth", nid
+c     print *,"artvisc.f entropy_visc_gpu after evmsmooth", nid
       call dsavg(res2) ! you DEFINITELY don't want a min here
-!      print *,"artvisc.f entropy_visc_gpu after dsavg", nid
-
+c     print *,"artvisc.f entropy_visc_gpu after dsavg", nid
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.15) then
+      end = dnekclock()
+      write(6,*) "dsavg time", end - start
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       return
       end
@@ -144,6 +266,9 @@ c-----------------------------------------------------------------------
 
       if (istep .eq. 1) return
       rdt=1.0/(dsdtcoef(stage)*DT_cmt)
+      !if(nid.eq.15) then
+      !    write(6,*) "debug dsdtcoef(stage)", dsdtcoef(stage), DT_cmt
+      !endif
       if (stage .eq. 1) then ! THE MOST SABOTAGEABLE PART OF THE CODE
          call sub3(res2,s(1,1,1),s(1,1,2),ntot) ! EVALUATE s_n-s_{n-1}
       else
@@ -292,6 +417,14 @@ c-----------------------------------------------------------------------
          call cmult(residual,const,nxyz*nelt)
       endif
 
+c     if(nid.eq.15) then
+c       print *,"$$$ artvisc.f resvisc check", nid
+c       do i=1,10
+c           print *, 'res2 residual ',res2(i),residual(i)
+c       enddo
+c     endif
+   
+
       return
       end
 
@@ -391,6 +524,14 @@ c-----------------------------------------------------------------------
          enddo
          call copy(resvisc(1,1,1,e),rtmp,nxyz)
       enddo
+ 
+      !if(nid.eq.15) then
+      !  print *,"$$$ artvisc.f evm_smooth check", nid
+      !  do i=1,10
+      !      print *, 'resvisc ',resvisc(i,1,1,1)
+      !  enddo
+      !endif
+
 
       return
       end
@@ -421,10 +562,31 @@ c-----------------------------------------------------------------------
          enddo
          maxeig=vlamax(wavespeed,nxyz)
          rhomax(e)=vlamax(vtrans(1,1,1,e,irho),nxyz)
+  
+c        if(nid.eq.15) then
+c         print *,"$$$ artvisc.f compute_entropy check", nid
+c         print *, 'maxeig in wavevisc',e, maxeig,c_max
+c        endif
+
+  
          do i=1,nxyz
             numax(i,e)=c_max*maxeig*meshh(e)
          enddo
       enddo
+
+#ifdef DEBUG
+      if(nid.eq.15) then
+         call printTArray("beforeDsop")
+      endif
+#endif
+   
+      !if(nid.eq.15) then
+c       print *,"$$$ artvisc.f compute_entropy check", nid
+c       do i=1,10
+c           print *, 't numax',t(i,1,1,1,3),numax(i)
+c       enddo
+      !  write(6,*) "wavevisc c_max", c_max
+      !endif
 
       call max_to_trilin(numax)
 
@@ -447,8 +609,13 @@ c-----------------------------------------------------------------------
 
 ! get maxima on faces
       call dsop(field,'MAX',lx1,ly1,lz1)
+      !if(nid.eq.15) then
+      !   call printTArray("afterDsop")
+      !   call printXm1("afterDsop")
+      !   call printYm1("afterDsop")
+      !   call printZm1("afterDsop")
+      !endif
 
-!       print *,"artvisc_gpu.cuf max_to_trilin_gpu after dsop", nid
 ! trilinear interpolation. you should adapt xyzlin to your needs instead
       do e=1,nelt
          p000=field(1,  1,  1,  e)
@@ -480,6 +647,15 @@ c-----------------------------------------------------------------------
      >                       c6*deltaz*deltax+c7*deltay*deltaz*deltax
          enddo
       enddo
+c      if(nid.eq.15) then
+c         write(6,*) "debug max_to_trilin, if3d", p000, c1, c2, c3, c4,
+c    > c5, c6, c7, rdx, rdy, deltax, deltay, deltaz, field(1,1,1,1)
+c    > , if3d
+c      ! print *,"$$$ artvisc.f max_to_trilin check", nid
+c      ! do i=1,10
+c      !     print *, 't field i',t(i,1,1,1,3),field(i)
+c      ! enddo
+c      endif
 
       return
       end

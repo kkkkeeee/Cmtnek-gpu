@@ -58,6 +58,9 @@ C> \f$\oint \mathbf{H}^{c\ast}\cdot\mathbf{n}dA\f$ on face points
          i_cvars=i_cvars+nfq
       enddo
 
+#ifdef MTIME 
+      call nekgsync()
+#endif
       call face_state_commo(fatface(iwm),fatface(iwp),nfq,nstate
      >                     ,dg_hndl)
 
@@ -139,7 +142,16 @@ C> @}
 !-----------------------------------------------------------------------
 ! operation flag is second-to-last arg, an integer
 !                                                1 ==> +
+!added by Kk 04/11 for performance debug
+#ifdef MTIME 
+      call nekgsync()
+      start = dnekclock()
+#endif
       call gs_op_fields(handle,yours,nf,nstate,1,1,0)
+#ifdef MTIME
+      end = dnekclock()
+      if(nid.eq.0) print *, "CPU gs_op time", end-start
+#endif
       call sub2 (yours,mine,ntot)
       return
       end

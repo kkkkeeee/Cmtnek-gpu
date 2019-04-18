@@ -275,8 +275,8 @@ __global__ void Ausm_flux(int neq, int ntotd, double *nx, double *ny, double *nz
 }
 
 
-void map_faced(double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w, int nx1, int nxd, int fdim, int nelt, int nfaces, int idir,int ip, int arrDim){
-/*arrDim is added by Kk 02/12 to identify the number of faces in 2D test case is 6 (arrDim=3) or 4 (arrDim=4). If arrDim =3, we need to call StrideBatch fuction for matrix multiplication.*/
+void map_faced(cublasHandle_t &handle, double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w, int nx1, int nxd, int fdim, int nelt, int nfaces, int idir,int ip, int arrDim){
+/*arrDim is added by Kk 02/12 to identify the number of faces in 2D test case is 6 (arrDim=3) or 4 (arrDim=2). If arrDim =3, we need to call StrideBatch fuction for matrix multiplication.*/
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code1 = cudaPeekAtLastError();
@@ -284,8 +284,8 @@ void map_faced(double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w,
 
 #endif
 	// may be creating the handle is time consiming and can pass it from the parent functions. Check this later. Adeesha
-	cublasHandle_t handle;
-	cublasCreate(&handle);
+	//cublasHandle_t handle; pass through parameter
+	//cublasCreate(&handle);
 	const double alf = 1;
 	const double bet = 0;
 	const double *alpha = &alf;
@@ -351,7 +351,7 @@ void map_faced(double *d_jgl, double *d_jgt, double *ju, double *u, double *d_w,
 
 	}	
         // Destroy the handle
-        cublasDestroy(handle);
+        //cublasDestroy(handle);
 }
 
 // d_fatface became d_flux
@@ -434,6 +434,9 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	int totpts =lxz2ldimlelt;
 
 	int blockSize = glbblockSize2[0], gridSize;
+        //create handle for map_faced
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
 /* 	double *cpu_jgl,*cpu_jgt;
 	cpu_jgl= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
@@ -453,29 +456,29 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
           printf("end our map_faced rl \n");
 */
 	if(lxd[0]>lx1[0]){
-		map_faced(d_jgl, d_jgt, d_nx, d_unx, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 3);
-		map_faced(d_jgl, d_jgt, d_ny, d_uny, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 3);
-		map_faced(d_jgl, d_jgt, d_nz, d_unz, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 3);
+		map_faced(handle, d_jgl, d_jgt, d_nx, d_unx, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 3);
+		map_faced(handle, d_jgl, d_jgt, d_ny, d_uny, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 3);
+		map_faced(handle, d_jgl, d_jgt, d_nz, d_unz, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 3);
 
-		map_faced(d_jgl, d_jgt, d_rl, d_fatface+iwm[0]-1+(irho[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_ul, d_fatface+iwm[0]-1+(iux[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_vl, d_fatface+iwm[0]-1+(iuy[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_wl, d_fatface+iwm[0]-1+(iuz[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_pl, d_fatface+iwm[0]-1+(ipr[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_tl, d_fatface+iwm[0]-1+(ithm[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_al, d_fatface+iwm[0]-1+(isnd[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_cpl, d_fatface+iwm[0]-1+(icpf[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_rl, d_fatface+iwm[0]-1+(irho[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_ul, d_fatface+iwm[0]-1+(iux[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_vl, d_fatface+iwm[0]-1+(iuy[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_wl, d_fatface+iwm[0]-1+(iuz[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_pl, d_fatface+iwm[0]-1+(ipr[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_tl, d_fatface+iwm[0]-1+(ithm[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_al, d_fatface+iwm[0]-1+(isnd[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_cpl, d_fatface+iwm[0]-1+(icpf[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
 
-		map_faced(d_jgl, d_jgt, d_rr, d_fatface+iwp[0]-1+(irho[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_ur, d_fatface+iwp[0]-1+(iux[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_vr, d_fatface+iwp[0]-1+(iuy[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_wr, d_fatface+iwp[0]-1+(iuz[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_pr, d_fatface+iwp[0]-1+(ipr[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_tr, d_fatface+iwp[0]-1+(ithm[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_ar, d_fatface+iwp[0]-1+(isnd[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
-		map_faced(d_jgl, d_jgt, d_cpr, d_fatface+iwp[0]-1+(icpf[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_rr, d_fatface+iwp[0]-1+(irho[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_ur, d_fatface+iwp[0]-1+(iux[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_vr, d_fatface+iwp[0]-1+(iuy[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_wr, d_fatface+iwp[0]-1+(iuz[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_pr, d_fatface+iwp[0]-1+(ipr[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_tr, d_fatface+iwp[0]-1+(ithm[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_ar, d_fatface+iwp[0]-1+(isnd[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_cpr, d_fatface+iwp[0]-1+(icpf[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
 
-		map_faced(d_jgl, d_jgt, d_phl, d_fatface+iwp[0]-1+(iph[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_phl, d_fatface+iwp[0]-1+(iph[0]-1)*totpts, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
 
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
@@ -505,7 +508,7 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
                 //corrected by Kk 02/12
 		//inviscidFlux_gpu_kernel1<<<gridSize, blockSize>>>(d_jaco_c,d_area,d_wghtc,ntot,lx1[0],lz1[0]); //wrong
 		inviscidFlux_gpu_kernel1<<<gridSize, blockSize>>>(d_jaco_c,d_area,d_wghtc,ntot,lx1[0],lz1[0], nfaces, lxz2ldim);
-		map_faced(d_jgl, d_jgt, d_jaco_f, d_jaco_c, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
+		map_faced(handle, d_jgl, d_jgt, d_jaco_f, d_jaco_c, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 0,ip[0], 2);
 
 		gridSize = (int)ceil((float)ntotd/blockSize);
 		inviscidFlux_gpu_kernel2<<<gridSize, blockSize>>>(d_jaco_f,d_wghtf,ntotd,lxd[0],lzd[0]);
@@ -589,11 +592,15 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 */
 
 	if(lxd[0]>lx1[0]){
+                /* comment here to make toteq run in parallel for performance; by Kk 04/12/19
 		for(int j=0; j<toteq[0];j++){
 			gridSize = (int)ceil((float)ntotd/blockSize);
 			map_faced(d_jgl, d_jgt,d_fatface+iflx[0]-1+j*totpts, d_flx+j*ntotd, d_w, lx1[0], lxd[0], fdim, nel, nfaces, 1,ip[0], 2);
 
-		}
+		}*/
+                //added by Kk 04/12/19 for performance
+	        map_faced(handle, d_jgl, d_jgt,d_fatface+iflx[0]-1, d_flx, d_w, lx1[0], lxd[0], fdim, nel, nfaces*toteq[0], 1,ip[0], 2);
+
                  //this following tow line is just for debug for flx and nx
                 //gpu_double_copy_gpu_wrapper(glbblockSize2[0],d_fatface+iflx[0]-1,0,d_flx,0,ntotd*toteq[0]);
                 //gpu_double_copy_gpu_wrapper(glbblockSize2[0],d_fatface+iflx[0]-1,0,d_nx,0,ntotd);

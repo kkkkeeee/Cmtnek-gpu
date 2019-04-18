@@ -46,13 +46,20 @@ __global__ void entropy_residual_flux_gpu_kernel(double *tlag, double *res2,int 
 
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
+                /*for performance, put *rdt to one equation by Kk 04/11
 		if(stage==1){
 			res2[id]=tlag[id]-tlag[ltot*lorder+id]   ;
 		}
 		else{
 			res2[id]=tlag[id]-tlag[ltot+id]   ;
 		}
-		res2[id] = res2[id]*rdt;
+		res2[id] = res2[id]*rdt;*/
+		if(stage==1){
+			res2[id]=(tlag[id]-tlag[ltot*lorder+id])*rdt;
+		}
+		else{
+			res2[id]=(tlag[id]-tlag[ltot+id])*rdt;
+		}
 
 		// evaluate_entropy_flux(e)
 		totalh[id]= vx[id]*tlag[id];
@@ -77,6 +84,9 @@ __global__ void flux_div_mini_gpu_kernel1(double *tlag, double *res2,int ntot, d
 	      ud[id] =  jacmi[id] *( rxm1[id]*ur1[id]+ sxm1[id]*us1[id]+txm1[id]*ut1[id]);
 	      ud[id] =  ud[id]+ jacmi[id] *( rym1[id]*ur2[id]+ sym1[id]*us2[id]+txm1[id]*ut2[id]);
 	      ud[id] =  ud[id] + jacmi[id] *( rzm1[id]*ur3[id]+ szm1[id]*us3[id]+tzm1[id]*ut3[id]);
+              
+              //added by Kk 04/11 for performance
+              res2[id] = res2[id] + ud[id];
 	}
 
 }
@@ -90,6 +100,9 @@ __global__ void flux_div_mini_gpu_kernel2(double *tlag, double *res2,int ntot, d
               // ur us ut [i] -> ur us ut[id] by Kk 03/22
 	      ud[id] =  jacmi[id] *(rxm1[id]*ur1[id]+ sxm1[id]*us1[id]);
 	      ud[id] =  ud[id]+ jacmi[id]*(rym1[id]*ur2[id]+ sym1[id]*us2[id]);
+
+              //added by Kk 04/11 for performance
+              res2[id] = res2[id] + ud[id];
 	}
 
 }
@@ -122,7 +135,7 @@ __global__ void mxm1(double *a, int n1, double *b, int n2, double *c, int n3, in
 
 
 
-extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag, double *d_res2,int *ntot, double *rdt, int *stage, int *lorder,int *ltot, int *lxd, int *lyd, int *lzd, double *d_vx, double *d_vy, double *d_vz, int *lx1, int *ly1, int *lz1, double *d_jacmi, double *d_rxm1, double *d_sxm1, double *d_txm1, double *d_rym1, double *d_sym1, double *d_tym1,double *d_rzm1, double *d_szm1, double *d_tzm1,int *if3d,int *nelt, double *d_dxm1, double *d_dxtm1, int *lelt){//added parameter lelt by Kk 03/16
+extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag, double *d_res2,int *ntot, double *rdt, int *stage, int *lorder,int *ltot, int *lxd, int *lyd, int *lzd, double *d_vx, double *d_vy, double *d_vz, int *lx1, int *ly1, int *lz1, double *d_jacmi, double *d_rxm1, double *d_sxm1, double *d_txm1, double *d_rym1, double *d_sym1, double *d_tym1,double *d_rzm1, double *d_szm1, double *d_tzm1,int *if3d,int *nelt, double *d_dxm1, double *d_dxtm1, int *lelt, double *d_totalh){//added parameter lelt by Kk 03/16; added d_totalh to parameter to replace d_totalh_temp by Kk04/11
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code1 = cudaPeekAtLastError();
@@ -133,7 +146,7 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 	//}
 
 
-	double *d_totalh_temp;  // Anyway d_totalh seems not needed. check with Dr.Tania. adeesha
+	//double *d_totalh_temp;  // Anyway d_totalh seems not needed. check with Dr.Tania. adeesha; use d_totalh to replace d_totalh_temp by Kk04/11
 	double *d_ur1;
 	double *d_us1;
 	double *d_ut1;
@@ -148,7 +161,8 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 	int lxyzdlelt = lxd[0]*lyd[0]*lzd[0]*lelt[0];
 	int ldd = lx1[0]*ly1[0]*lz1[0];
 	//cudaMalloc((void**)&d_totalh_temp,3*lxyzd *nelt[0]*  sizeof(double));
-	cudaMalloc((void**)&d_totalh_temp,3*lxyzd *lelt[0]*  sizeof(double));//note here changed to lelt by Kk, check if correct
+	//cudaMalloc((void**)&d_totalh_temp,3*lxyzd *lelt[0]*  sizeof(double));//note here changed to lelt by Kk, check if correct; use d_totalh to replace d_totalh_temp by Kk04/11
+
 	cudaMalloc((void**)&d_ur1,ldd *  nelt[0]*sizeof(double)); //nelt[0] added later.  need to double check.
 	cudaMalloc((void**)&d_us1,ldd *  nelt[0]*sizeof(double));
 	cudaMalloc((void**)&d_ut1,ldd *  nelt[0]*sizeof(double));
@@ -159,8 +173,9 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 	cudaMalloc((void**)&d_us3,ldd *  nelt[0]*sizeof(double));
 	cudaMalloc((void**)&d_ut3,ldd *  nelt[0]*sizeof(double));
 	cudaMalloc((void**)&d_ud,nelt[0]*ldd *  sizeof(double));
-	cudaMemset(d_totalh_temp, 0.0, 3*lxyzd*lelt[0]*sizeof(double)); //nelt[0] -> lelt[0] by Kk 03/22
-	cudaMemset(d_ur1, 0.0, ldd*nelt[0]*sizeof(double));
+	//cudaMemset(d_totalh_temp, 0.0, 3*lxyzd*lelt[0]*sizeof(double)); //nelt[0] -> lelt[0] by Kk 03/22; use d_totalh to replace d_totalh_temp by Kk04/11
+	/* comment here for performance, duplicate with below, by Kk04/11
+        cudaMemset(d_ur1, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_us1, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_ut1, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_ur2, 0.0, ldd*nelt[0]*sizeof(double));
@@ -169,7 +184,7 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 	cudaMemset(d_ur3, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_us3, 0.0, ldd*nelt[0]*sizeof(double));
 	cudaMemset(d_ut3, 0.0, ldd*nelt[0]*sizeof(double));
-	cudaMemset(d_ud, 0.0, ldd*nelt[0]*sizeof(double));
+	cudaMemset(d_ud, 0.0, ldd*nelt[0]*sizeof(double));*/
 
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)ntot[0]/blockSize); //ntot[0] = lxyz * nelt
@@ -177,7 +192,7 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 
         //lxyzd -> lxyzdlelt by Kk 03/16
 	//entropy_residual_flux_gpu_kernel<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh_temp, lxyzd, d_vx, d_vy, d_vz, if3d[0]);
-	entropy_residual_flux_gpu_kernel<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh_temp, lxyzdlelt, d_vx, d_vy, d_vz, if3d[0]);
+	entropy_residual_flux_gpu_kernel<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh, lxyzdlelt, d_vx, d_vy, d_vz, if3d[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	code1 = cudaPeekAtLastError();
@@ -198,7 +213,7 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
         cudaMemset(d_ut3, 0.0, ldd*nelt[0]*sizeof(double));
         cudaMemset(d_ud, 0.0, ldd*nelt[0]*sizeof(double));
 	if(if3d[0]){
-               gpu_local_grad3(d_ur1,d_us1,d_ut1,d_totalh_temp,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
+               gpu_local_grad3(d_ur1,d_us1,d_ut1,d_totalh,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
@@ -206,21 +221,21 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 		printf("CUDA: entropy_residual_gpu_wrapper after 1st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-               gpu_local_grad3(d_ur2,d_us2,d_ut2,d_totalh_temp+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
+               gpu_local_grad3(d_ur2,d_us2,d_ut2,d_totalh+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
 		printf("CUDA: entropy_residual_gpu_wrapper after 2st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-               gpu_local_grad3(d_ur3,d_us3,d_ut3,d_totalh_temp+lxyzdlelt*2,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
+               gpu_local_grad3(d_ur3,d_us3,d_ut3,d_totalh+lxyzdlelt*2,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
 		printf("CUDA: entropy_residual_gpu_wrapper after 3st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-                flux_div_mini_gpu_kernel1<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh_temp, lxyzd, d_ur1,d_us1, d_ut1, d_ur2,d_us2, d_ut2, d_ur3, d_us3, d_ut3,d_ud, ldd, d_jacmi, d_rxm1, d_sxm1, d_txm1, d_rym1, d_sym1, d_tym1, d_rzm1, d_szm1, d_tzm1,if3d[0]);
+                flux_div_mini_gpu_kernel1<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh, lxyzd, d_ur1,d_us1, d_ut1, d_ur2,d_us2, d_ut2, d_ur3, d_us3, d_ut3,d_ud, ldd, d_jacmi, d_rxm1, d_sxm1, d_txm1, d_rym1, d_sym1, d_tym1, d_rzm1, d_szm1, d_tzm1,if3d[0]); //use d_totalh to replace d_totalh_temp by Kk04/11
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
@@ -229,7 +244,7 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 #endif
 	} 
         else{
-               gpu_local_grad2(d_ur1,d_us1,d_totalh_temp,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
+               gpu_local_grad2(d_ur1,d_us1,d_totalh,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
@@ -237,14 +252,14 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 		printf("CUDA: entropy_residual_gpu_wrapper after 1st gpu_local_grad2 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-               gpu_local_grad2(d_ur2,d_us2,d_totalh_temp+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]);
+               gpu_local_grad2(d_ur2,d_us2,d_totalh+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]); //use d_totalh to replace d_totalh_temp by Kk04/11
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
 		printf("CUDA: entropy_residual_gpu_wrapper after 2st gpu_local_grad2 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-                flux_div_mini_gpu_kernel2<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh_temp, lxyzd, d_ur1,d_us1, d_ut1, d_ur2,d_us2, d_ut2, d_ur3, d_us3, d_ut3,d_ud, ldd, d_jacmi, d_rxm1, d_sxm1, d_txm1, d_rym1, d_sym1, d_tym1, d_rzm1, d_szm1, d_tzm1,if3d[0]);
+                flux_div_mini_gpu_kernel2<<<gridSize, blockSize>>>(d_tlag,d_res2,ntot[0],rdt[0],stage[0],lorder[0], ltot[0], d_totalh, lxyzd, d_ur1,d_us1, d_ut1, d_ur2,d_us2, d_ut2, d_ur3, d_us3, d_ut3,d_ud, ldd, d_jacmi, d_rxm1, d_sxm1, d_txm1, d_rym1, d_sym1, d_tym1, d_rzm1, d_szm1, d_tzm1,if3d[0]); //use d_totalh to replace d_totalh_temp by Kk04/11
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
@@ -253,14 +268,15 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 #endif
 	}
 
-        gpu_nekadd2(glbblockSize1[0], d_res2,d_ud, ntot[0]);
+        /*for performance, comment out nekadd2, put add in the flux_div_mini_gpu_kernel1 or flux_div_mini_gpu_kernel2
+        gpu_nekadd2(glbblockSize1[0], d_res2,d_ud, ntot[0]);*/
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	code1 = cudaPeekAtLastError();
 	printf("CUDA: entropy_residual_gpu_wrapper after nekadd2 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-	cudaFree(d_totalh_temp);
+	//cudaFree(d_totalh_temp); //use d_totalh to replace d_totalh_temp by Kk04/11
 
 	cudaFree(d_ur1);
 	cudaFree(d_ur2);
@@ -282,8 +298,8 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 #endif
 }
 
-__global__ void wavevisc_gpu_kernel(double *t,double *csound, double *vx, double *vy, double *vz, int ntot, double *wavespeed,int lxyz, int lx1, int ly1, int lz1, double *vtranstmp, double c_max,int ltot, double *meshh ){
-
+__global__ void wavevisc_gpu_kernel(double *t,double *csound, double *vx, double *vy, double *vz, int ntot, double *wavespeed,int lxyz, int lx1, int ly1, int lz1, double c_max,int ltot, double *meshh ){
+//deleted parameter vtranstemp since no use
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
 	if(id<ntot){
 		wavespeed[id]= csound [id] +sqrt(vx[id]*vx[id]+vy[id]*vy[id]+vz[id]*vz[id]  )	;//sqrtf -> sqrt, corrected by Kk 02/05
@@ -336,11 +352,9 @@ extern "C" void wavevisc_gpu_wrapper_(int *glbblockSize1,double *d_t, double *d_
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code1 = cudaPeekAtLastError();
-	// if (code1 != cudaSuccess){
 	printf("CUDA: Start wavevisc_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code1));
 	printf("CUDA: Start compute_entropy_gpu_wrapper values nelt= %d,lelt= %d,lx1= %d,ly1= %d, lz1= %d,c_max= %lf,irho= %d \n",nelt[0],lelt[0],lx1[0],ly1[0],lz1[0],c_max[0],irho[0]);       
 #endif
-	// }
 
 
 	int ntot = nelt[0]*lx1[0]*ly1[0]*lz1[0];
@@ -348,24 +362,22 @@ extern "C" void wavevisc_gpu_wrapper_(int *glbblockSize1,double *d_t, double *d_
 	int ltot = lelt[0]*lxyz;
 	double *d_wavespeed; 
 	cudaMalloc((void**)&d_wavespeed,nelt[0]*lxyz* sizeof(double));
-	// cudaMemset(d_totalh_temp, 0.0, 3*lxyzd*nelt*sizeof(double));
+
+        /* comment vtranstemp here for performance by Kk 04/11, since no use of it
 	double *d_vtranstemp; 
 	cudaMalloc((void**)&d_vtranstemp,nelt[0]*lxyz* sizeof(double));
-	cudaMemcpy(d_vtranstemp, &d_vtrans[(irho[0]-1)*lelt[0]*lxyz], nelt[0]*lxyz* sizeof(double), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(d_vtranstemp, &d_vtrans[(irho[0]-1)*lelt[0]*lxyz], nelt[0]*lxyz* sizeof(double), cudaMemcpyDeviceToDevice);*/
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)ntot/blockSize);
-	wavevisc_gpu_kernel<<<gridSize, blockSize>>>(d_t,d_csound, d_vx, d_vy, d_vz,ntot,d_wavespeed, lxyz,lx1[0],ly1[0],lz1[0],d_vtranstemp,c_max[0], ltot, d_meshh);
+	wavevisc_gpu_kernel<<<gridSize, blockSize>>>(d_t,d_csound, d_vx, d_vy, d_vz,ntot,d_wavespeed, lxyz,lx1[0],ly1[0],lz1[0],c_max[0], ltot, d_meshh);//deleted parameter d_vtranstemp since no use
 
 	cudaFree(d_wavespeed);
-	cudaFree(d_vtranstemp);
+	//cudaFree(d_vtranstemp); //comment by Kk 04/11
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code2 = cudaPeekAtLastError();
-	// if (code2 != cudaSuccess){
 	printf("CUDA: End Wavevisc_gpu_wrapper cuda status: %s\n",cudaGetErrorString(code2));
 #endif
-	// }
-
 }
 
 __global__ void max_to_trilin_gpu_kernel(double *t,int ntot,int lxyz, int lx1, int ly1, int lz1,int ltot, int lxy, double *xm1, double *ym1, double *zm1, int if3d ){

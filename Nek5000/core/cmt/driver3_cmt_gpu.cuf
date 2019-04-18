@@ -54,19 +54,25 @@
 !  need to paralleliz but set_convect_cons is not  easy. for now copy vx,vy,,vz back to cpu. talk with Dr.Tania. adeesha.
 
       if (lxd.gt.lx1) then
-         !copy arrays to cpu
-         tocpucopy_gas(10)=1
-         tocpucopy_gas(11)=1
-         tocpucopy_gas(12)=1
-         call copytocpu_gpu()
 
-         call set_convect_cons (vxd,vyd,vzd,vx,vy,vz)
+         if(istep .le. 2) then !when istep<=2, may need to call set_dealias_rx in set_convect_cons
+            !copy arrays to cpu
+            tocpucopy_gas(10)=1
+            tocpucopy_gas(11)=1
+            tocpucopy_gas(12)=1
+            call copytocpu_gpu()
+
+            call set_convect_cons (vxd,vyd,vzd,vx,vy,vz)
          
-         ! remove  when above  function is done in gpu
-         togpucopy_gas(13)=1
-         togpucopy_gas(14)=1
-         togpucopy_gas(15)=1
-         call copytogpu_gpu()
+            ! remove  when above  function is done in gpu
+            togpucopy_gas(13)=1
+            togpucopy_gas(14)=1
+            togpucopy_gas(15)=1
+            call copytogpu_gpu()
+         else
+           call set_convect_cons_gpu_wrapper(d_vxd, d_vyd, d_vzd, d_vx, d_vy, d_vz, lx1, lxd, d_jgl, d_jgt, if3dgpu, ldim, nelt) 
+
+         endif
 
       else
          call double_copy_gpu_wrapper(glbblockSize2,d_vxd,0,d_vx,0,ntot)

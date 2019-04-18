@@ -432,7 +432,7 @@ __global__ void nekinvcol3_gpu_kernel(double *a, double *b, double *c, int n){
 	}
 }
 
-void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double* d_ab, bool if3d, double * d_w, int ldw, int nel, int intermediatestride, int eq, bool second_eq){
+void gpu_specmpn(double *d_b, int nb, double *d_a, int na, double * d_ba, double* d_ab, bool if3d, double * d_w, int ldw, int nel, int intermediatestride, int eq, bool second_eq){ //eq is not in use now
 	//intermediatestride means the stride size need to skip
 #ifdef DEBUGPRINT
 	cudaError_t code1 = cudaPeekAtLastError();

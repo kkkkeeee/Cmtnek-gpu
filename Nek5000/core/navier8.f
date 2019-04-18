@@ -1868,8 +1868,9 @@ c     Distribute and assign partitions
       if (.not.ifgfdm) then             ! gllnid is already assigned for gfdm
         if ( gfirst .eq. 1) then
            if (nid .eq. 0) then
-               call assign_partitions   !(gllnid, lelt, nelgt, np)
-!keke add, assign gllnid according to the elements load balance
+               !call assign_partitions 
+               call assign_partitions_hybrid 
+               !keke add, assign gllnid according to the elements load balance
            endif
             lng = isize*neli
             call bcast(gllnid,lng)

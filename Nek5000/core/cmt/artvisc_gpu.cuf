@@ -44,15 +44,29 @@
       subroutine entropy_viscosity_gpu
       use cudafor
       use glbvariable_gpu
+#ifdef MTIME
+      include 'mpif.h'!for time measurement, dnekclock() just doesn't work, added by Kk 04/10
+#endif
       parameter (lxyz=lx1*ly1*lz1)
       common /scrns/ scrent(lxyz,lelt)
       integer e
       character*132 deathmessage
+#ifdef MTIME
+      real*8 start, end
+#endif
 
       pi=4.0*atan(1.0)
 
       !n=lx1*ly1*lz1
       ntot=lx1*ly1*lz1*nelt
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      call nekgsync()
+      start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 ! entropy at this and lorder prior steps
       call compute_entropy_gpu
@@ -64,6 +78,12 @@
 !      call copytocpu_gpu()
 !      call printTlag("afterCompEntropy")
 !#endif
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "compute_entropy_gpu time", end - start
+     call nekgsync()
+     start = mpi_wtime() !dnekclock()
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -100,6 +120,12 @@
       call copytocpu_gpu()
       call printTlag("beforeEntropyR")
 #endif
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "entropy_viscosity_gpu comm1 time", end - start
+     call nekgsync()
+     start = mpi_wtime() !dnekclock()
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       call entropy_residual_gpu ! fill res2
@@ -113,6 +139,12 @@
       call printRes2("afterEntropyR")
       call printTArray("afterEntropyR")
       call printTlag("afterEntropyR")
+#endif
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "entropy_residual_gpu time", end - start
+     call nekgsync()
+     start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -140,6 +172,12 @@
       call printVtrans("afterCopy")
       call printMeshh("afterCopy")
 #endif
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "entropy_viscosity_gpu double_copy time", end - start
+     call nekgsync()
+     start = mpi_wtime() !dnekclock()
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before wavevisc_gpu", nid
@@ -152,6 +190,12 @@
 !      call copytocpu_gpu()
 !      call printTArray("afterWavevisc")
 !#endif
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "wavevisc_gpu time", end - start
+     call nekgsync()
+     start = mpi_wtime() !dnekclock()
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  
@@ -166,6 +210,12 @@
       tocpucopy_gas(20)=1 !res2
       call copytocpu_gpu()
       call printRes2("afterResvisc")
+#endif
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "resvisc_gpu time", end - start
+     call nekgsync()
+     start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -185,6 +235,12 @@
       call printRes2("afterEvm")
       call printTArray("afterEvm")
 #endif
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "evmsmooth_gpu time", end - start
+     call nekgsync()
+     start = mpi_wtime() !dnekclock()
+#endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before dsavg", nid
@@ -199,6 +255,12 @@
 
 !      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after dsavg", nid
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "dsavg time", end - start
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       return
       end
@@ -221,7 +283,7 @@
       !if(DT_cmt.eq.0) DT_cmt=0.01 ! only for now remove later. adeesha.
 
       rdt=1.0/(dsdtcoef(stage)*DT_cmt)
-      write(6,*) "debug dsdtcoef(stage)", dsdtcoef(stage), DT_cmt
+      !write(6,*) "debug dsdtcoef(stage)", dsdtcoef(stage), DT_cmt
 
 !      print *,"artvisc.cuf entropy_residual_gpu start",istep,stage,DT_cmt,rdt,nid
       
@@ -232,7 +294,7 @@
 
       call entropy_residual_gpu_wrapper(glbblockSize1,d_tlag,d_res2,ntot,rdt,stage,lorder-1,ltot,&
        lxd,lyd,lzd,d_vx, d_vy, d_vz, lx1,ly1, lz1, d_jacmi, d_rxm1, d_sxm1, d_txm1,d_rym1,&
-        d_sym1, d_tym1,d_rzm1,d_szm1, d_tzm1,if3dgpu,nelt,d_dxm1, d_dxtm1, lelt)!added parameter lelt by Kk 03/16
+        d_sym1, d_tym1,d_rzm1,d_szm1, d_tzm1,if3dgpu,nelt,d_dxm1, d_dxtm1, lelt, d_totalh)!added parameter lelt by Kk 03/16; added d_totalh to parameter to replace d_totalh_temp by Kk04/11
 
 
 
@@ -277,14 +339,6 @@
 
       call resvisc_gpu_wrapper2(glbblockSize1,d_res2,nelt,lelt,lx1,ly1,lz1,c_sub_e,maxdiff)
 
-      !following code is for testing only. delete later.
-!      tocpucopy_gas(20)=1
-!      call copytocpu_gpu()
-
-!      print *,"$$$ artvisc.cuf resvisc_gpu check", nid
-!      do i=1,100
-!           print *, 'res2', i, res2(i)
-!      enddo
 
       return
       end
