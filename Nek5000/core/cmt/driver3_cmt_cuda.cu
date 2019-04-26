@@ -4,9 +4,10 @@
 
 //#define DEBUGPRINT 0
 
-__global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *vz, double *u, int nelt, int nxyz,int ntot,int irpu, int irpv, int irpw, int iret, int irg, int toteq,int if3d,double *scr, double* energy, double *vtrans, int irho, double *phig, int lx1, int ly1, int lz1, int *lglel, double *xm1, double *ym1, double *zm1, double *t,int ldimt, int npscal, double *pr, double p0th, double *sii, double *siii, double *vdiff, int ifield,char *cb, int icv, int icp, double *csound, int imu,int ilam, double cpgref, double cvgref, double gmaref, double rgasref,  int ltot,int lxy){    
+__global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *vz, double *u, int nelt, int nxyz,int ntot,int irpu, int irpv, int irpw, int iret, int irg, int toteq,int if3d,double *scr, double* energy, double *vtrans, int irho, double *phig, int lx1, int ly1, int lz1, int *lglel, double *xm1, double *ym1, double *zm1, double *t,int ldimt, int npscal, double *pr, double p0th, double *sii, double *siii, double *vdiff, int ifield,char *cb, int icv, int icp, double *csound, int imu, int iknd, int ilam, double cpgref, double cvgref, double gmaref, double rgasref,  int ltot,int lxy){//added iknd as parameter by kk 04/26    
 	int id = blockIdx.x*blockDim.x+threadIdx.x;
-	if(id<nelt*nxyz){
+        //if(id<nelt*nxyz){
+	if(id<ntot){//ntot = nelt *nxyz, added by kk 04/23
 
 		int e = id/nxyz;
 		int i = id%nxyz;
@@ -40,9 +41,10 @@ __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *v
 		}
 
 
-		scr[id] = scr[id]/irg_c; //invcol2
+		/*scr[id] = scr[id]/irg_c; //invcol2
 		//scr[id] = scr[id]/c; //invcol2
-		scr[id] = scr[id] * 0.5; //cmult
+		scr[id] = scr[id] * 0.5; //cmult*/
+                scr[id] = scr[id]/irg_c *0.5; //invcol2, above merge to 1, by kk 04/26
 
 		energy[id] =  u[e*e_offset+(iret-1)*nxyz+i] -scr[id];// sub3	
 		energy[id] = energy[id]/irg_c;// invcol2; replace c with irg_c by Kk 04/09/2019
@@ -55,28 +57,28 @@ __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *v
 		int j =  (id/lx1)%ly1;
 		int newi = id % lx1;
 
-		double x = xm1[e*nxyz+k*lxy+j*lx1+newi];
-		double y = ym1[e*nxyz+k*lxy+j*lx1+newi];
-		double z = zm1[e*nxyz+k*lxy+j*lx1+newi];
+		double x = xm1[id]; //xm1[e*nxyz+k*lxy+j*lx1+newi];
+		double y = ym1[id]; //ym1[e*nxyz+k*lxy+j*lx1+newi];
+		double z = zm1[id]; //zm1[e*nxyz+k*lxy+j*lx1+newi];
 		double r = x*x+y*y;
 		double theta=0.0;
 		if (r>0.0){ r = sqrtf(r);}
 		if ( x != 0.0 || y!= 0.0){theta = atan2(y,x);	}
-		double ux= vx[e*nxyz+k*lxy+j*lx1+newi];
-		double uy= vy[e*nxyz+k*lxy+j*lx1+newi];
-		double uz= vz[e*nxyz+k*lxy+j*lx1+newi];
-		double temp = t [ e*nxyz+k*lxy+j*lx1+newi ];
+		double ux= vx[id]; //vx[e*nxyz+k*lxy+j*lx1+newi];
+		double uy= vy[id]; //vy[e*nxyz+k*lxy+j*lx1+newi];
+		double uz= vz[id]; //vz[e*nxyz+k*lxy+j*lx1+newi];
+		double temp = t[id]; // t [ e*nxyz+k*lxy+j*lx1+newi ];
 		int ips;
 		double ps[10]; // ps is size of ldimt which is 3. Not sure npscal is also 3. Need to check with Dr.Tania
 		for (ips=0;ips<npscal;ips++){
 			ps[ips]=t[(ips+1)*ltot+e*nxyz+k*lxy+j*lx1+newi ]; // 5 th dimension of t is idlmt which is 3. Not sure how the  nekasgn access ips+1. Need to check with Dr.Tania
 		}
-		double pa = pr [e*nxyz+k*lxy+j*lx1+newi];
+		double pa = pr[id]; //pr [e*nxyz+k*lxy+j*lx1+newi];
 		double p0= p0th;
-		double si2 =  sii[e*nxyz+k*lxy+j*lx1+newi];
-		double si3 =  siii[e*nxyz+k*lxy+j*lx1+newi];
-		double udiff =  vdiff[(ifield-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
-		double utrans =  vtrans[(ifield-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
+		double si2 =  sii[id]; //sii[e*nxyz+k*lxy+j*lx1+newi];
+		double si3 =  siii[id]; //siii[e*nxyz+k*lxy+j*lx1+newi];
+		double udiff = vdiff[(ifield-1)*ltot+id]; // vdiff[(ifield-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
+		double utrans = vtrans[(ifield-1)*ltot+id];  // vtrans[(ifield-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
 		char cbu1 = cb[0];
 		char cbu2 = cb[1];
 		char cbu3 = cb[2];
@@ -86,22 +88,22 @@ __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *v
 		double varsic[10];
 		for (eqnum=0;eqnum<toteq;eqnum++){
 			varsic[eqnum] = u[e*e_offset+eqnum*nxyz+k*lxy+j*lx1+newi];
-
 		}
-		double phi = phig[e*nxyz+k*lxy+j*lx1+newi];
-		double rho = vtrans[(irho-1)*ltot +e*nxyz+k*lxy+j*lx1+newi];
-		double pres = pr[e*nxyz+k*lxy+j*lx1+newi];
+		double phi = phig[id]; //phig[e*nxyz+k*lxy+j*lx1+newi];
+		double rho = vtrans[(irho-1)*ltot + id]; //vtrans[(irho-1)*ltot +e*nxyz+k*lxy+j*lx1+newi];
+		double pres = pr[id]; // pr[e*nxyz+k*lxy+j*lx1+newi];
 		double cv=0.0,cp=0.0;
 		if(rho!=0){
-			cv=vtrans[(icv-1)*ltot +e*nxyz+k*lxy+j*lx1+newi]/rho;
-			cp=vtrans[(icp-1)*ltot +e*nxyz+k*lxy+j*lx1+newi]/rho;
+			cv=vtrans[(icv-1)*ltot+ id]/rho; // vtrans[(icv-1)*ltot +e*nxyz+k*lxy+j*lx1+newi]/rho;
+			cp=vtrans[(icp-1)*ltot + id]/rho; // vtrans[(icp-1)*ltot +e*nxyz+k*lxy+j*lx1+newi]/rho;
 		}
-		double asnd = csound [e*nxyz+k*lxy+j*lx1+newi];
-		double mu = vdiff[(imu-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
-		udiff = vdiff[(imu-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];// this overrides the udiff in nekasgn (line 63 in this function). Need to check withDr.Tania
-		double lambda = vdiff[(ilam-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
+		double asnd = csound[id]; //csound [e*nxyz+k*lxy+j*lx1+newi];
+		double mu = vdiff[(imu-1)*ltot+id]; // vdiff[(imu-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
+		//udiff = vdiff[(imu-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];// this overrides the udiff in nekasgn (line 63 in this function). Need to check withDr.Tania
+		udiff = vdiff[(iknd-1)*ltot+id]; //vdiff[(imu-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];// imu should be iknd, corrected by Kk 04/26
+		double lambda = vdiff[(ilam-1)*ltot+id]; //vdiff[(ilam-1)*ltot+e*nxyz+k*lxy+j*lx1+newi];
 
-		double e_internal = energy[e*nxyz+k*lxy+j*lx1+newi];
+		double e_internal = energy[id]; //energy[e*nxyz+k*lxy+j*lx1+newi];
 		//subroutine cmt_userEOS
 		cp=cpgref;
 		cv=cvgref;
@@ -112,15 +114,19 @@ __global__ void compute_primitive_vars_kernel (double *vx, double *vy, double *v
 
 		pres=rho*rgasref*temp;//overrides
 
-		vtrans[(icp-1)*ltot +e*nxyz+k*lxy+j*lx1+newi]=cp*rho;
+		/* comment to replace with id
+                vtrans[(icp-1)*ltot +e*nxyz+k*lxy+j*lx1+newi]=cp*rho;
 		vtrans[(icv-1)*ltot +e*nxyz+k*lxy+j*lx1+newi]=cv*rho;
 		t [ e*nxyz+k*lxy+j*lx1+newi ]= temp;
-		csound [e*nxyz+k*lxy+j*lx1+newi]=asnd;
-
+		csound [e*nxyz+k*lxy+j*lx1+newi]=asnd;*/
+                vtrans[(icp-1)*ltot +id]=cp*rho;
+                vtrans[(icv-1)*ltot +id]=cv*rho;
+                t [id]= temp;
+                csound [id]=asnd;
 	}
 }
 
-extern "C" void compute_primitive_vars_gpu_wrapper_(int *glbblockSize1,double *d_vx, double *d_vy, double *d_vz, double *d_u, int *nxyz, int *ntot, int *nelt,int *irpu, int *irpv, int *irpw, int* iret,  int *irg, int *toteq, int *if3d, double *d_vtrans, int *irho, double *d_phig, int *lx1, int *ly1, int *lz1, int *d_lglel, double *d_xm1, double *d_ym1, double *d_zm1, double *d_t,int *ldimt, int *npscal, double *d_pr, double *p0th, double *d_sii, double *d_siii, double *d_vdiff, int *ifield,char *d_cb, int *icv, int *icp, double *d_csound, int *imu,int *ilam, double *cpgref, double *cvgref, double *gmaref, double *rgasref, int *ltot){
+extern "C" void compute_primitive_vars_gpu_wrapper_(int *glbblockSize1,double *d_vx, double *d_vy, double *d_vz, double *d_u, int *nxyz, int *ntot, int *nelt,int *irpu, int *irpv, int *irpw, int* iret,  int *irg, int *toteq, int *if3d, double *d_vtrans, int *irho, double *d_phig, int *lx1, int *ly1, int *lz1, int *d_lglel, double *d_xm1, double *d_ym1, double *d_zm1, double *d_t,int *ldimt, int *npscal, double *d_pr, double *p0th, double *d_sii, double *d_siii, double *d_vdiff, int *ifield,char *d_cb, int *icv, int *icp, double *d_csound, int *imu, int *iknd, int *ilam, double *cpgref, double *cvgref, double *gmaref, double *rgasref, int *ltot){
 #ifdef DEBUGPRINT
 	cudaError_t code1 = cudaPeekAtLastError();
 
@@ -136,8 +142,9 @@ extern "C" void compute_primitive_vars_gpu_wrapper_(int *glbblockSize1,double *d
 
 	int lxy=lx1[0]*ly1[0];
 	int blockSize =glbblockSize1[0], gridSize;
-	gridSize = (int)ceil((float)nelt[0]*nxyz[0]/blockSize);
-	compute_primitive_vars_kernel<<<gridSize, blockSize>>>(d_vx, d_vy, d_vz, d_u, nelt[0], nxyz[0],ntot[0],  irpu[0], irpv[0], irpw[0], iret[0],irg[0],toteq[0],if3d[0],d_scr,d_energy,d_vtrans, irho[0],d_phig ,lx1[0], ly1[0],lz1[0], d_lglel, d_xm1, d_ym1,d_zm1, d_t,ldimt[0], npscal[0], d_pr,p0th[0], d_sii,d_siii,d_vdiff, ifield[0],d_cb, icv[0], icp[0],d_csound,imu[0],ilam[0],  cpgref[0], cvgref[0], gmaref[0], rgasref[0],ltot[0],lxy);
+	//gridSize = (int)ceil((float)nelt[0]*nxyz[0]/blockSize);
+        gridSize = (int)ceil((float)ntot[0]/blockSize); //ntot = nxyz * nelt, changed by kk 04/26
+	compute_primitive_vars_kernel<<<gridSize, blockSize>>>(d_vx, d_vy, d_vz, d_u, nelt[0], nxyz[0],ntot[0],  irpu[0], irpv[0], irpw[0], iret[0],irg[0],toteq[0],if3d[0],d_scr,d_energy,d_vtrans, irho[0],d_phig ,lx1[0], ly1[0],lz1[0], d_lglel, d_xm1, d_ym1,d_zm1, d_t,ldimt[0], npscal[0], d_pr,p0th[0], d_sii,d_siii,d_vdiff, ifield[0],d_cb, icv[0], icp[0],d_csound,imu[0], iknd[0], ilam[0],  cpgref[0], cvgref[0], gmaref[0], rgasref[0],ltot[0],lxy);
 
 
 	cudaFree(d_scr);
@@ -210,48 +217,53 @@ extern "C" void set_convect_cons_gpu_wrapper_(double *d_vxd, double *d_vyd, doub
         int ldw=2*pow(ld,ldim[0]);
         double *d_w;
         cudaMalloc((void**)&d_w, nelt[0]*ldw*sizeof(double));
+        //create handle
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
-//#ifdef DEBUGPRINT
+#ifdef DEBUGPRINT
         cudaDeviceSynchronize();
         cudaError_t code1 = cudaPeekAtLastError();
         printf("CUDA: Start set_convect_cons_gpu_wrapper_ cuda status: %s\n",cudaGetErrorString(code1));
 
         printf("CUDA: Start set_convect_cons_gpu_wrapper_ values lx1=%d , lxd=%d,if3d=%d,nelt=%d,ldim=%d \n", lx1[0],lxd[0],if3d[0], nelt[0],ldim[0]);
-//#endif
+#endif
 
-        gpu_specmpn(d_vxd, lxd[0], d_vx, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
+        gpu_specmpn(handle, d_vxd, lxd[0], d_vx, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
 
-//#ifdef DEBUGPRINT
+#ifdef DEBUGPRINT
         cudaDeviceSynchronize();
         cudaError_t code3 = cudaPeekAtLastError();
         printf("CUDA: set_convect_cons_gpu_wrapper_ first gpu_specmpn cuda status: %s\n",cudaGetErrorString(code3));
-//#endif
+#endif
 
-        gpu_specmpn(d_vyd, lxd[0], d_vy, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
+        gpu_specmpn(handle, d_vyd, lxd[0], d_vy, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
 
-//#ifdef DEBUGPRINT
+#ifdef DEBUGPRINT
         cudaDeviceSynchronize();
         cudaError_t code4 = cudaPeekAtLastError();
         printf("CUDA: set_convect_cons_gpu_wrapper_ second gpu_specmpn cuda status: %s\n",cudaGetErrorString(code4));
-//#endif
+#endif
 
         if(if3d[0]){
-           gpu_specmpn(d_vzd, lxd[0], d_vz, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
+           gpu_specmpn(handle, d_vzd, lxd[0], d_vz, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,1,true);
 
-//#ifdef DEBUGPRINT
+#ifdef DEBUGPRINT
         cudaDeviceSynchronize();
         cudaError_t code5 = cudaPeekAtLastError();
         printf("CUDA: set_convect_cons_gpu_wrapper_ third gpu_specmpn cuda status: %s\n",cudaGetErrorString(code5));
-//#endif
+#endif
 
         }
         cudaFree(d_w);
+        //destroy handle
+        cublasDestroy(handle);
 
-//#ifdef DEBUGPRINT
+#ifdef DEBUGPRINT
         cudaDeviceSynchronize();
         cudaError_t code2 = cudaPeekAtLastError();
         printf("CUDA: End set_convect_cons_gpu_wrapper_ cuda status: %s\n",cudaGetErrorString(code2));
-//#endif
+#endif
         
 
 

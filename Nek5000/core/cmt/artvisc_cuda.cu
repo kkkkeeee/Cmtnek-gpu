@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "cuda_helpers.h"
+#include <cublas_v2.h> //added by kk 04/26/2019 for cublasDgemm handle
 //#define DEBUGPRINT 0
 
 __global__ void compute_entropy_gpu_kernel(double *tlag, double *pr, double *vtrans,int ntot, int irho, double ntol , double rgam, double gmaref,int ltot  ){
@@ -188,6 +189,9 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)ntot[0]/blockSize); //ntot[0] = lxyz * nelt
+        //create handle for gpu_local_grad3 kk 04/18
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
 
         //lxyzd -> lxyzdlelt by Kk 03/16
@@ -213,7 +217,7 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
         cudaMemset(d_ut3, 0.0, ldd*nelt[0]*sizeof(double));
         cudaMemset(d_ud, 0.0, ldd*nelt[0]*sizeof(double));
 	if(if3d[0]){
-               gpu_local_grad3(d_ur1,d_us1,d_ut1,d_totalh,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
+               gpu_local_grad3(handle, d_ur1,d_us1,d_ut1,d_totalh,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
@@ -221,14 +225,14 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 		printf("CUDA: entropy_residual_gpu_wrapper after 1st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-               gpu_local_grad3(d_ur2,d_us2,d_ut2,d_totalh+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
+               gpu_local_grad3(handle, d_ur2,d_us2,d_ut2,d_totalh+lxyzdlelt,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
 		printf("CUDA: entropy_residual_gpu_wrapper after 2st gpu_local_grad3 cuda status: %s\n",cudaGetErrorString(code1));
 #endif
 
-               gpu_local_grad3(d_ur3,d_us3,d_ut3,d_totalh+lxyzdlelt*2,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
+               gpu_local_grad3(handle, d_ur3,d_us3,d_ut3,d_totalh+lxyzdlelt*2,lx1[0],d_dxm1,d_dxtm1,nelt[0]);//use d_totalh to replace d_totalh_temp by Kk04/11
 #ifdef DEBUGPRINT
 		cudaDeviceSynchronize();
 		code1 = cudaPeekAtLastError();
@@ -291,6 +295,8 @@ extern "C" void entropy_residual_gpu_wrapper_(int *glbblockSize1,double *d_tlag,
 	cudaFree(d_ut3);
 
 	cudaFree(d_ud);
+        //destroy handle
+        cublasDestroy(handle);  //added by Kk 04/26
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code2 = cudaPeekAtLastError();

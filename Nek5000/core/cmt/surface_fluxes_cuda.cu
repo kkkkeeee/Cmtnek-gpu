@@ -401,9 +401,7 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	double *d_fs;
 	double *d_flx;
 
-
-
-	cudaMalloc(&d_w, ntotd*sizeof(double));
+	/*cudaMalloc(&d_w, ntotd*sizeof(double));
 	cudaMalloc(&d_nx, ntotd*sizeof(double));
 	cudaMalloc(&d_ny, ntotd*sizeof(double));
 	cudaMalloc(&d_nz, ntotd*sizeof(double));
@@ -429,7 +427,37 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	cudaMalloc(&d_jaco_f, ntotd*sizeof(double));
 	cudaMalloc(&d_phl, ntotd*sizeof(double));
 	cudaMalloc(&d_fs, ntotd*sizeof(double));
-	cudaMalloc(&d_flx, ntotd*toteq[0]*sizeof(double));
+	cudaMalloc(&d_flx, ntotd*toteq[0]*sizeof(double));*/
+
+        double *d_all;
+        cudaMalloc(&d_all, 29*ntotd*sizeof(double));
+        d_w = d_all;
+        d_nx = d_w + ntotd;
+        d_ny = d_nx+ntotd;
+        d_nz = d_ny+ntotd;
+
+        d_rl = d_nz+ntotd;
+        d_ul = d_rl+ntotd;
+        d_wl = d_ul+ntotd;
+        d_vl = d_wl+ntotd;
+        d_pl = d_vl+ntotd;
+        d_tl = d_pl+ntotd;
+        d_al = d_tl+ntotd;
+        d_cpl = d_al+ntotd;
+
+        d_rr = d_cpl+ntotd;
+        d_ur = d_rr+ntotd;
+        d_vr = d_ur+ntotd;
+        d_wr = d_vr+ntotd;
+        d_pr = d_wr+ntotd;
+        d_tr = d_pr+ntotd;
+        d_ar = d_tr+ntotd;
+        d_cpr = d_ar+ntotd;
+        d_jaco_c = d_cpr + ntotd;
+        d_jaco_f = d_jaco_c+ntotd;
+        d_phl = d_jaco_f+ntotd;
+        d_fs = d_phl+ntotd;
+        d_flx = d_fs+ntotd;
 
 	int totpts =lxz2ldimlelt;
 
@@ -616,7 +644,8 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 
 	}
 
-	cudaFree(d_w);//added by Kk 03/29	
+        cudaFree(d_all); //added by Kk 04/26
+	/*cudaFree(d_w);//added by Kk 03/29	
 	cudaFree(d_nx);	
 	cudaFree(d_ny);	
 	cudaFree(d_nz);	
@@ -640,7 +669,9 @@ extern "C" void inviscidflux_gpu_wrapper_(int *glbblockSize2,double *d_jgl,doubl
 	cudaFree(d_jaco_f);	
 	cudaFree(d_phl);	
 	cudaFree(d_fs);	
-	cudaFree(d_flx);	
+	cudaFree(d_flx);*/
+        // Destroy the handle
+        cublasDestroy(handle);
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();

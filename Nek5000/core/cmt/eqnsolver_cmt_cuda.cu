@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <cublas_v2.h> //for cublasDgemm handle by Kk 04/26
 #include <sys/time.h>
 #include "nvml.h"
 #include "cuda_helpers.h"
@@ -392,7 +393,9 @@ extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,doub
 		consta=1.0;// ! Baumann-Oden
 	}
 
-
+        //create handle for gpu_local_grad3_t kk 04/26/2019
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
 	int blockSize1 = glbblockSize1[0], blockSize2= glbblockSize2[0],gridSize1,gridSize2,gridSize3;
 #ifdef DEBUGPRINT
@@ -460,7 +463,7 @@ extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,doub
 			//computation of ur us ut are in the kernel3
 			//gradm1_t
 			if(if3d[0]){//corrected by Kk 03/20 if3d -> if3d[0]
-				gpu_local_grad3_t(d_gradm1_t_overwrites, d_ur, d_us,d_ut,lx1[0],d_dxm1,d_dxtm1, d_tmp, nelt[0]);		
+				gpu_local_grad3_t(handle, d_gradm1_t_overwrites, d_ur, d_us,d_ut,lx1[0],d_dxm1,d_dxtm1, d_tmp, nelt[0]);		
 			}
 			else{
 				gpu_local_grad2_t(d_gradm1_t_overwrites, d_ur, d_us,lx1[0],d_dxm1,d_dxtm1, d_tmp, nelt[0]);		
@@ -488,6 +491,8 @@ extern "C" void igtu_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,doub
 	cudaFree(d_tmp);
 	cudaFree(d_superhugeh);
 	cudaFree(d_gradm1_t_overwrites);
+        // Destroy the handle
+        cublasDestroy(handle);
 
 #ifdef DEBUGPRINT
 	cudaError_t code2 = cudaPeekAtLastError();
@@ -686,6 +691,9 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)nnel/blockSize);
+        //create handle for gpu_local_grad3 kk04/26
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
 	for(int eq=0; eq<toteq[0];eq++){
 	cudaMemset(d_ur, 0.0, ndlel*sizeof(double));
@@ -698,7 +706,7 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 		compute_gradients_gpu_kernel1<<<gridSize, blockSize>>>(d_ud,d_u,d_phig,nnel,lx1[0],ly1[0],lz1[0],lxy,nxyz,toteqlxyz,eq);
 
 		if(if3d[0]){
-			gpu_local_grad3(d_ur,d_us,d_ut,d_ud,lx1[0],d_dxm1,d_dxtm1,nelt[0]);// why define  d_ur .. to ldd if only using lx1. check with Dr.Tania. adeesha.
+			gpu_local_grad3(handle, d_ur,d_us,d_ut,d_ud,lx1[0],d_dxm1,d_dxtm1,nelt[0]);// why define  d_ur .. to ldd if only using lx1. check with Dr.Tania. adeesha.
 			/*double *cpu_dud;
 			cpu_dud= (double*)malloc(ndlel*sizeof(double));
 			cudaMemcpy(cpu_dud,d_ud,ndlel*sizeof(double) , cudaMemcpyDeviceToHost);
@@ -808,6 +816,8 @@ extern "C" void compute_gradients_gpu_wrapper_(int *glbblockSize1,double *d_u,do
 	cudaFree(d_us);
 	cudaFree(d_ut);
 	cudaFree(d_ud);
+        // Destroy the handle
+        cublasDestroy(handle);
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
@@ -986,7 +996,8 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 	double *d_tu;
 
 
-	cudaMalloc((void**)&d_ju1,nelt[0]*ldd*sizeof(double));
+        /*comment out for one d_all for performance by Kk 04/26*/
+	/*cudaMalloc((void**)&d_ju1,nelt[0]*ldd*sizeof(double));
 	cudaMalloc((void**)&d_ju2,nelt[0]*ldd*sizeof(double));
 	cudaMalloc((void**)&d_w, nelt[0]*ldw*sizeof(double));
 
@@ -995,7 +1006,18 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 	cudaMalloc((void**)&d_us,nelt[0]*ldd*sizeof(double));
 	cudaMalloc((void**)&d_ut,nelt[0]*ldd*sizeof(double));
 	cudaMalloc((void**)&d_ud,nelt[0]*ldd*sizeof(double));
-	cudaMalloc((void**)&d_tu,nelt[0]*ldd*sizeof(double));
+	cudaMalloc((void**)&d_tu,nelt[0]*ldd*sizeof(double));*/
+        double *d_all;
+        cudaMalloc((void**)&d_all, nelt[0]*(ldd*7+ldw)*sizeof(double));
+        int lddnelt = nelt[0]*ldd;
+        d_ju1 = d_all;
+        d_ju2 = d_ju1+lddnelt;
+        d_ur = d_ju2 + lddnelt;
+        d_us = d_ur + lddnelt;
+        d_ut = d_us + lddnelt;
+        d_ud = d_ut + lddnelt;
+        d_tu = d_ud + lddnelt;
+        d_w = d_tu + lddnelt;
 
 
 	cudaMemset(d_ju1, 0.0, nelt[0]*ldd*sizeof(double));
@@ -1004,6 +1026,9 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)nnel/blockSize);
+        //create cublas handle for gpu_specmpn & gpu_local_grad3_t
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
 	//	int i=0;
 
@@ -1022,7 +1047,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 					//printf("GPU :eqnsolver.cu : convective_cmt_gpu_wrapper start if lxd>lx1 before gpu_gett_int_ptr\n");
 					//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
 					//printf("GPU :eqnsolver.cu : convective_cmt_gpu_wrapper start if lxd>lx1 after gpu_gett_int_ptr\n");
-					gpu_specmpn(d_convh+j*ldd*lelt[0], lxd[0], d_u+(j+1)*lxyz ,lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], toteq[0], j+1, true ); 
+					gpu_specmpn(handle, d_convh+j*ldd*lelt[0], lxd[0], d_u+(j+1)*lxyz ,lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], toteq[0], j+1, true ); 
 #ifdef DEBUGPRINT
 					cudaDeviceSynchronize();
 					code1 = cudaPeekAtLastError();
@@ -1039,7 +1064,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
                                 //corrected if3d -> if3d[0] by Kk 03/25
 				//gpu_specmpn(d_ju1, lxd[0], d_phig, lx1[0], d_jgl, d_jgt, if3d, d_w, ldw, nelt[0], 1,eq,true);
-				gpu_specmpn(d_ju1, lxd[0], d_phig, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,eq,true);
+				gpu_specmpn(handle, d_ju1, lxd[0], d_phig, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], 1,eq,true);
 				//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
 #ifdef DEBUGPRINT
 				cudaDeviceSynchronize();
@@ -1050,7 +1075,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
                                 //corrected if3d -> if3d[0] by Kk 03/25
 				//gpu_specmpn(d_ju2, lxd[0], d_pr, lx1[0], d_jgl, d_jgt, if3d, d_w, ldw, nelt[0],1,eq,true);
-				gpu_specmpn(d_ju2, lxd[0], d_pr, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0],1,eq,true);
+				gpu_specmpn(handle, d_ju2, lxd[0], d_pr, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0],1,eq,true);
 				/*if(eq==1){
 				  double *cpu_ju1;
 				  cpu_ju1= (double*)malloc(ldd*lelt[0]*sizeof(double));
@@ -1079,7 +1104,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 				if(eq<4){
 					//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
 
-					gpu_specmpn(d_convh, lxd[0], d_u+eq*lxyz,lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], toteq[0], eq,true);
+					gpu_specmpn(handle, d_convh, lxd[0], d_u+eq*lxyz,lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0], toteq[0], eq,true);
 					int blockSize, gridSize;
 
 					// Number of threads in each thread block
@@ -1090,7 +1115,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 				else if(eq==4){
 					//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
 
-					gpu_specmpn(d_convh, lxd[0], d_u+eq*lxyz, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0],toteq[0],eq,true);
+					gpu_specmpn(handle, d_convh, lxd[0], d_u+eq*lxyz, lx1[0], d_jgl, d_jgt, if3d[0], d_w, ldw, nelt[0],toteq[0],eq,true);
 #ifdef DEBUGPRINT
 					cudaDeviceSynchronize();
 					code1 = cudaPeekAtLastError();
@@ -1207,8 +1232,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 			printf("CUDA: convective_cmt_gpu_wrapper before gpu_local_grad if3d: %d\n",if3d[0]);
 #endif
 			if(if3d[0]){//corrected by Kk 02/25 if3d -> if3d[0]
-				//uncooment after fix gpu_local_grad3_t
-				gpu_local_grad3_t(d_ud, d_ur, d_us, d_ut, lxd[0], d_dg, d_dgt, d_w, nelt[0]);
+				gpu_local_grad3_t(handle, d_ud, d_ur, d_us, d_ut, lxd[0], d_dg, d_dgt, d_w, nelt[0]);
 			}
 			else{
 				gpu_local_grad2_t(d_ud, d_ur, d_us, lxd[0], d_dg, d_dgt, d_w, nelt[0]);
@@ -1247,7 +1271,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 			//gpu_get_int_ptr(&i,if3d[0], lx1[0], lxd[0], nelt[0],d_jgl, d_jgt,d_wkd,lxd[0],d_pjgl);
                         //if(eq ==1){printf("**************begin intp_rstd %d \n", eq+1);}
-			gpu_specmpn(d_tu,lx1[0],d_ud,lxd[0],d_jgt,d_jgl,if3d[0],d_w,ldw,nelt[0],1,eq,false);
+			gpu_specmpn(handle, d_tu,lx1[0],d_ud,lxd[0],d_jgt,d_jgl,if3d[0],d_w,ldw,nelt[0],1,eq,false);
                         //if(eq==1){printf("**************end intp_rstd %d \n", eq+1);}
 
                         /*if(eq==1){
@@ -1294,7 +1318,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 			flux_div_integral_aliased_kernel1<<<gridSize, blockSize>>>(d_ur, d_us, d_ut, d_totalh, d_rx, ndlel, ndnel, if3d[0], lxd[0], lyd[0], lzd[0], lxyd, lxyzd, ldim[0]);
 			if(if3d[0]){//corrected by Kk 02/26 if3d -> if3d[0]
 				//uncomment after fix gpu_local_grad3_t
-				gpu_local_grad3_t(d_ud, d_ur, d_us, d_ut, lxd[0], d_d, d_dt, d_w, nelt[0]);
+				gpu_local_grad3_t(handle, d_ud, d_ur, d_us, d_ut, lxd[0], d_d, d_dt, d_w, nelt[0]);
 			}
 			else{
 				gpu_local_grad2_t(d_ud, d_ur, d_us, lxd[0], d_d, d_dt, d_w, nelt[0]);
@@ -1319,7 +1343,7 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 //				printf("debug 2d_res1 %d %d %d %.30lf \n ",j,i/lxyz,i%(lxyz),cpu_res1[j*lxyzlelt+i]);
 //				}
 //			}
-	cudaFree(d_ur);
+	/*cudaFree(d_ur);
 	cudaFree(d_us);
 	cudaFree(d_ut);
 	cudaFree(d_ud);
@@ -1327,7 +1351,10 @@ extern "C" void convective_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize
 
 	cudaFree(d_ju1);
 	cudaFree(d_ju2);
-	cudaFree(d_w);
+	cudaFree(d_w);*/
+        cudaFree(d_all);
+        //destroy handle
+        cublasDestroy(handle);
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
@@ -1805,6 +1832,9 @@ extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,d
 	cudaMalloc((void**)&d_tmp,nnel*sizeof(double));
 	cudaMalloc((void**)&d_hface,lxz2ldimlelt*sizeof(double));
 	cudaMalloc((void**)&d_normal,lxz2ldimlelt*sizeof(double));
+        //create handle for local_grad3_t kk 04/18/2019
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
 
 
@@ -1829,7 +1859,7 @@ extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,d
 		//kernel3 is gradm11_t function
 		viscous_cmt_gpu_kernel3<<<gridSize1, blockSize1>>>(d_ur,d_us,d_ut, d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,d_diffh,ldim[0],nnel,lxyzlelt,d_bm1,if3d[0],nxyz);
 		if(if3d[0]){//corrected by Kk 02/27 if3d -> if3d[0]
-			gpu_local_grad3_t(d_ud, d_ur, d_us,d_ut,lx1[0],d_dxm1,d_dxtm1, d_tmp, nelt[0]);		
+			gpu_local_grad3_t(handle, d_ud, d_ur, d_us,d_ut,lx1[0],d_dxm1,d_dxtm1, d_tmp, nelt[0]);		
 		}
 		else{
 			gpu_local_grad2_t(d_ud, d_ur, d_us,lx1[0],d_dxm1,d_dxtm1, d_tmp, nelt[0]);		
@@ -1866,6 +1896,8 @@ extern "C" void viscous_cmt_gpu_wrapper_(int *glbblockSize1,int *glbblockSize2,d
 	cudaFree(d_tmp);
 	cudaFree(d_hface);
 	cudaFree(d_normal);
+        // Destroy the handle
+        cublasDestroy(handle);
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
 	cudaError_t code2 = cudaPeekAtLastError();
@@ -1951,6 +1983,9 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 
 	int blockSize = glbblockSize1[0], gridSize;
 	gridSize = (int)ceil((float)nnel/blockSize);
+        //create handle for gpu_local_grad3 kk 04/26
+        cublasHandle_t handle;
+        cublasCreate(&handle);
 
 // double *cpu_d;
  //                               cpu_d= (double*)malloc(lxd[0]*lxd[0]*lxd[0]*sizeof(double));
@@ -1975,7 +2010,7 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 
 
 			if(if3d[0]){ //corrected by Kk 03/06/2019 if3d -> if3d[0]
-				gpu_local_grad3(d_ur, d_us, d_ut, d_phig, lx1[0], d_d, d_dt, nelt[0]);  
+				gpu_local_grad3(handle, d_ur, d_us, d_ut, d_phig, lx1[0], d_d, d_dt, nelt[0]);  
 			}
 			else{
 				gpu_local_grad2(d_ur, d_us, d_phig, lx1[0], d_d, d_dt, nelt[0]);
@@ -2084,6 +2119,8 @@ extern "C" void compute_forcing_gpu_wrapper_(int *glbblockSize1,double *d_phig,d
 	cudaFree(d_us);
 	cudaFree(d_ut);
         cudaFree(d_rdumz); //added by Kk 03/29
+        // Destroy the handle
+        cublasDestroy(handle);
 
 #ifdef DEBUGPRINT
 	cudaDeviceSynchronize();
