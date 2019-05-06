@@ -1,0 +1,4092 @@
+!-----------------------------------------------------------------------
+!     added by adeesha of module, for global variables
+      module glbvariable_gpu
+       
+      include 'SIZE'
+      include 'CMTPART'
+      include 'TSTEP'
+      include 'INPUT'
+      include 'MASS'
+      include 'SOLN'
+      include 'PARALLEL'
+      include 'GEOM'
+      include 'CMTDATA'
+      include 'CMTTIMERS'
+      include 'CTIMER'
+      include 'DG'
+      include 'DEALIAS'    
+      
+      include 'DXYZ'
+      include 'EIGEN'
+      include 'IXYZ'
+      include 'MVGEOM'
+      include 'TOPOL'
+      include 'STEADY'
+      include 'TURBO'
+      include 'ESOLV'
+      include 'WZ'
+      include 'WZF'
+
+  
+      integer ,parameter :: lengthoftogpucopy_gas =100
+      integer , parameter:: lengthoftogpucopy_part =50
+      integer  :: togpucopy_gas ( lengthoftogpucopy_gas  )
+      integer  :: togpucopy_part (lengthoftogpucopy_part )
+
+      integer  :: tocpucopy_gas ( lengthoftogpucopy_gas  )
+      integer  :: tocpucopy_part (lengthoftogpucopy_part )
+      integer , parameter :: glbblockSize1 =512
+      integer , parameter :: glbblockSize2 = 1024
+
+!      integer , parameter:: if3dgpu =1
+
+!     gas data structrues
+      
+
+      real, device :: d_res3(lx1,ly1,lz1,toteq,lelt) ! 1
+      real, device :: d_u(lx1,ly1,lz1,toteq,lelt)    ! 2
+      real, device :: d_res1(lx1,ly1,lz1,lelt,toteq)  ! 3 
+      real, device :: d_bm1(lx1,ly1,lz1,lelt)         ! 4
+      real, device :: d_tcoef(3,3)                    ! 5
+      real, device :: d_graduf(toteq*3*lx1*lz1*2*ldim*lelt)! 6 always dim first then toteq then elements . ****This changed later dim first then elements then toteq in surface_fluxes igu_cmt. check. adeesha.
+      real, device :: d_gradu(toteq*3*lx1*ly1*lz1*lelt) ! 7 additional lelt to support gpu parallelizm. always dim first then toteq then elements 
+      real, device :: d_diffh(3*lx1*ly1*lz1*lelt) ! 8 additional lelt to support gpu parallelizm. dim first then elements
+!      real, device :: d_w(nelt*lwkd)                 ! 9
+      real, device :: d_vx(lx1,ly1,lz1,lelv)         ! 10
+      real, device :: d_vy(lx1,ly1,lz1,lelv)         ! 11
+      real, device :: d_vz(lx1,ly1,lz1,lelv)         ! 12
+      real, device :: d_vxd(lxd,lyd,lzd,lelv)        ! 13 
+      real, device :: d_vyd(lxd,lyd,lzd,lelv)        ! 14
+      real, device :: d_vzd(lxd,lyd,lzd,lelv)        ! 15  
+      real, device :: d_convh(lxd*lyd*lzd*lelt,3)   ! 16 additional lelt is for gpu parallization. dim first then elements then grid points
+      real, device :: d_rx(lxd,lyd,lzd,ldim*ldim,lelv)          !17
+      real, device :: d_area(lx1,lz1,6,lelt)         ! 18
+      real, device :: d_phig(lx1,ly1,lz1,lelt)      ! 19
+      real, device :: d_res2(lx1,ly1,lz1,lelt,toteq)   ! 20
+      integer, device :: d_iface_flux(lx1*lz1*2*ldim,lelt)   ! 21
+      real, device :: d_totalh(lxd*lyd*lzd*lelt,3)   ! 22 additional  lelt is for gpu  support. May be this can be covered  by d_convh or  vise versa. check  with Dr.Tania. adeesha.
+      real, device :: d_rxm1(lx1,ly1,lz1,lelt)         ! 23
+      real, device :: d_sxm1(lx1,ly1,lz1,lelt)         ! 24
+      real, device :: d_txm1(lx1,ly1,lz1,lelt)         ! 25
+      real, device :: d_rym1(lx1,ly1,lz1,lelt)         ! 26
+      real, device :: d_sym1(lx1,ly1,lz1,lelt)         ! 27
+      real, device :: d_tym1(lx1,ly1,lz1,lelt)         ! 28
+      real, device :: d_rzm1(lx1,ly1,lz1,lelt)         ! 29
+      real, device :: d_szm1(lx1,ly1,lz1,lelt)         ! 30
+      real, device :: d_tzm1(lx1,ly1,lz1,lelt)         ! 31
+      real, device :: d_jacmi(lx1,ly1,lz1,lelt)      ! 32
+      real, device :: d_dt(lxd*lyd*lzd)              ! 33 
+      real, device :: d_usrf(lx1,ly1,lz1,5,lelt)      ! 34 additional lelt to support gpu.
+!!      real, device :: d_vols(lx1,ly1,lz1,nelt,5)    ! 35
+      real, device :: d_wghtc(lx1*lz1)               ! 36
+      real, device :: d_wghtf(lxd*lzd)               ! 37
+      real, device :: d_unx(lx1,lz1,6,lelt)          ! 38
+      real, device :: d_uny(lx1,lz1,6,lelt)          ! 39 
+      real, device :: d_unz(lx1,lz1,6,lelt)          ! 40
+      character, device :: d_cbc(3*6*lelt*(ldimt1+1)) ! 41 +1 is beucase 0:ldimt1. check what this means with Dr.Tania adeesha.
+      real, device :: d_dxm1(lx1,lx1)       ! 42
+      real, device :: d_dxtm1(lx1,lx1)       ! 43
+      real, device :: d_tlag (lx1,ly1,lz1,lelt,lorder-1,ldimt) ! 44
+      real, device :: d_pr (lx2,ly2,lz2,lelv) ! 45
+      real, device :: d_vtrans (lx1,ly1,lz1,lelt,ldimt1) !46
+      real, device :: d_meshh(lelt) !47
+      real, device :: d_gridh(lx1*ly1*lz1,lelt) !48
+      real, device :: d_xm1(lx1,ly1,lz1,lelt) !49
+      real, device :: d_ym1(lx1,ly1,lz1,lelt) !50
+      real, device :: d_zm1(lx1,ly1,lz1,lelt) !51
+      integer, device:: d_lglel(lelt)  ! 52
+      real, device :: d_t(lx1,ly1,lz1,lelt,ldimt) ! 53
+      real, device :: d_sii(lx1,ly1,lz1,lelt)     !54
+      real, device :: d_siii(lx1,ly1,lz1,lelt)     !55
+      real, device :: d_vdiff(lx1,ly1,lz1,lelt,ldimt1) !56      
+      character, device :: d_cb(3)             !57
+      real, device :: d_csound(lx1,ly1,lz1,lelt) !58
+      integer, device:: d_gllel(lelg)  ! 59
+      real, device :: d_flux(nqq*3*lx1*lz1*2*ldim*lelt) !60 only for now. remove this and put it in surfaces cuda functions and delete. change this later.
+
+!      real, device :: d_fatface(nqq*3*lx1*lz1*2*ldim*lelt) !61 only for now. remove this and put it in surfaces cuda functions and delete. change this later.
+      real, device :: d_wkd(2*lxd*lxd*lxd*lelt) !62  ! may be not needed. check and remove later. adeesha.
+      real, device :: d_viscscr(lx1*ly1*lz1*lelt) !63  ! may be not needed. check and remove later. adeesha.
+      real, device :: d_d(lxd*lyd*lzd)              ! 66
+      real, device :: d_jgl(lxd*lyd*lzd)              ! 67
+      real, device :: d_jgt(lxd*lyd*lzd)              ! 68
+      real, device :: d_dg(lxd*lyd*lzd)              ! 69
+      real, device :: d_dgt(lxd*lyd*lzd)              !70 
+      real, device :: d_jacm1(lx1,ly1,lz1,lelt)      ! 71 !added new variable by Kk 03/06 for compute_forcing
+
+!important **** need jgl and jgt arrays here to store constant values in get_int_ptr or some similar function
+
+
+!      particles structures
+
+      real, device :: d_rpart(lr,llpart)              ! 1
+      integer, device :: d_ipart(li,llpart)           ! 2
+      real, device :: d_kv_stage_p(llpart,4,ldim)     ! 3
+      real, device :: d_kx_stage_p(llpart,4,ldim)     ! 4
+      integer, device :: d_bc_part(6)                 ! 5
+      real, device :: d_xgll(lx1)                     ! 6
+      real, device :: d_ygll(lx1)                     ! 7 
+      real, device :: d_zgll(lx1)                     ! 8
+      real, device :: d_wxgll(lx1)                    ! 9
+      real, device :: d_wygll(lx1)                    ! 10
+      real, device :: d_wzgll(lx1)                    ! 11
+      real, device :: d_rfpts(lrf,llpart)             ! 12
+      integer, device :: d_ifpts(lif,llpart)          ! 13 
+      integer, device :: d_ifptsmap(llpart)           ! 14
+      real, device :: d_xerange(2,3,lelt)             ! 15
+      integer, device :: d_xdrange(2,3)               ! 16
+      real, device:: d_x_part(3)                      ! 17
+      real, device:: d_v_part(3)                      ! 18
+      real, device :: d_rxbo(2,3)	              !19
+      !real, device:: d_ptw(lx1,ly1,lz1,lelt,8)        !20   
+      !real, device:: d_rhs_fluidp(lx1,ly1,lz1,lelt,7) !21  
+
+
+      real :: adeetemp(10)
+      real, device :: adee_d_temp(10)
+
+      end module
+!--------------------------------------------------------------------------------------------------------------------------------------------------
+      subroutine usr_particles_init_gpu ()
+      use cudafor
+      use glbvariable_gpu       
+     
+      parameter (ldg=lxd**3,lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt_1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg)&
+                  , wkd(lwkd)
+
+      common /dgradl/ d_l(ldg),dt_l(ldg),dg_l(ldg),dgt_l(ldg),jgl_l(ldg) &
+         ,jgt_l(ldg), wkd_l(lwkd)
+      real jgl,jgt
+ 
+      integer code
+      
+!      print *,"GPU: Start cmtparticles_gpu.cuf usr_particles_init ",nid
+
+!     call initial values of jgl,jgt,d,dt,dgl,dgt
+      call get_int_ptr (ip,lx1,lxd)
+      call get_dgl_ptr(ip,lxd,lxd)
+      call get_dgll_ptr(ip,lx1,lx1)
+
+!       do i= 1, ldg
+!          write(6,*) "d dt debug", i, d_l(i), dt_l(i)
+!       enddo
+
+
+
+!       do i = 1, lxd*lxd*lxd
+!                write(6,*) " inint debug jgl first", i,jgl(i), jgt(i)
+!       enddo
+ 
+
+      do i=1,lengthoftogpucopy_gas 
+           togpucopy_gas(i)=1
+      end do
+      !do j=1,lengthoftogpucopy_part !fixed here, 01/24 --Kk 
+      !     togpucopy_part(j)=1
+      !end do
+      togpucopy_gas(6)=0
+
+      call copytogpu_gpu()
+
+      code = cudaPeekAtLastError()
+      
+!      print *,"GPU: End cmtparticles_gpu.cuf usr_particles_init cuda status:",cudaGetErrorString(code)
+
+
+      return
+      end
+
+
+!---------------------------------------------------------
+      subroutine copytogpu_gpu ()
+      use cudafor
+      use glbvariable_gpu
+
+     
+      parameter (ldg=lxd**3)
+      parameter (lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt_1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg)&
+                  , wkd(lwkd)
+      common /dgradl/ d_l(ldg),dt_l(ldg),dg_l(ldg),dgt_l(ldg),jgl_l(ldg) &
+         ,jgt_l(ldg), wkd_l(lwkd)
+
+      real jgl,jgt
+
+      integer code
+      character cbc_new(3, 6, lelt, 0:ldimt1)
+      character*3 cb
+!     print *,"GPU: Start cmtparticles_gpu.cuf copytogpu_gpu ",nid
+
+!----- copy gas data
+      if(togpucopy_gas(1).eq.1) then
+           istate = cudaMemcpy(d_res3, res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 1", cudaGetErrorString(istate)
+      endif
+
+!      do i = 1, nelt
+!        do j = 1, toteq
+!           do k = 1, lz1
+!              do m = 1, ly1
+!              do n = 1,lx1
+!              write(6,*) "uarray", n, m, k, j, i, u(n,m,k,j,i)
+!              enddo
+!              enddo
+!           enddo
+!        enddo
+!     enddo
+
+
+
+      if(togpucopy_gas(2).eq.1) then
+           istate = cudaMemcpy(d_u,u, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
+!      priat *,"istate 2", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(3).eq.1) then
+           istate = cudaMemcpy(d_res1, res1, lx1*ly1*lz1*lelt*toteq,cudaMemcpyHostToDevice)
+!      print *,"istate 3", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(4).eq.1) then
+           istate = cudaMemcpy(d_bm1, bm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 4", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(5).eq.1) then
+           istate = cudaMemcpy(d_tcoef,tcoef,9,cudaMemcpyHostToDevice)
+!      print *,"istate 5", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(6).eq.1) then
+           istate = cudaMemcpy(d_graduf, graduf,toteq*3*lx1*lz1*2*ldim,cudaMemcpyHostToDevice)
+!      print *,"istate 6", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(7).eq.1) then
+           istate = cudaMemcpy(d_gradu,gradu,toteq*3*lx1*ly1*lz1,cudaMemcpyHostToDevice)
+!      print *,"istate 7" , cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(8).eq.1) then
+           istate = cudaMemcpy(d_diffh,diffh,3*lx1*ly1*lz1,cudaMemcpyHostToDevice)
+!      print *,"istate 8", cudaGetErrorString(istate)
+      endif 
+
+      if(togpucopy_gas(10).eq.1) then
+           istate = cudaMemcpy(d_vx, vx, lx1*ly1*lz1*nelt,cudaMemcpyHostToDevice)!changed lelv -> nelt by Kk 04/09/2019 togpucopy_gas(10-15)
+      !print *,"istate 10", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(11).eq.1) then
+           istate = cudaMemcpy(d_vy, vy, lx1*ly1*lz1*nelt,cudaMemcpyHostToDevice)
+      !print *,"istate 11", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(12).eq.1) then
+           istate = cudaMemcpy(d_vz, vz, lx1*ly1*lz1*nelt,cudaMemcpyHostToDevice)
+      !print *,"istate 12", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(13).eq.1) then
+           istate = cudaMemcpy(d_vxd,vxd, lxd*lyd*lzd*nelt,cudaMemcpyHostToDevice)
+!      print *,"istate 13", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(14).eq.1) then
+           istate = cudaMemcpy(d_vyd,vyd, lxd*lyd*lzd*nelt,cudaMemcpyHostToDevice)
+!      print *,"istate 14", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(15).eq.1) then
+           istate = cudaMemcpy(d_vzd,vzd, lxd*lyd*lzd*nelt,cudaMemcpyHostToDevice)
+!      print *,"istate 15", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(16).eq.1) then
+           istate = cudaMemcpy(d_convh, convh,lxd*lyd*lzd*3,cudaMemcpyHostToDevice)
+!      print *,"istate 16", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(17).eq.1) then
+           istate = cudaMemcpy(d_rx, rx, lxd*lyd*lzd*ldim*ldim*lelv,cudaMemcpyHostToDevice)
+!      print *,"istate 17", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(18).eq.1) then
+           istate = cudaMemcpy(d_area,area, lx1*lz1*6*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 18", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(19).eq.1) then
+           istate = cudaMemcpy(d_phig, phig, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 19", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(20).eq.1) then
+           istate = cudaMemcpy(d_res2, res2, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 20", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(21).eq.1) then
+           istate = cudaMemcpy(d_iface_flux,iface_flux, lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 21", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(22).eq.1) then
+           istate = cudaMemcpy(d_totalh, totalh,lxd*lyd*lzd*3,cudaMemcpyHostToDevice)
+!      print *,"istate 22", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(23).eq.1) then
+           istate = cudaMemcpy(d_rxm1, rxm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 23", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(24).eq.1) then
+           istate = cudaMemcpy(d_sxm1, sxm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 24", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(25).eq.1) then
+           istate = cudaMemcpy(d_txm1, txm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 25", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(26).eq.1) then
+           istate = cudaMemcpy(d_rym1, rym1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!     print *,"istate 26", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(27).eq.1) then
+           istate = cudaMemcpy(d_sym1, sym1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 27", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(28).eq.1) then
+           istate = cudaMemcpy(d_tym1, tym1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 28", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(29).eq.1) then
+           istate = cudaMemcpy(d_rzm1, rzm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 29", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(30).eq.1) then
+           istate = cudaMemcpy(d_szm1, szm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 30", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(31).eq.1) then
+           istate = cudaMemcpy(d_tzm1, tzm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 31", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(32).eq.1) then
+           istate = cudaMemcpy(d_jacmi,jacmi, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 32", cudaGetErrorString(istate)
+      endif 
+
+      if(togpucopy_gas(33).eq.1) then
+           istate = cudaMemcpy(d_dt,dt_l, lxd*lyd*lzd,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_gas(34).eq.1) then
+           istate = cudaMemcpy(d_usrf,usrf, lx1*ly1*lz1*5,cudaMemcpyHostToDevice)
+!      print *,"istate 34", cudaGetErrorString(istate)
+      endif 
+!      if(togpucopy_gas(1).eq.1) then
+!           istate = cudaMemcpy(d_res3, res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyHostToDevice)
+!      endif 
+      if(togpucopy_gas(36).eq.1) then
+           istate = cudaMemcpy(d_wghtc,wghtc, lx1*lz1,cudaMemcpyHostToDevice)
+!      print *,"istate 36", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(37).eq.1) then
+           !corrected by Kk 02/11/19 lyd->lzd
+           !istate = cudaMemcpy(d_wghtf,wghtf, lxd*lyd,cudaMemcpyHostToDevice)
+           istate = cudaMemcpy(d_wghtf,wghtf, lxd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 37", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(38).eq.1) then
+           istate = cudaMemcpy(d_unx, unx, lx1*lz1*6*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 38", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(39).eq.1) then
+           istate = cudaMemcpy(d_uny, uny, lx1*lz1*6*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 39", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(40).eq.1) then
+           istate = cudaMemcpy(d_unz, unz, lx1*lz1*6*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 40", cudaGetErrorString(istate)
+      endif
+
+      if(togpucopy_gas(41).eq.1) then
+!      do i = 1, 500
+!         write(6,*) 'gpu cbc: ', i, cbc(i,1,1)
+!      enddo
+      do c = 0, ldimt1
+      do b = 1, nelt
+      do a = 1, 6
+         cb=cbc(a, b, c)
+         cbc_new(1, a, b, c) = (cb(1:2))
+         cbc_new(2, a, b, c) = (cb(2:3))
+         cbc_new(3, a, b, c) = (cb(3:4))
+!        write(6,*) 'cbc_new:', a, b, c, cbc_new(1, a, b, c), '1', cbc_new(2, a, b, c), '2', cbc_new(3, a, b, c), '3', cbc(a, b, c), '4', cbc(a,b,c), '5',cb
+      enddo
+      enddo
+      enddo
+
+     
+           istate = cudaMemcpy(d_cbc,cbc_new,3*6*lelt*(ldimt1+1),cudaMemcpyHostToDevice)
+!      print *,"istate 41", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(42).eq.1) then
+           istate = cudaMemcpy(d_dxm1, dxm1, lx1*lx1,cudaMemcpyHostToDevice)
+!      print *,"istate 42", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(43).eq.1) then
+           istate = cudaMemcpy(d_dxtm1, dxtm1, lx1*lx1,cudaMemcpyHostToDevice)
+!      print *,"istate 43", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(44).eq.1) then
+           istate = cudaMemcpy(d_tlag, tlag, lx1*ly1*lz1*lelt*(lorder-1)*ldimt,cudaMemcpyHostToDevice)
+!      print *,"istate 44", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(45).eq.1) then
+           istate = cudaMemcpy(d_pr,pr, lx2*ly2*lz2*lelv,cudaMemcpyHostToDevice)
+!      print *,"istate 45", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(46).eq.1) then
+           istate = cudaMemcpy(d_vtrans,vtrans, lx1*ly1*lz1*lelt*ldimt1,cudaMemcpyHostToDevice)
+!      print *,"istate 46", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(47).eq.1) then
+           istate = cudaMemcpy(d_meshh,meshh,lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 47", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(48).eq.1) then
+           istate = cudaMemcpy(d_gridh,gridh,lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 48", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(49).eq.1) then
+           istate = cudaMemcpy(d_xm1,xm1,lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 49", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(50).eq.1) then
+           istate = cudaMemcpy(d_ym1,ym1,lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 50", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(51).eq.1) then
+           istate = cudaMemcpy(d_zm1,zm1,lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 51", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(52).eq.1) then
+           istate = cudaMemcpy(d_lglel,lglel,lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 52", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(53).eq.1) then
+           istate = cudaMemcpy(d_t,t,lx1*ly1*lz1*lelt*ldimt,cudaMemcpyHostToDevice)
+!     print *,"istate 53", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(54).eq.1) then
+           !istate = cudaMemcpy(d_sii,sii,lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 54", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(55).eq.1) then
+           !istate = cudaMemcpy(d_siii,siii,lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 55", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(56).eq.1) then
+           istate = cudaMemcpy(d_vdiff,vdiff,lx1*ly1*lz1*lelt*ldimt1,cudaMemcpyHostToDevice)
+!      print *,"istate 56", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(57).eq.1) then
+           istate = cudaMemcpy(d_cb,cb,3,cudaMemcpyHostToDevice)
+!      print *,"istate 57", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(58).eq.1) then
+           istate = cudaMemcpy(d_csound,csound,lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 58", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_gas(59).eq.1) then
+           istate = cudaMemcpy(d_gllel,gllel,lelg,cudaMemcpyHostToDevice)
+!      print *,"istate 59", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(60).eq.1) then
+           !istate = cudaMemcpy(d_flux,flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
+      endif
+!      if(togpucopy_gas(61).eq.1) then
+           !istate = cudaMemcpy(d_fatface,fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 61", cudaGetErrorString(istate)
+!      endif
+     if(togpucopy_gas(62).eq.1) then
+           !istate = cudaMemcpy(d_wkd,wkd,2*lxd*lxd*lxd*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 62", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(63).eq.1) then
+           !istate = cudaMemcpy(d_wkd,wkd,2*lxd*lxd*lxd*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 63", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(66).eq.1) then
+           istate = cudaMemcpy(d_d,d_l,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 66", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(67).eq.1) then
+           istate = cudaMemcpy(d_jgl,jgl,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 67", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(68).eq.1) then
+           istate = cudaMemcpy(d_jgt,jgt,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 68", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(69).eq.1) then
+           istate = cudaMemcpy(d_dg,dg,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 69", cudaGetErrorString(istate)
+      endif
+      if(togpucopy_gas(70).eq.1) then
+           istate = cudaMemcpy(d_dgt,dgt,lxd*lyd*lzd,cudaMemcpyHostToDevice)
+!      print *,"istate 70", cudaGetErrorString(istate)
+      endif
+      !added by Kk 03/06
+      if(togpucopy_gas(71).eq.1) then
+           istate = cudaMemcpy(d_jacm1,jacm1, lx1*ly1*lz1*lelt,cudaMemcpyHostToDevice)
+!      print *,"istate 71", cudaGetErrorString(istate)
+      endif 
+
+!-----copy particles data
+
+      if(togpucopy_part(1).eq.1) then
+           istate = cudaMemcpy(d_rpart, rpart, lr*llpart,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(2).eq.1) then
+           istate = cudaMemcpy(d_ipart, ipart, li*llpart,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(3).eq.1) then
+           istate = cudaMemcpy(d_kv_stage_p, kv_stage_p,llpart*4*ldim,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(4).eq.1) then
+           istate = cudaMemcpy(d_kx_stage_p, kx_stage_p,llpart*4*ldim,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(5).eq.1) then
+           istate = cudaMemcpy(d_bc_part, bc_part, 6,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(6).eq.1) then
+           istate = cudaMemcpy(d_xgll, xgll, lx1,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(7).eq.1) then
+           istate = cudaMemcpy(d_ygll, ygll, lx1,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(8).eq.1) then
+           istate = cudaMemcpy(d_zgll, zgll, lx1,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(9).eq.1) then
+           istate = cudaMemcpy(d_wxgll, wxgll, lx1,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(10).eq.1) then
+           istate = cudaMemcpy(d_wygll, wygll, lx1,cudaMemcpyHostToDevice)
+!      print *,"istate 10", cudaGetErrorString(istate)
+      endif 
+      if(togpucopy_part(11).eq.1) then
+           istate = cudaMemcpy(d_wzgll, wgll, lx1,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(12).eq.1) then
+           istate = cudaMemcpy(d_rfpts, rfpts,lrf*llpart ,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(13).eq.1) then
+           istate = cudaMemcpy(d_ifpts, ifpts,lif*llpart ,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(14).eq.1) then
+           istate = cudaMemcpy(d_ifptsmap, ifptsmap,llpart ,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(15).eq.1) then
+           istate = cudaMemcpy(d_xerange, xerange,2*3*lelt ,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(16).eq.1) then
+           istate = cudaMemcpy(d_xdrange,xdrange, 2*3 ,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(17).eq.1) then
+           istate = cudaMemcpy(d_x_part,x_part, 3 ,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(18).eq.1) then
+           istate = cudaMemcpy(d_v_part,v_part, 3 ,cudaMemcpyHostToDevice)
+      endif 
+      if(togpucopy_part(19).eq.1) then
+           istate = cudaMemcpy(d_rxbo,rxbo, 2*3 ,cudaMemcpyHostToDevice)
+      endif
+      !if(togpucopy_part(20).eq.1) then
+      !     istate = cudaMemcpy(d_ptw,ptw,lx1*ly1*lz1*lelt*8 ,cudaMemcpyHostToDevice)
+      !endif
+      !if(togpucopy_part(21).eq.1) then
+      !     istate = cudaMemcpy(d_rhs_fluidp,rhs_fluidp,lx1*ly1*lz1*lelt*7 ,cudaMemcpyHostToDevice)
+      !endif
+
+
+!      print *,"cmtparticles_gpu.cuf copytogpu_gpu End",nid
+
+
+      do i=1,lengthoftogpucopy_gas
+           togpucopy_gas(i)=0
+      end do
+!      print *,"cmtparticles_gpu.cuf copytogpu_gpu after 1st",nid
+      do j=1,lengthoftogpucopy_part
+           togpucopy_part(j)=0
+      end do
+!      print *,"cmtparticles_gpu.cuf copytogpu_gpu after 2nd",nid
+
+
+
+
+      code = cudaPeekAtLastError()
+      !if (code.ne.cudaSuccess) then
+!        print *,'cuda end of memcopy in togpucompy status :',cudaGetErrorString(code)
+      !endif
+
+      return
+      end
+
+
+!----------------------------------------------------------------------
+
+
+
+
+
+
+!----------------------------------------------------------------------
+!     effeciently move particles between processors routines
+!----------------------------------------------------------------------
+      subroutine move_particles_inproc_gpu()
+!     Interpolate fluid velocity at current xyz points and move
+!     data to the processor that owns the points.
+!     Input:    n = number of points on this processor
+!     Output:   n = number of points on this processor after the move
+!     Code checks for n > llpart and will not move data if there
+!     is insufficient room.
+      use cudafor
+      use glbvariable_gpu       
+
+
+!      real, device :: d_rpart(lr,llpart)
+
+      call particles_in_nid_gpu()
+
+
+      return
+      end
+
+
+
+!----------------------------------------------------------------------------
+      subroutine particles_in_nid_gpu()
+      use cudafor
+      use glbvariable_gpu       
+
+      integer :: a
+      a=5
+!      print *,"cmtparu.cuf par_in_nid_gpu temp0 a", nid, adeetemp(0),a
+      call particles_in_nid_wrapper(adeetemp,a,adee_d_temp)
+
+      return
+      end
+
+!------------------------------------------------------------------------------
+      subroutine gpu_copy()
+      use cudafor
+      use glbvariable_gpu
+
+      call double_copy_gpu_wrapper(glbblockSize2,d_res3,0,d_u,0,lx1*ly1*lz1*lelt*toteq)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!#ifdef DEBUG
+!      !following code is for testing only. delete later.
+!      tocpucopy_gas(1)=1
+!      call copytocpu_gpu()
+!      call printRes3('firstCopy')
+!#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      return
+      end
+
+!------------------------------------------------------------------------------
+
+!C> Compute right-hand-side of the semidiscrete conservation law
+!C> Store it in res1
+      subroutine compute_rhs_and_dt_gpu
+      use cudafor
+      use  glbvariable_gpu
+#ifdef MTIME
+      include 'mpif.h'!for time measurement, dnekclock() just doesn't work, added by Kk 04/01
+#endif
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, & ! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+! not sure if viscous surface fluxes can live here yet
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      real graduf
+
+      integer e,eq
+      real wkj(lx1+lxd)
+      character*32  dumchars
+      !added by Kk to output gradu
+      common /KekeDebug/ gradu_copy(lx1*ly1*lz1, lelt, toteq, 3)
+      real gradu_copy
+      real*8 start, end, start1 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   if(istep .ge. 0) then
+!      tocpucopy_gas(49)=1 !d_xm1
+!      tocpucopy_gas(50)=1 !d_ym1
+      tocpucopy_gas(56)=1 !vdiff
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
+      call printVdiff("begin")
+      call printTArray("begin")
+!      call printXm1("before2")
+!      call printYm1("before2")
+   endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      !comment out by Kk 02/05/2019 since it makes meshh different
+      !gridh is same in sod3 test case, but for safe just commented out
+      !call compute_mesh_h_gpu()
+      !call compute_grid_h_gpu() 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!#ifdef DEBUG
+!      tocpucopy_gas(47)=1 !meshh
+!      tocpucopy_gas(48)=1 !gridh
+!      tocpucopy_gas(49)=1 !d_xm1
+!      tocpucopy_gas(50)=1 !d_ym1
+!      tocpucopy_gas(51)=1 !d_zm1
+!      tocpucopy_gas(38)=1 !unx 
+!      call copytocpu_gpu()
+!      call printUnx("afterCompMeshh")
+!      call printXm1("afterCompMeshh")
+!      call printYm1("afterCompMeshh")
+!      call printZm1("afterCompMeshh")
+!      call printMeshh("afterCompMeshh")
+!      call printGridh("afterCompMeshh")
+!#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+      if (lxd.gt.lx1) then
+         call set_dealias_face ! zwgl functions required.
+         ! remove  when above  function is done in gpu
+         togpucopy_gas(36)=1
+         togpucopy_gas(37)=1
+         call copytogpu_gpu()
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+!         tocpucopy_gas(38)=1 !unx 
+!         call copytocpu_gpu()
+!         call printUnx("afterDealias")
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      else
+         !copy arrays to cpu
+         tocpucopy_gas(23)=1
+         tocpucopy_gas(24)=1
+         tocpucopy_gas(25)=1
+         tocpucopy_gas(26)=1
+         tocpucopy_gas(27)=1
+         tocpucopy_gas(28)=1
+         tocpucopy_gas(29)=1
+         tocpucopy_gas(30)=1
+         tocpucopy_gas(31)=1
+         call copytocpu_gpu()
+
+         call set_alias_rx(istep)
+
+         togpucopy_gas(17)=1
+         call copytogpu_gpu()
+
+      endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+ !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(10)=1 !vx
+      tocpucopy_gas(2)=1
+      tocpucopy_gas(58)=1
+      tocpucopy_gas(3)=1
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
+      call printUarray('beforecompute')
+      call printRes1('beforecompute')
+      call printCsound("beforecompute")
+      call printTArray("beforecompute")
+   endif
+#endif
+
+#ifdef MTIME
+     start = mpi_wtime() ! dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      call compute_primitive_vars_gpu
+
+      !just for debug
+      !tocpucopy_gas(13)=1
+      !tocpucopy_gas(14)=1
+      !tocpucopy_gas(15)=1
+      !call copytocpu_gpu()
+      !call printVxyzd("afterCompNoWrapper")
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+!     !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(2)=1
+      tocpucopy_gas(10)=1 !vx
+      tocpucopy_gas(11)=1
+      tocpucopy_gas(12)=1
+      tocpucopy_gas(13)=1
+      tocpucopy_gas(14)=1
+      tocpucopy_gas(15)=1
+      tocpucopy_gas(46)=1
+      tocpucopy_gas(45)=1
+      tocpucopy_gas(53)=1
+      tocpucopy_gas(58)=1
+      tocpucopy_gas(56)=1
+      tocpucopy_gas(38)=1 !unx 
+      tocpucopy_gas(56)=1 !vdiff
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
+
+      call printUarray('afterPrimitiveVars')
+      call printVx('afterPrimitiveVars')
+      call printVy('afterPrimitiveVars')
+      call printVz('afterPrimitiveVars')
+      call printCsound('afterPrimitiveVars')
+      call printUnx("afterPrimitiveVars")
+      call printVdiff("afterPrimitiveVars")
+      call printTArray("afterPrimitiveVars")
+    endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Compute_primitive_vars_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!     need to do some work to parallelize using gpu  due to mpi reduce calls
+      if(stage.eq.1) then
+         !copy arrays to cpu
+         tocpucopy_gas(10)=1 !vx
+         tocpucopy_gas(11)=1 !vy
+         tocpucopy_gas(12)=1 !vz
+         tocpucopy_gas(58)=1 !csound
+         tocpucopy_gas(56)=1 !vdiff
+         tocpucopy_gas(48)=1 !gridh
+         call copytocpu_gpu()
+         call setdtcmt
+         call set_tstep_coef
+      
+         togpucopy_gas(5)=1 !tcoef
+         call copytogpu_gpu()
+      endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+!only for testing. delete later.
+   if(istep .ge. 0) then
+       tocpucopy_gas(56)=1 !vdiff
+       tocpucopy_gas(20)=1 !res2
+       tocpucopy_gas(44)=1 !tlag
+       tocpucopy_gas(46)=1 !vtrans
+       tocpucopy_gas(53)=1 !t
+       call copytocpu_gpu()
+       call printRes2("beforeEntropy")
+       call printVtrans("beforeEntropy")
+       call printTlag("beforeEntropy")
+       call printTArray("beforeEntropy")
+       call printVdiff("beforeEntropy")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "GPU Setdtcmt time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      call entropy_viscosity_gpu ! accessed through uservp. computes
+                             ! entropy residual and max wave speed
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   !only for testing. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(56)=1 !vdiff
+      tocpucopy_gas(20)=1 !res2
+      tocpucopy_gas(44)=1 !tlag
+      tocpucopy_gas(38)=1 !unx 
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
+      call printVdiff("afterEntropy")
+      call printTArray("afterEntropy")
+      call printRes2("afterEntropy")
+      call printTlag("afterEntropy")
+      call printUnx("afterEntropy")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Entropy_viscosity_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+      call compute_transport_props_gpu ! everything inside rk stage
+      
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   if(istep .ge. 0) then
+      tocpucopy_gas(56)=1 !vdiff
+      tocpucopy_gas(38)=1 !unx 
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
+      call printVdiff("afterTransportProps")
+      call printUnx("afterTransportProps")
+      call printTArray("afterTransportProps")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Compute_transport_props_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      ntot = lx1*ly1*lz1*lelt*toteq
+
+      call rzero_gpu_wrapper(glbblockSize2,d_res1,0,ntot );
+      call rzero_gpu_wrapper(glbblockSize2,d_flux,0,heresize );
+      call rzero_gpu_wrapper(glbblockSize2,d_graduf,0,hdsize );
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+      !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("beforefluxes")
+   endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      call fluxes_full_field_gpu
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("afterfluxes")
+      
+      tocpucopy_gas(3)=1
+      call copytocpu_gpu()
+      call printRes1('afterfluxes')
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Fluxes_full_field_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+      nstate=nqq
+      nfq=lx1*lz1*2*ldim*nelt
+      iwm =1
+      iwp =iwm+nstate*nfq
+      iflx=iwp+nstate*nfq
+      do eq=1,toteq
+         ieq=(eq-1)*ndg_face+iflx
+         !print *,'111st debug',ieq,eq,stage,istep
+         call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
+      enddo
+   
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   !only for testing. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(3)=1
+      call copytocpu_gpu()
+      call printRes1("afterfirstintegral")
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("afterfirstintegral")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Surface_integral_full_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+
+      iuj=iflx ! overwritten with U -{{U}}
+      ium=(iu1-1)*nfq+iwm
+      iup=(iu1-1)*nfq+iwp
+      call   imqqtu_gpu_wrapper(glbblockSize2,d_flux,iuj,ium,iup,lx1,ly1,lz1,ldim,nelt,lelt,toteq)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+!following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      !tocpucopy_gas(2)=1 !u
+      tocpucopy_gas(3)=1 !res1
+      call copytocpu_gpu()
+      call printRes1('afterImqqtu')
+      !call printUarray('afterImqqtu')
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("afterImqqtu")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Imqqtu_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+      call   imqqtu_dirichlet_gpu_wrapper(glbblockSize2,d_flux,ifield,ilam,irho,icv,icp,imu,molmass,&
+       iwp,iwm,iuj,iux,iuy,iuz,iph,ithm,iu1,iu2,iu3,iu4,iu5,icvf,toteq,lx1,ly1,lz1,d_cbc,d_lglel,&
+       d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,&
+       d_pres,d_csound,ldim,lelt,nelt,npscal,p0th,nqq)
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(3)=1
+      call copytocpu_gpu()
+      call printRes1('afterImqqtud')
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("afterImqqtud")
+      istate = cudaMemcpy(graduf,d_graduf,toteq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printGraduf("afterImqqtud")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Imqqtu_dirichlet_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      call igtu_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_flux,d_gradu,d_graduf,d_iface_flux,&
+       d_diffh,d_vtrans,d_vdiff,d_vx,d_vy,d_vz,d_u,d_viscscr,d_jacmi,&
+       d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,d_dxm1,d_dxtm1,d_res1,toteq,&
+       iuj,lx1,ly1,lz1,irho,ilam,imu,icv,iknd,inus,nelt,lelt,ldim,ifsip,d_area,d_unx,d_uny,d_unz,if3dgpu)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(2)=1 !u
+      tocpucopy_gas(3)=1 !res1
+      tocpucopy_gas(19)=1 !phig
+      tocpucopy_gas(13)=1 !vxd
+      tocpucopy_gas(14)=1 !vyd
+      tocpucopy_gas(15)=1 !vzd
+      tocpucopy_gas(17)=1 !rx
+      tocpucopy_gas(69)=1 !dg
+      tocpucopy_gas(70)=1 !dgt
+      call copytocpu_gpu()
+      call printRes1('afterIgtu')
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("afterIgtu")
+      istate = cudaMemcpy(graduf,d_graduf,toteq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printGraduf("afterIgtu")
+      call printUarray('afterIgtu')
+      call printPhig("afterIgtu")
+      call printVxyzd("afterIgtu")
+      call printRx("afterIgtu")
+      call printDgDgt("afterIgtu")
+      
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Igtu_cmt_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+     start1 = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+         call cmtusrf_gpu_wrapper(glbblockSize1,d_usrf,d_xm1,d_ym1,d_zm1,d_vx,d_vy,d_vz,&
+          d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_ptw,d_lglel,d_gllel,d_rhs_fluidp,&
+          d_u,d_phig,lx1,ly1,lz1,toteq,istep,npscal,two_way,time_delay,icmtp,nelt,lelt,&
+          p0th,ifield)
+
+
+         call compute_gradients_gpu_wrapper(glbblockSize1,d_u,d_phig,d_dxm1,d_dxtm1,d_gradu,&
+          d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,d_szm1,d_txm1,d_tym1,d_tzm1,lx1,ly1,lz1,&
+          nelt,lelt,toteq,lxd,lyd,lzd,if3dgpu)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+ !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(3)=1 !res1
+      tocpucopy_gas(2)=1 !u
+      tocpucopy_gas(19)=1 !phig
+      tocpucopy_gas(23)=1 !rxm1
+      tocpucopy_gas(26)=1 !rym1
+      tocpucopy_gas(29)=1 !rzm1
+      tocpucopy_gas(42)=1 !d_dxm1
+      tocpucopy_gas(43)=1 !d_dxtm1
+      call copytocpu_gpu()
+      call copytocpu_gpu()
+      call printRes1('afterCompGrad')
+      istate = cudaMemcpy(gradu_copy,d_gradu,toteq*3*lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+      call printGradu("afterCompGrad")
+
+      !call printUarray('afterCompGrad')
+      !call printPhig('afterCompGrad')
+      call printDxm1('afterCompGrad')
+      call printRxm1('afterCompGrad')
+      call printJacmi('afterCompGrad')
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Cmtusrf_gpu_wrapper & compute_gradients time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+            call convective_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_wkd,d_convh,d_vxd,d_vyd,&
+              d_vzd,d_totalh,d_rx,d_dg,d_dgt,d_res1,lx1,ly1,lz1,nelt,lelt,toteq,lxd,&
+              lyd,lzd,ldim,if3dgpu,d_u,d_phig,d_pr,d_dt,d_d,d_jgl,d_jgt)        ! convh & totalh -> res1
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+ !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(3)=1
+      call copytocpu_gpu()
+      call printRes1('afterConvective')
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Convective_cmt_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+            call viscous_cmt_gpu_wrapper(glbblockSize1,glbblockSize2,d_diffh,d_gradu,d_vtrans,&
+              d_vdiff,d_vx,d_vy,d_vz,d_u,d_viscscr,d_jacmi,d_rxm1,d_rym1,d_rzm1,d_sxm1,d_sym1,&
+              d_szm1,d_txm1,d_tym1,d_tzm1,d_graduf,d_unx,d_uny,d_unz,d_iface_flux,d_dxm1,d_dxtm1,&
+              d_res1,d_area,d_bm1,lx1,ly1,lz1,toteq,irho,ilam,imu,icv,iknd,inus,if3dgpu,ldim,nelt,lelt) 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+ !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(3)=1
+      call copytocpu_gpu()
+      call printRes1('afterViscousCMT')
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Viscous_cmt_gpu_wrapper time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+            call compute_forcing_gpu_wrapper(glbblockSize1,d_phig,d_rxm1,d_sxm1,d_txm1,d_rym1,d_sym1,d_tym1,&
+             d_rzm1,d_szm1,d_tzm1,d_jacm1,d_pr,d_res1,d_usrf,d_bm1,lx1,ly1,lz1,lelt,nelt,if3dgpu,&
+             lxd,lyd,lzd,toteq,ldim,d_wkd,d_d,d_dt) !corrected by Kk 03/06 d_jacmi -> d-jacm1
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+ !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(3)=1
+      call copytocpu_gpu()
+      call printRes1('afterCompForcing')
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("afterCompForcing")
+      istate = cudaMemcpy(graduf,d_graduf,toteq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printGraduf("afterCompForcing")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Compute_forcing_gpu_wrapper time", end - start
+     write(6,*) "GPU Compute_forcing total time", end - start1
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      call igu_cmt_gpu(flux(iwp),graduf,flux(iwm),iwp,iwm)  
+    
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(3)=1
+      call copytocpu_gpu()
+      call printRes1('afterIguCMT')
+
+      istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printFatface("afterIguCMT")
+      istate = cudaMemcpy(graduf,d_graduf,toteq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+      call printGraduf("afterIguCMT")
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Igu_cmt_gpu time", end - start
+     start = mpi_wtime() !dnekclock()
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+      do eq=1,toteq
+         ieq=(eq-1)*ndg_face+iwp
+         call surface_integral_full_gpu_wrapper(glbblockSize2,d_res1,d_flux,eq,ieq,nelt,lelt,toteq,lx1,ly1,lz1,ldim,d_iface_flux)
+         !call surface_integral_full(res1(1,1,1,1,eq),flux(ieq))
+      enddo
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+   !following code is for testing only. delete later.
+   if(istep .ge. 0) then
+      tocpucopy_gas(1)=1
+      tocpucopy_gas(2)=1
+      tocpucopy_gas(3)=1 !res1
+      tocpucopy_gas(4)=1
+      tocpucopy_gas(56)=1 !vdiff
+      tocpucopy_gas(53)=1 !t
+      
+      call copytocpu_gpu()
+      call printUarray('last')
+      call printBm1('last')
+      call printRes1('last')
+      call printRes3('last')
+      call printVdiff("last")
+      call printTArray("last")
+      !stop
+   endif
+#endif
+
+#ifdef MTIME
+     end = mpi_wtime() !dnekclock()
+     write(6,*) "Surface_integral_full_gpu_wrapper second time", end - start
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      return
+      end
+!-----------------------------------------------------------------------
+
+      subroutine update_u_gpu
+      use  glbvariable_gpu
+
+
+
+      call update_u_gpu_wrapper(glbblockSize1, d_u, d_bm1, d_tcoef, d_res3, &
+           d_res1, nelt, lelt, lx1, ly1, lz1, toteq, stage) 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef DEBUG
+!      !following code is for testing only. delete later.
+     if(istep .ge. 0) then
+       tocpucopy_gas(1)=1 !res3
+       tocpucopy_gas(2)=1 !u
+       tocpucopy_gas(3)=1 !res1
+       tocpucopy_gas(4)=1 !bm1
+       tocpucopy_gas(5)=1 !d_tcoef
+       call copytocpu_gpu()
+ 
+       write(6,*) "debug tcoef222222:", step, stage, tcoef(1,1),tcoef(1,2)&
+       ,tcoef(1,3),tcoef(2,1),tcoef(2,2),tcoef(2,3)&
+       ,tcoef(3,1),tcoef(3,2), tcoef(3,3)
+       call printUarray('afterUpdateU')
+       call printRes1('afterUpdateU')
+       call printRes3('afterUpdateU')
+       call printBm1('afterUpdateU')
+    endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      return 
+      end
+
+!c----------------------------------------------------------------------
+!c     particle force routines
+!c----------------------------------------------------------------------
+      subroutine usr_particles_solver_gpu
+!c
+!c     call routines in ordered way - main solver structure
+!c
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CMTDATA'
+      include 'CMTPART'
+
+      logical ifinject
+      integer icalld
+      save    icalld
+      data    icalld  /-1/
+
+      if (icalld .eq. -1) then
+         pttime(1) = 0.
+      else
+         pttime(1) = pttime(1) + dnekclock() - ptdum(1)
+      endif
+
+      icalld = icalld + 1
+
+!c     should we inject particles at this time step?
+      ifinject = .false.
+      if (inject_rate .gt. 0) then
+      if ((mod(istep,inject_rate).eq.0)) then 
+         ifinject = .true. 
+      endif
+      endif
+
+      if (istep .gt. time_delay) then
+
+!c     scheme 1 --------------------------------------------------------
+      if (abs(time_integ) .eq. 0) then           
+
+!c     rk3 integration -------------------------------------------------
+      elseif (abs(time_integ) .eq. 1) then       
+         if (stage.eq.1) then
+            ! Update coordinates if particle moves outside boundary
+            ptdum(2) = dnekclock()
+               call update_particle_location_gpu  
+            pttime(2) = pttime(2) + dnekclock() - ptdum(2)
+
+            ! Inject particles if needed
+            if (ifinject) call place_particles_gpu
+
+            ! Update where particle is stored at
+            ptdum(3) = dnekclock()
+               call move_particles_inproc_gpu
+            pttime(3) = pttime(3) + dnekclock() - ptdum(3)
+
+            if (two_way.gt.1) then
+
+               ! Create ghost/wall particles
+               ptdum(4) = dnekclock()
+                  call create_extra_particles_gpu
+               pttime(4) = pttime(4) + dnekclock() - ptdum(4)
+
+               ! Send ghost particles
+               ptdum(5) = dnekclock()
+                  call send_ghost_particles_gpu
+               pttime(5) = pttime(5) + dnekclock() - ptdum(5)
+   
+               ! Projection to Eulerian grid
+               ptdum(6) = dnekclock()
+                  call spread_props_grid
+               pttime(6) = pttime(6) + dnekclock() - ptdum(6)
+   
+            endif
+         endif
+
+         ! Interpolate Eulerian properties to particle location
+         ptdum(7) = dnekclock()
+            call interp_props_part_location
+         pttime(7) = pttime(7) + dnekclock() - ptdum(7)
+
+         ! Evaluate particle force models
+         ptdum(8) = dnekclock()
+            call usr_particles_forcing  
+         pttime(8) = pttime(8) + dnekclock() - ptdum(8)
+
+         ! Integrate in time
+         ptdum(9) = dnekclock()
+            call rk3_integrate
+         pttime(9) = pttime(9) + dnekclock() - ptdum(9)
+
+         ! Update forces
+         ptdum(10) = dnekclock()
+            call compute_forcing_post_part
+         pttime(10) = pttime(10) + dnekclock() - ptdum(10)
+
+!c     Other -----------------------------------------------------------
+      elseif (abs(time_integ) .eq. 2) then
+
+      endif ! particle scheme
+
+      endif ! time_delay
+
+      ptdum(1) = dnekclock()
+
+      return
+      end
+!c----------------------------------------------------------------------
+
+!c-----------------------------------------------------------------------
+      subroutine send_ghost_particles_gpu
+!c
+!c     send only ghost particles
+!c
+!c     bc_part = -1,1  => non-periodic search
+!c     bc_part = 0  => periodic search
+!c
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CMTDATA'
+      include 'CMTPART'
+
+      common /nekmpi/ mid,mp,nekcomm,nekgroup,nekreal
+      common /myparth/ i_fp_hndl, i_cr_hndl
+
+      logical partl         ! dummy used in c_t_t()
+
+!c     send ghost particles
+      call crystal_tuple_transfer(i_cr_hndl,nfptsgp,llpart &
+                , iptsgp,nigp,partl,0,rptsgp,nrgp,jgpps) ! jgpps is overwri
+
+      return
+      end
+!c-----------------------------------------------------------------------
+
+!c-----------------------------------------------------------------------
+      subroutine create_extra_particles_gpu
+!c
+!c     create ghost and wall particles
+!c
+!c     bc_part = -1,1  => non-periodic search
+!c     bc_part = 0  => periodic search
+!c
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CMTDATA'
+      include 'CMTPART'
+
+!c     create ghost particles
+      if (nrect_assume .eq. 2) call create_ghost_particles_rect_full_gpu
+      if (nrect_assume .eq. 1) call create_ghost_particles_rect_gpu
+      if (nrect_assume .gt. 0) call create_wall_particles_image_gpu
+
+      return
+      end
+!c----------------------------------------------------------------------
+      subroutine create_wall_particles_image_gpu
+!c
+!c     spread a local particle property to local fluid grid points
+!c
+      include 'SIZE'
+      include 'INPUT'
+      include 'GEOM'
+      include 'SOLN'
+      include 'CMTDATA'
+      include 'CMTPART'
+
+      real bl_list(3),rthresh,rxdum(3)
+      integer idummap(2,3)
+
+      common /gpfix/ ilgp_f(lelt,6),ilgp_e(lelt,12),ilgp_c(lelt,8)
+
+      idummap(1,1) = 1
+      idummap(2,1) = 2
+      idummap(1,2) = 3
+      idummap(2,2) = 4
+      idummap(1,3) = 5
+      idummap(2,3) = 6
+
+
+      rthresh = 1E-9
+
+      do i=1,n
+
+         ic = 0
+         ie = ipart(je0,i) + 1
+
+         do i2=1,3
+         do i1=1,2
+            if (abs(xerange(i1,i2,ie)-xdrange(i1,i2)).lt. rthresh) then
+               ic = ic + 1
+               bl_list(ic) = idummap(i1,i2)
+            endif
+         enddo
+         enddo
+
+         do ii=1,ic
+            j = bl_list(ii)
+
+            if (bc_part(j) .eq. -1) then
+               nj1 = mod(j,2)
+               if (nj1.ne.0) nj1 = 1
+               if (nj1.eq.0) nj1 = 2
+               nj2 = int((j-1)/2) + 1
+
+               rxdum(1)   = rpart(jx  ,i)
+               rxdum(2)   = rpart(jx+1,i)
+               rxdum(3)   = rpart(jx+2,i)
+
+               rsdist = xdrange(nj1,nj2) - rxdum(nj2)
+               rsdist = 2.*rsdist
+
+               rxdum(nj2) = rxdum(nj2) + rsdist
+
+               nfptsgp = nfptsgp + 1
+               
+               rptsgp(jgpx,nfptsgp)    = rxdum(1)           ! x loc
+               rptsgp(jgpy,nfptsgp)    = rxdum(2)           ! y log
+               rptsgp(jgpz,nfptsgp)    = rxdum(3)           ! z log
+               rptsgp(jgpfh,nfptsgp)   = rpart(jf0,i)   ! hyd. force x
+               rptsgp(jgpfh+1,nfptsgp) = rpart(jf0+1,i) ! hyd. force y
+               rptsgp(jgpfh+2,nfptsgp) = rpart(jf0+2,i) ! hyd. force z
+               rptsgp(jgpvol,nfptsgp)  = rpart(jvol,i)  ! particle volum
+               rptsgp(jgpdpe,nfptsgp)  = rpart(jdpe,i)  ! particle dp eff
+               rptsgp(jgpspl,nfptsgp)  = rpart(jspl,i)  ! spl
+               rptsgp(jgpg0,nfptsgp)   = rpart(jg0,i)   ! work done by forc
+               rptsgp(jgpq0,nfptsgp)   = rpart(jq0,i)   ! heating from part 
+               rptsgp(jgpv0,nfptsgp)   = rpart(jv0,i)   ! particle velocity
+               rptsgp(jgpv0+1,nfptsgp) = rpart(jv0+1,i) ! particle velocity
+               rptsgp(jgpv0+2,nfptsgp) = rpart(jv0+2,i) ! particle velocity
+               
+               iptsgp(jgppid1,nfptsgp) = -1
+               iptsgp(jgppid2,nfptsgp) = -1
+               iptsgp(jgppid3,nfptsgp) = -1
+               
+                  ipdum  = nid
+                  iedum  = ipart(je0,i)
+               
+               iptsgp(jgpps,nfptsgp)   = ipdum  ! overwritten mpi
+               iptsgp(jgppt,nfptsgp)   = ipdum  ! dest. mpi rank
+               iptsgp(jgpes,nfptsgp)   = iedum    ! dest. elment
+
+               do ifc=1,nfacegp
+
+                  if (ilgp_f(ie,ifc) .eq. 0) then
+
+                     nfptsgp = nfptsgp + 1
+                   
+                     rptsgp(jgpx,nfptsgp)    = rxdum(1)           ! x loc
+                     rptsgp(jgpy,nfptsgp)    = rxdum(2)           ! y log
+                     rptsgp(jgpz,nfptsgp)    = rxdum(3)           ! z log
+                     rptsgp(jgpfh,nfptsgp)   = rpart(jf0,i)   ! hyd. force x
+                     rptsgp(jgpfh+1,nfptsgp) = rpart(jf0+1,i) ! hyd. force y
+                     rptsgp(jgpfh+2,nfptsgp) = rpart(jf0+2,i) ! hyd. force z
+                     rptsgp(jgpvol,nfptsgp)  = rpart(jvol,i)  ! particle volum
+                     rptsgp(jgpdpe,nfptsgp)  = rpart(jdpe,i)  ! particle dp eff
+                     rptsgp(jgpspl,nfptsgp)  = rpart(jspl,i)  ! spl
+                     rptsgp(jgpg0,nfptsgp)   = rpart(jg0,i)   ! work done by forc
+                     rptsgp(jgpq0,nfptsgp)   = rpart(jq0,i)   ! heating from part 
+                     rptsgp(jgpv0,nfptsgp)   = rpart(jv0,i)   ! particle velocity
+                     rptsgp(jgpv0+1,nfptsgp) = rpart(jv0+1,i) ! particle velocity
+                     rptsgp(jgpv0+2,nfptsgp) = rpart(jv0+2,i) ! particle velocity
+                   
+                     iptsgp(jgppid1,nfptsgp) = -1
+                     iptsgp(jgppid2,nfptsgp) = -1
+                     iptsgp(jgppid3,nfptsgp) = -1
+                   
+                        ipdum  = el_face_proc_map(ie,ifc)
+                        iedum  = el_face_el_map(ie,ifc)
+
+                     iptsgp(jgpps,nfptsgp)   = ipdum  ! overwritten mpi
+                     iptsgp(jgppt,nfptsgp)   = ipdum  ! dest. mpi rank
+                     iptsgp(jgpes,nfptsgp)   = iedum    ! dest. elment
+                   
+                  endif
+               enddo
+
+               do ifc=1,nedgegp
+
+                  if (ilgp_e(ie,ifc) .eq. 0) then
+
+                     nfptsgp = nfptsgp + 1
+                   
+                     rptsgp(jgpx,nfptsgp)    = rxdum(1)           ! x loc
+                     rptsgp(jgpy,nfptsgp)    = rxdum(2)           ! y log
+                     rptsgp(jgpz,nfptsgp)    = rxdum(3)           ! z log
+                     rptsgp(jgpfh,nfptsgp)   = rpart(jf0,i)   ! hyd. force x
+                     rptsgp(jgpfh+1,nfptsgp) = rpart(jf0+1,i) ! hyd. force y
+                     rptsgp(jgpfh+2,nfptsgp) = rpart(jf0+2,i) ! hyd. force z
+                     rptsgp(jgpvol,nfptsgp)  = rpart(jvol,i)  ! particle volum
+                     rptsgp(jgpdpe,nfptsgp)  = rpart(jdpe,i)  ! particle dp eff
+                     rptsgp(jgpspl,nfptsgp)  = rpart(jspl,i)  ! spl
+                     rptsgp(jgpg0,nfptsgp)   = rpart(jg0,i)   ! work done by forc
+                     rptsgp(jgpq0,nfptsgp)   = rpart(jq0,i)   ! heating from part 
+                     rptsgp(jgpv0,nfptsgp)   = rpart(jv0,i)   ! particle velocity
+                     rptsgp(jgpv0+1,nfptsgp) = rpart(jv0+1,i) ! particle velocity
+                     rptsgp(jgpv0+2,nfptsgp) = rpart(jv0+2,i) ! particle velocity
+                   
+                     iptsgp(jgppid1,nfptsgp) = -1
+                     iptsgp(jgppid2,nfptsgp) = -1
+                     iptsgp(jgppid3,nfptsgp) = -1
+                   
+                        ipdum  = el_edge_proc_map(ie,ifc)
+                        iedum  = el_edge_el_map(ie,ifc)
+                   
+                     iptsgp(jgpps,nfptsgp)   = ipdum  ! overwritten mpi
+                     iptsgp(jgppt,nfptsgp)   = ipdum  ! dest. mpi rank
+                     iptsgp(jgpes,nfptsgp)   = iedum    ! dest. elment
+                  endif
+               enddo
+
+               do ifc=1,ncornergp
+
+                  if (ilgp_c(ie,ifc) .eq. 0) then
+
+                     nfptsgp = nfptsgp + 1
+                   
+                     rptsgp(jgpx,nfptsgp)    = rxdum(1)           ! x loc
+                     rptsgp(jgpy,nfptsgp)    = rxdum(2)           ! y log
+                     rptsgp(jgpz,nfptsgp)    = rxdum(3)           ! z log
+                     rptsgp(jgpfh,nfptsgp)   = rpart(jf0,i)   ! hyd. force x
+                     rptsgp(jgpfh+1,nfptsgp) = rpart(jf0+1,i) ! hyd. force y
+                     rptsgp(jgpfh+2,nfptsgp) = rpart(jf0+2,i) ! hyd. force z
+                     rptsgp(jgpvol,nfptsgp)  = rpart(jvol,i)  ! particle volum
+                     rptsgp(jgpdpe,nfptsgp)  = rpart(jdpe,i)  ! particle dp eff
+                     rptsgp(jgpspl,nfptsgp)  = rpart(jspl,i)  ! spl
+                     rptsgp(jgpg0,nfptsgp)   = rpart(jg0,i)   ! work done by forc
+                     rptsgp(jgpq0,nfptsgp)   = rpart(jq0,i)   ! heating from part 
+                     rptsgp(jgpv0,nfptsgp)   = rpart(jv0,i)   ! particle velocity
+                     rptsgp(jgpv0+1,nfptsgp) = rpart(jv0+1,i) ! particle velocity
+                     rptsgp(jgpv0+2,nfptsgp) = rpart(jv0+2,i) ! particle velocity
+                   
+                     iptsgp(jgppid1,nfptsgp) = -1
+                     iptsgp(jgppid2,nfptsgp) = -1
+                     iptsgp(jgppid3,nfptsgp) = -1
+                   
+                        ipdum  = el_corner_proc_map(ie,ifc)
+                        iedum  = el_corner_el_map(ie,ifc)
+                   
+                     iptsgp(jgpps,nfptsgp)   = ipdum  ! overwritten mpi
+                     iptsgp(jgppt,nfptsgp)   = ipdum  ! dest. mpi rank
+                     iptsgp(jgpes,nfptsgp)   = iedum    ! dest. elment
+                  endif
+               enddo
+
+
+
+            endif
+         enddo
+
+      enddo
+
+
+      return
+      end
+!c-----------------------------------------------------------------------
+      subroutine create_ghost_particles_rect_gpu
+!c
+!c     this routine will create ghost particles by checking if particle
+!c     is within d2chk of element faces
+!c
+!c     ghost particle x,y,z list will be in rptsgp(jgpx,j),rptsgp(jgpy,j),
+!c     rptsgp(jgpz,j), while processor and local element id are in
+!c     iptsgp(jgppt,j) and iptsgp(jgpes,j)
+!c
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CMTDATA'
+      include 'CMTPART'
+
+      nfptsgp = 0
+      do i = 1,n
+         ie = ipart(je0,i) + 1
+!c        vector coordinates of what faces a particle is next to
+         ii = 0
+         jj = 0
+         kk = 0
+         if (abs(rpart(jx,i) - xerange(1,1,ie)).lt.d2chk(1)) ii=-1
+         if (abs(rpart(jx,i) - xerange(2,1,ie)).lt.d2chk(1)) ii=1
+         if (abs(rpart(jy,i) - xerange(1,2,ie)).lt.d2chk(2)) jj=-1
+         if (abs(rpart(jy,i) - xerange(2,2,ie)).lt.d2chk(2)) jj=1
+         if (abs(rpart(jz,i) - xerange(1,3,ie)).lt.d2chk(3)) kk=-1
+         if (abs(rpart(jz,i) - xerange(2,3,ie)).lt.d2chk(3)) kk=1
+
+         itype = abs(ii)+abs(jj)+abs(kk) ! face (1), edge (2), or
+                                         ! corner (3) particle
+
+         if (itype.eq.1) then          ! face particle
+            call gp_create_gpu(ii,jj,kk,i,&
+            nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+         elseif (itype.eq.2) then      ! edge particle
+            call gp_create_gpu(ii,jj,kk,i,&
+            nedgegp,el_edge_num,el_edge_proc_map,el_edge_el_map)
+            if (abs(ii) + abs(jj) .eq. 2) then
+               call gp_create_gpu(0,jj,kk,i,&
+               nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+               call gp_create_gpu(ii,0,kk,i,&
+               nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+            elseif (abs(ii) + abs(kk) .eq. 2) then
+               call gp_create_gpu(0,jj,kk,i,&
+               nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+               call gp_create_gpu(ii,jj,0,i,&
+               nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+            elseif (abs(jj) + abs(kk) .eq. 2) then
+               call gp_create_gpu(ii,0,kk,i,&
+               nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+               call gp_create_gpu(ii,jj,0,i,&
+               nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+            endif
+         elseif (itype.eq.3) then       ! corner particle
+            call gp_create_gpu(ii,jj,kk,i,&
+            ncornergp,el_corner_num,el_corner_proc_map,&
+            el_corner_el_map)
+            call gp_create_gpu(0,jj,kk,i,&
+            nedgegp,el_edge_num,el_edge_proc_map,el_edge_el_map)
+            call gp_create_gpu(ii,0,kk,i,&
+            nedgegp,el_edge_num,el_edge_proc_map,el_edge_el_map)
+            call gp_create_gpu(ii,jj,0,i,&
+            nedgegp,el_edge_num,el_edge_proc_map,el_edge_el_map)
+            call gp_create_gpu(ii,0,0,i,&
+            nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+            call gp_create_gpu(0,jj,0,i,&
+            nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+            call gp_create_gpu(0,0,kk,i,&
+            nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+         endif
+      enddo
+
+      return
+      end
+!c-----------------------------------------------------------------------
+      subroutine create_ghost_particles_rect_full_gpu
+!c
+!c     this routine will create ghost particles by checking if particle
+!c     is within d2chk of element faces
+!c
+!c     ghost particle x,y,z list will be in rptsgp(jgpx,j),rptsgp(jgpy,j),
+!c     rptsgp(jgpz,j), while processor and local element id are in
+!c     iptsgp(jgppt,j) and iptsgp(jgpes,j)
+!c
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CMTDATA'
+      include 'CMTPART'
+
+      nfptsgp = 0
+      do i = 1,n
+         do j=1,3*nfacegp-2,3   ! faces
+            ii = el_face_num(j) 
+            jj = el_face_num(j+1) 
+            kk = el_face_num(j+2) 
+            call gp_create_gpu(ii,jj,kk,i,&
+             nfacegp,el_face_num,el_face_proc_map,el_face_el_map)
+         enddo
+
+         do j=1,3*nedgegp-2,3   ! edges
+            ii = el_edge_num(j) 
+            jj = el_edge_num(j+1) 
+            kk = el_edge_num(j+2) 
+            call gp_create_gpu(ii,jj,kk,i,&
+             nedgegp,el_edge_num,el_edge_proc_map,el_edge_el_map)
+         enddo
+
+         do j=1,3*ncornergp-2,3   ! corners
+            ii = el_corner_num(j) 
+            jj = el_corner_num(j+1) 
+            kk = el_corner_num(j+2) 
+            call gp_create_gpu(ii,jj,kk,i,&
+           ncornergp,el_corner_num,el_corner_proc_map,el_corner_el_map)
+         enddo
+
+      enddo
+
+      return
+      end
+!c-----------------------------------------------------------------------
+      subroutine gp_create_gpu(ii,jj,kk,i, &
+                  nnl,el_tmp_num,el_tmp_proc_map,el_tmp_el_map)
+!c
+!c     this routine will create a ghost particle and append its position
+!c     to rptsgp and its processor and element to iptsgp. nfptsgp will then
+!c     be incremented. Note that ghost particles will not be created if 
+!c     they are to be created on the same processor. In the near future, 
+!c     this might not be true if periodic conditions are needed.
+!c
+!c     el_tmp_num holds vector coordinates of tmp=face,edge, or corners
+!c     el_tmp_proc_map holds MPI rank of neighbor elements in el_tmp_num
+!c                     order
+!c     el_tmp_el_map holds local element number of neighbor elements
+!c
+!c     ii,jj,kk are vectors that tell what element a ghost particle
+!c     should be sent to
+!c
+!c     i is which particle is creating the ghost particle from rpart,etc
+!c
+      include 'SIZE'
+      include 'TOTAL'
+      include 'CMTDATA'
+      include 'CMTPART'
+
+      common /nekmpi/ mid,mp,nekcomm,nekgroup,nekreal
+      common /myparth/ i_fp_hndl, i_cr_hndl
+
+      integer el_tmp_proc_map(lelt,12)  ,el_tmp_el_map(lelt,12), &
+             el_tmp_num(36)
+
+      real rdumpos(3)
+
+      xdlen = xdrange(2,1) - xdrange(1,1)
+      ydlen = xdrange(2,2) - xdrange(1,2)
+      zdlen = xdrange(2,3) - xdrange(1,3)
+
+            ie = ipart(je0,i)+1
+
+      xedlen = xerange(2,1,ie) - xerange(1,1,ie)
+      yedlen = xerange(2,2,ie) - xerange(1,2,ie)
+      zedlen = xerange(2,3,ie) - xerange(1,3,ie)
+
+
+      ic = 0
+      do j=1,3*nnl-2,3
+         ic = ic + 1
+         if (el_tmp_num(j)  .eq.ii) then
+         if (el_tmp_num(j+1).eq.jj) then
+         if (el_tmp_num(j+2).eq.kk) then
+
+!c           if (nid .eq. el_tmp_proc_map(ie,ic)) then 
+!c           if (ie .eq.  el_tmp_el_map(ie,ic) + 1) then 
+!c              goto 1511
+!c           endif
+!c           endif
+
+
+            nfptsgp = nfptsgp + 1
+            iitmp1 = 0
+            iitmp2 = 0
+            iitmp3 = 0
+
+            ! note that altering locs is for bc in periodic ..
+            xloc = rpart(jx,i)
+            if (xloc+xedlen*ii .gt. xdrange(2,1)) then
+                 xloc = rpart(jx,i) - xdlen
+                 iitmp1 = 1
+                 goto 123
+            endif
+            if (xloc+xedlen*ii .lt. xdrange(1,1))then
+                 xloc = rpart(jx,i) + xdlen
+                 iitmp1 = 1
+                 goto 123
+            endif
+  123 continue
+            yloc = rpart(jy,i)
+            if (yloc+yedlen*jj .gt. xdrange(2,2))then
+                 yloc = rpart(jy,i) - ydlen
+                 iitmp2 = 1
+                 goto 124
+            endif
+            if (yloc+yedlen*jj .lt. xdrange(1,2))then
+                 yloc = rpart(jy,i) + ydlen
+                 iitmp2 = 1
+                 goto 124
+            endif
+  124 continue
+            zloc = rpart(jz,i)
+            if (zloc+zedlen*kk .gt. xdrange(2,3))then
+                 zloc = rpart(jz,i) - zdlen
+                 iitmp3 = 1
+                 goto 125
+            endif
+            if (zloc+zedlen*kk .lt. xdrange(1,3))then
+                 zloc = rpart(jz,i) + zdlen
+                 iitmp3 = 1
+                 goto 125
+            endif
+  125 continue
+
+            rptsgp(jgpx,nfptsgp)    = xloc           ! x loc
+            rptsgp(jgpy,nfptsgp)    = yloc           ! y log
+            rptsgp(jgpz,nfptsgp)    = zloc           ! z log
+            rptsgp(jgpfh,nfptsgp)   = rpart(jf0,i)   ! hyd. force x
+            rptsgp(jgpfh+1,nfptsgp) = rpart(jf0+1,i) ! hyd. force y
+            rptsgp(jgpfh+2,nfptsgp) = rpart(jf0+2,i) ! hyd. force z
+            rptsgp(jgpvol,nfptsgp)  = rpart(jvol,i)  ! particle volum
+            rptsgp(jgpdpe,nfptsgp)  = rpart(jdpe,i)  ! particle dp eff
+            rptsgp(jgpspl,nfptsgp)  = rpart(jspl,i)  ! spl
+            rptsgp(jgpg0,nfptsgp)   = rpart(jg0,i)   ! work done by forc
+            rptsgp(jgpq0,nfptsgp)   = rpart(jq0,i)   ! heating from part 
+            rptsgp(jgpv0,nfptsgp)   = rpart(jv0,i)   ! particle velocity
+            rptsgp(jgpv0+1,nfptsgp) = rpart(jv0+1,i) ! particle velocity
+            rptsgp(jgpv0+2,nfptsgp) = rpart(jv0+2,i) ! particle velocity
+
+            iptsgp(jgppid1,nfptsgp) = ipart(jpid1,i)          ! part id 1 tag
+            iptsgp(jgppid2,nfptsgp) = ipart(jpid2,i)          ! part id 2 tag
+            iptsgp(jgppid3,nfptsgp) = ipart(jpid3,i)          ! part id 3 tag
+
+               ipdum  = el_tmp_proc_map(ie,ic)
+               iedum  = el_tmp_el_map(ie,ic)
+
+! DZ
+               if (ipdum .lt. 0 .or. iedum .lt.0) then
+                  nfptsgp=nfptsgp-1
+                  goto 1511
+               endif
+
+
+            iptsgp(jgpps,nfptsgp)   = ipdum  ! overwritten mpi
+            iptsgp(jgppt,nfptsgp)   = ipdum  ! dest. mpi rank
+            iptsgp(jgpes,nfptsgp)   = iedum    ! dest. elment
+
+!c           check if extra particles have been created on the same mpi
+!c           rank and also take care of boundary particles
+            ibctype = abs(bc_part(1))+abs(bc_part(3))+abs(bc_part(5))
+
+! DZ
+!c           take care of periodic stuff first
+            if (nid.eq.iptsgp(jgppt,nfptsgp)) then ! dont create gp on own rank 
+                                                   ! unless moved and periodic
+            if (ibctype .eq. 0) then            ! all three sides periodic
+               if (iitmp1+iitmp2+iitmp3 .eq.0) then
+                  nfptsgp=nfptsgp-1
+                  goto 1511
+               endif
+            elseif (ibctype .eq. 1) then        ! only two sides periodic
+               if (abs(bc_part(1)) .eq. 1) then
+                  if (iitmp2+iitmp3 .eq. 0) then
+                     nfptsgp=nfptsgp-1
+                     goto 1511
+                  endif
+               elseif (abs(bc_part(3)) .eq. 1) then
+                  if (iitmp1+iitmp3 .eq. 0) then
+                     nfptsgp=nfptsgp-1
+                     goto 1511
+                  endif
+               elseif (abs(bc_part(5)) .eq. 1) then
+                  if (iitmp1+iitmp2 .eq. 0) then
+                     nfptsgp=nfptsgp-1
+                     goto 1511
+                  endif
+               endif
+            elseif (ibctype .eq. 2) then        ! only one side periodic
+               if (bc_part(1) .eq. 0) then
+                  if (iitmp1 .eq. 0) then
+                     nfptsgp=nfptsgp-1
+                     goto 1511
+                  endif
+               elseif (bc_part(3) .eq. 0) then
+                  if (iitmp2 .eq. 0) then
+                     nfptsgp=nfptsgp-1
+                     goto 1511
+                  endif
+               elseif (bc_part(5) .eq. 0) then
+                  if (iitmp3 .eq. 0) then
+                     nfptsgp=nfptsgp-1
+                     goto 1511
+                  endif
+               endif
+            elseif (ibctype .eq. 3) then        ! no sides periodic 
+               nfptsgp=nfptsgp-1
+               goto 1511
+            endif
+            endif ! end if(nid.eq. ...)
+
+!c           take care of non-periodic stuff second
+            if (ibctype .gt. 0) then
+               if (ibctype .eq. 3) then         ! no sides periodic
+                  if (iitmp1+iitmp2+iitmp3 .gt.0) then
+                     nfptsgp=nfptsgp-1
+                     goto 1511
+                  endif
+               elseif (ibctype .eq.1) then      ! two sides periodic
+                  if (abs(bc_part(1)) .eq. 1) then
+                     if (iitmp1 .gt. 0) then
+                        nfptsgp=nfptsgp-1
+                        goto 1511
+                     endif
+                  elseif (abs(bc_part(3)) .eq. 1) then
+                     if (iitmp2 .gt. 0) then
+                        nfptsgp=nfptsgp-1
+                        goto 1511
+                     endif
+                  elseif (abs(bc_part(5)) .eq. 1) then
+                     if (iitmp3 .gt. 0) then
+                        nfptsgp=nfptsgp-1
+                        goto 1511
+                     endif
+                  endif
+               elseif (ibctype .eq.2) then      ! one side periodic
+                  if (bc_part(1) .eq. 0) then
+                     if (iitmp2+iitmp3.gt.0) then
+                        nfptsgp=nfptsgp-1
+                        goto 1511
+                     endif
+                  elseif (bc_part(3) .eq. 0) then
+                     if (iitmp1+iitmp3.gt.0) then
+                        nfptsgp=nfptsgp-1
+                        goto 1511
+                     endif
+                  elseif (bc_part(5) .eq. 0) then
+                     if (iitmp1+iitmp2.gt.0) then
+                        nfptsgp=nfptsgp-1
+                        goto 1511
+                     endif
+                  endif
+               endif
+            endif
+
+            goto 1511
+         endif
+         endif
+         endif
+      enddo
+ 1511 continue
+
+      return
+      end
+!c-----------------------------------------------------------------------
+
+!c----------------------------------------------------------------------
+      subroutine update_particle_location_gpu
+!c     check if particles are outside domain
+!c     > if bc_part = 0 then it is periodic
+!c     > if bc_part = -1,1 then particles are killed (outflow)
+!      include 'SIZE'
+!      include 'CMTDATA'
+!      include 'CMTPART'
+      use cudafor
+      use glbvariable_gpu     
+     
+      jx0 = jx
+     
+      nbc_sum = abs(bc_part(1)) + abs(bc_part(2)) +& 
+               abs(bc_part(3)) + abs(bc_part(4)) + &
+               abs(bc_part(5)) + abs(bc_part(6)) ! all periodic, don't search
+      
+      if(n.gt.0) then
+         print *,'Entering update_particle_location_wrapper_'
+         call update_particle_location_wrapper(d_rpart, d_xdrange, &
+              d_bc_part, n, ndim, nr,ni, jx0, jx1, jx2, jx3,nbc_sum,lr,li,llpart)      
+      else
+         print *,'n is less than 1 in update_particle_location_gpu'
+      endif
+      
+      return
+      end
+!c-----------------------------------------------------------------------
+
+!c----------------------------------------------------------------------
+      subroutine place_particles_gpu
+!c
+!c     Place particles in this routine, also called for injection
+!c
+!      include 'SIZE'
+!      include 'TOTAL'
+!      include 'CMTDATA'
+!      include 'CMTPART'
+
+      use cudafor
+      use glbvariable_gpu
+!      integer icalld  !commented because  of error. uncomment and check  later. adeesha.
+!      save    icalld
+!      data    icalld  /-1/
+
+      icalld = icalld + 1
+
+      if (ipart_restartr .eq. 0) then
+
+!c        correct nwe if discrepancy on rank 0
+         nwe         = int(nw/np)                ! num. part per proc
+         nw_tmp      = iglsum(nwe,1)
+         if ((nw_tmp .ne. nw) .and. (nid.eq.0)) nwe = nwe +(nw - nw_tmp)
+         
+         
+
+!c        main loop to distribute particles
+         do i = 1,nwe
+            n = n + 1
+
+            call place_particles_user
+
+            do j=0,2
+               rpart(jx +j,n) = x_part(j)
+               rpart(jx1+j,n) = x_part(j)
+               rpart(jx2+j,n) = x_part(j)
+               rpart(jx3+j,n) = x_part(j)
+
+               rpart(jv0+j,n) = v_part(j)
+               rpart(jv1+j,n) = v_part(j)
+               rpart(jv2+j,n) = v_part(j)
+               rpart(jv3+j,n) = v_part(j)
+            enddo
+         
+!c           set some rpart values for later use
+            rpart(jdp,n)   = d_part                              ! particle diameter
+            rpart(jtaup,n) = rpart(jdp,n)**2*rho_p/18.0d+0/mu_0  ! particle time scale
+            rpart(jrhop,n) = rho_p                               ! particle density 
+            rpart(jvol,n)  = pi*rpart(jdp,n)**3/6.               ! particle volume
+            rpart(jspl,n)  = rspl                                ! super particle loading
+         
+            rpart(jtemp,n)  = tp_0                               ! intial particle temp
+            rpart(jtempf,n) = tp_0                               ! intial fluid temp (overwritten)
+            rpart(jrho,n)   = param(1)                           ! initial fluid density (overwritten interp)
+         
+!c           set global particle id (3 part tag)
+            ipart(jpid1,n) = nid 
+            ipart(jpid2,n) = i
+            ipart(jpid3,n) = icalld
+         enddo
+
+      else
+         ! read in data
+         call read_parallel_restart_part
+
+         call place_particles_else_gpu_wrapper(d_rpart,d_xdrange,&
+         d_v_part,d_rxbo,n,ndim,jv0,jv1,jv2,jv3,lr,li)
+
+      endif
+
+!     copy back rpart for cpu to do the error checking or implement it in gpu. adeesha
+      ! Error checking
+      if (n.gt.llpart)then 
+         if (nid.eq.0)&
+           write(6,*)'Not enough space to store more particles'
+         call exitt
+      endif
+
+      if (.not. if3d) then
+         do i=1,n
+            if (abs(rpart(jz,i)-1.0) .gt. 1E-16) then
+               if (nid.eq.0) &
+                 write(6,*)'Particle zstart is not right for 2d case'
+               call exitt
+            endif
+         enddo
+      endif
+
+      return
+      end
+!c----------------------------------------------------------------------
+
+
+!---------------------------------------------------------
+      subroutine copytocpu_gpu ()
+      use cudafor
+      use glbvariable_gpu
+
+      parameter (ldg=lxd**3)
+      parameter (lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt_1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg)&
+                  , wkd(lwkd)
+      real jgl,jgt
+
+      integer code
+!      print *,"cmtpartcles_gpu copytocpu_gpu Start",nid 
+!----- copy gas data
+      if(tocpucopy_gas(1).eq.1) then
+           istate = cudaMemcpy(res3, d_res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyDeviceToHost)
+!           print *,"istate 1", cudaGetErrorString(istate) 
+      endif
+      if(tocpucopy_gas(2).eq.1) then
+           istate = cudaMemcpy(u,d_u, lx1*ly1*lz1*toteq*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 2", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(3).eq.1) then
+           istate = cudaMemcpy(res1, d_res1, lx1*ly1*lz1*lelt*toteq,cudaMemcpyDeviceToHost)
+      print *,"istate 3", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(4).eq.1) then
+           istate = cudaMemcpy(bm1, d_bm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 4", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(5).eq.1) then
+           istate = cudaMemcpy(tcoef, d_tcoef,9,cudaMemcpyDeviceToHost)
+!      print *,"istate 5", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(6).eq.1) then
+           istate = cudaMemcpy(graduf, d_graduf,toteq*3*lx1*lz1*2*ldim,cudaMemcpyDeviceToHost)
+!      print *,"istate 6", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(7).eq.1) then
+           istate = cudaMemcpy(gradu,d_gradu,toteq*3*lx1*ly1*lz1,cudaMemcpyDeviceToHost)
+!      print *,"istate 7", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(8).eq.1) then
+           istate = cudaMemcpy(diffh,d_diffh,3*lx1*ly1*lz1,cudaMemcpyDeviceToHost)
+!      print *,"istate 8", cudaGetErrorString(istate) 
+      endif 
+!      if(tocpucopy_gas(1).eq.1) then
+!           istate = cudaMemcpy(res3, d_res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 9", cudaGetErrorString(istate) 
+!      endif 
+      if(tocpucopy_gas(10).eq.1) then
+           istate = cudaMemcpy(vx, d_vx, lx1*ly1*lz1*nelt,cudaMemcpyDeviceToHost) !changed lelv -> nelt for 10-15
+      !print *,"istate 10", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(11).eq.1) then
+           istate = cudaMemcpy(vy, d_vy, lx1*ly1*lz1*nelt,cudaMemcpyDeviceToHost)
+      !print *,"istate 11", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(12).eq.1) then
+           istate = cudaMemcpy(vz, d_vz, lx1*ly1*lz1*nelt,cudaMemcpyDeviceToHost)
+      !print *,"istate 12", cudaGetErrorString(istate),lelt,lelv 
+      endif 
+      if(tocpucopy_gas(13).eq.1) then
+           istate = cudaMemcpy(vxd,d_vxd, lxd*lyd*lzd*nelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 13", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(14).eq.1) then
+           istate = cudaMemcpy(vyd,d_vyd, lxd*lyd*lzd*nelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 14", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(15).eq.1) then
+           istate = cudaMemcpy(vzd,d_vzd, lxd*lyd*lzd*nelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 15", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(16).eq.1) then
+           istate = cudaMemcpy(convh, d_convh, lelt*lxd*lyd*lzd*3,cudaMemcpyDeviceToHost)
+!      print *,"istate 16", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(17).eq.1) then
+           istate = cudaMemcpy(rx, d_rx, lxd*lyd*lzd*ldim*ldim*lelv,cudaMemcpyDeviceToHost)
+!      print *,"istate 17", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(18).eq.1) then
+           istate = cudaMemcpy(area,d_area, lx1*lz1*6*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 18", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(19).eq.1) then
+           istate = cudaMemcpy(phig, d_phig, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 19", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(20).eq.1) then
+           istate = cudaMemcpy(res2, d_res2, lx1*ly1*lz1*toteq*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 20", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(21).eq.1) then
+           istate = cudaMemcpy(iface_flux,d_iface_flux, lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 21", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(22).eq.1) then
+           istate = cudaMemcpy(totalh, d_totalh, lelt*lxd*lyd*lzd*3,cudaMemcpyDeviceToHost)
+!      print *,"istate 22", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(23).eq.1) then
+           istate = cudaMemcpy(rxm1, d_rxm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 23", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(24).eq.1) then
+           istate = cudaMemcpy(sxm1, d_sxm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 24", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(25).eq.1) then
+           istate = cudaMemcpy(txm1, d_txm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 25", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(26).eq.1) then
+           istate = cudaMemcpy(rym1, d_rym1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 26", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(27).eq.1) then
+          istate = cudaMemcpy(sym1, d_sym1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 27", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(28).eq.1) then
+           istate = cudaMemcpy(tym1, d_tym1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 28", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(29).eq.1) then
+           istate = cudaMemcpy(rzm1, d_rzm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 29", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(30).eq.1) then
+           istate = cudaMemcpy(szm1, d_szm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 30", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(31).eq.1) then
+           istate = cudaMemcpy(tzm1, d_tzm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 31", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(32).eq.1) then
+           istate = cudaMemcpy(jacmi,d_jacmi, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 32", cudaGetErrorString(istate) 
+      endif 
+
+!      if(tocpucopy_gas(1).eq.1) then
+!           istate = cudaMemcpy(res3, d_res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyDeviceToHost)
+!      endif 
+      if(tocpucopy_gas(34).eq.1) then
+!           istate = cudaMemcpy(usrf,d_usrf, lx1*ly1*lz1*5,cudaMemcpyDeviceToHost)
+!      print *,"istate 34", cudaGetErrorString(istate) 
+      endif 
+!      if(tocpucopy_gas(1).eq.1) then
+!           istate = cudaMemcpy(res3, d_res3, lx1*ly1*lz1*toteq*lelt,cudaMemcpyDeviceToHost)
+!      endif 
+      if(tocpucopy_gas(36).eq.1) then
+           istate = cudaMemcpy(wghtc, d_wghtc, lx1*lz1,cudaMemcpyDeviceToHost)
+!      print *,"istate 36", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(37).eq.1) then
+           istate = cudaMemcpy(wghtf, d_wghtf, lxd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 37", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(38).eq.1) then
+           istate = cudaMemcpy(unx, d_unx, lx1*lz1*6*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 38", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(39).eq.1) then
+           istate = cudaMemcpy(uny, d_uny, lx1*lz1*6*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 39", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(40).eq.1) then
+           istate = cudaMemcpy(unz, d_unz, lx1*lz1*6*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 40", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(41).eq.1) then
+           istate = cudaMemcpy(cbc,d_cbc,3*6*lelt*(ldimt1+1),cudaMemcpyDeviceToHost)
+!      print *,"istate 41", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(42).eq.1) then
+           istate = cudaMemcpy(dxm1, d_dxm1, lx1*lx1,cudaMemcpyDeviceToHost)
+!      print *,"istate 42", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(43).eq.1) then
+           istate = cudaMemcpy(dxtm1, d_dxtm1, lx1*lx1,cudaMemcpyDeviceToHost)
+!      print *,"istate 43", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(44).eq.1) then
+           istate = cudaMemcpy(tlag, d_tlag, lx1*ly1*lz1*lelt*(lorder-1)*ldimt,cudaMemcpyDeviceToHost)
+!      print *,"istate 44", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(45).eq.1) then
+           istate = cudaMemcpy(pr,d_pr, lx2*ly2*lz2*lelv,cudaMemcpyDeviceToHost)
+!      print *,"istate 45", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(46).eq.1) then
+           istate = cudaMemcpy(vtrans,d_vtrans, lx1*ly1*lz1*lelt*ldimt1,cudaMemcpyDeviceToHost)
+!      print *,"istate 46", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(47).eq.1) then
+           istate = cudaMemcpy(meshh,d_meshh,lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 47", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(48).eq.1) then
+           istate = cudaMemcpy(gridh,d_gridh,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 48", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(49).eq.1) then
+           istate = cudaMemcpy(xm1,d_xm1,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 49", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(50).eq.1) then
+           istate = cudaMemcpy(ym1,d_ym1,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 50", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(51).eq.1) then
+           istate = cudaMemcpy(zm1,d_zm1,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 51", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(52).eq.1) then
+           istate = cudaMemcpy(lglel,d_lglel,lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 52", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(53).eq.1) then
+           istate = cudaMemcpy(t,d_t,lx1*ly1*lz1*lelt*ldimt,cudaMemcpyDeviceToHost)
+!      print *,"istate 53", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(54).eq.1) then
+           istate = cudaMemcpy(sii,d_sii,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 54", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(55).eq.1) then
+           istate = cudaMemcpy(siii,d_siii,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 55", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(56).eq.1) then
+           istate = cudaMemcpy(vdiff,d_vdiff,lx1*ly1*lz1*lelt*ldimt1,cudaMemcpyDeviceToHost)
+!      print *,"istate 56", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(57).eq.1) then
+           istate = cudaMemcpy(cb,d_cb,3,cudaMemcpyDeviceToHost)
+!      print *,"istate 57", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(58).eq.1) then
+           istate = cudaMemcpy(csound,d_csound,lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 58", cudaGetErrorString(istate) 
+      endif 
+      if(tocpucopy_gas(59).eq.1) then
+           istate = cudaMemcpy(gllel,d_gllel,lelg,cudaMemcpyDeviceToHost)
+!      print *,"istate 59", cudaGetErrorString(istate) 
+      endif
+      if(tocpucopy_gas(60).eq.1) then
+           istate = cudaMemcpy(flux,d_flux,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 60", cudaGetErrorString(istate) 
+      endif
+!      if(tocpucopy_gas(61).eq.1) then
+!           istate = cudaMemcpy(fatface,d_fatface,nqq*3*lx1*lz1*2*ldim*lelt,cudaMemcpyDeviceToHost)
+!      endif
+
+      if(tocpucopy_gas(66).eq.1) then
+           istate = cudaMemcpy(d,d_d,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 66", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(67).eq.1) then
+           istate = cudaMemcpy(jgl,d_jgl,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 67", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(68).eq.1) then
+           istate = cudaMemcpy(jgt,d_jgt,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 68", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(69).eq.1) then
+           istate = cudaMemcpy(dg,d_dg,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 69", cudaGetErrorString(istate)
+      endif
+      if(tocpucopy_gas(70).eq.1) then
+           istate = cudaMemcpy(dgt,d_dgt,lxd*lyd*lzd,cudaMemcpyDeviceToHost)
+!      print *,"istate 70", cudaGetErrorString(istate)
+      endif
+      !added by Kk 03/06
+      if(tocpucopy_gas(71).eq.1) then
+           istate = cudaMemcpy(jacm1,d_jacm1, lx1*ly1*lz1*lelt,cudaMemcpyDeviceToHost)
+!      print *,"istate 71", cudaGetErrorString(istate) 
+      endif 
+
+
+
+!-----copy particles data
+
+      if(tocpucopy_part(1).eq.1) then
+           istate = cudaMemcpy(rpart, d_rpart, lr*llpart,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(2).eq.1) then
+           istate = cudaMemcpy(ipart, d_ipart, li*llpart,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(3).eq.1) then
+           istate = cudaMemcpy(kv_stage_p, d_kv_stage_p,llpart*4*ldim,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(4).eq.1) then
+           istate = cudaMemcpy(kx_stage_p, d_kx_stage_p,llpart*4*ldim,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(5).eq.1) then
+           istate = cudaMemcpy(bc_part, d_bc_part, 6,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(6).eq.1) then
+           istate = cudaMemcpy(xgll, d_xgll, lx1,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(7).eq.1) then
+           istate = cudaMemcpy(ygll, d_ygll, lx1,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(8).eq.1) then
+           istate = cudaMemcpy(zgll, d_zgll, lx1,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(9).eq.1) then
+           istate = cudaMemcpy(wxgll, d_wxgll, lx1,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(10).eq.1) then
+           istate = cudaMemcpy(wygll, d_wygll, lx1,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(11).eq.1) then
+           istate = cudaMemcpy(wzgll, d_wgll, lx1,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(12).eq.1) then
+           istate = cudaMemcpy(rfpts, d_rfpts,lrf*llpart ,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(13).eq.1) then
+           istate = cudaMemcpy(ifpts, d_ifpts,lif*llpart ,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(14).eq.1) then
+           istate = cudaMemcpy(ifptsmap, d_ifptsmap,llpart ,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(15).eq.1) then
+           istate = cudaMemcpy(xerange, d_xerange,2*3*lelt ,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(16).eq.1) then
+           istate = cudaMemcpy(xdrange,d_xdrange, 2*3 ,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(17).eq.1) then
+           istate = cudaMemcpy(x_part,d_x_part, 3 ,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(18).eq.1) then
+           istate = cudaMemcpy(v_part,d_v_part, 3 ,cudaMemcpyDeviceToHost)
+      endif 
+      if(tocpucopy_part(19).eq.1) then
+           istate = cudaMemcpy(rxbo,d_rxbo, 2*3 ,cudaMemcpyDeviceToHost)
+      endif
+      !if(tocpucopy_part(20).eq.1) then
+      !     istate = cudaMemcpy(ptw,d_ptw,lx1*ly1*lz1*lelt*8 ,cudaMemcpyDeviceToHost)
+      !endif
+      !if(tocpucopy_part(21).eq.1) then
+      !     istate = cudaMemcpy(rhs_fluidp,d_rhs_fluidp,lx1*ly1*lz1*lelt*7 ,cudaMemcpyDeviceToHost)
+      !endif
+
+
+!      print *,"cmtparticles_gpu.cuf copytocpu_gpu End",nid
+
+
+      do i=1,lengthoftogpucopy_gas
+           tocpucopy_gas(i)=0
+      end do
+
+!      print *,"cmtparticles_gpu.cuf copytocpu_gpu after 1st",nid
+
+      do j=1,lengthoftogpucopy_part
+           tocpucopy_part(j)=0
+      end do
+
+
+!      print *,"cmtparticles_gpu.cuf copytocpu_gpu after 2nd",nid
+
+
+      code = cudaPeekAtLastError()
+      !if (code.ne.cudaSuccess) then
+!        print *,'cuda  end of memcopy in tocpucopy status :',cudaGetErrorString(code)
+      !endif
+
+      return
+      end
+
+
+!----------------------------------------------------------------------
+      subroutine printUarray(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+      real   lpm_xerange(2,3,lelt)
+      common /lpm_elementrange/ lpm_xerange
+
+      integer isprint, i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+      isprint = 0
+         do i = 1, nelt
+            write(x1, fmt) i
+            write(x2, fmt) istep
+            write(x3, fmt) stage
+          OPEN(UNIT=9999+i,FILE='uarray.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+            trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+              do j=1, toteq
+                do k=1, lz1
+                   do n=1, ly1
+                       do m=1, lx1
+            WRITE(UNIT=9999+i, FMT=*) m, n, k, j, u(m,n,k,j,i)
+                       enddo
+                   enddo
+                enddo
+             enddo
+            CLOSE(UNIT=9999+i)
+        enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printTemp(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include t
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=11099+i,FILE='t.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn = 1, ldimt
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=11099+i, FMT = *) m,k,j,nn &
+      ,t(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=11099+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printVx(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=10799+i,FILE='vx.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+            //trim(atype),FORM="FORMATTED",&
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=10799+i, FMT = *) m,k,j &
+      ,vx(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=10799+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printVy(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=10899+i,FILE='vy.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+            //trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=10899+i, FMT = *) m,k,j &
+      ,vy(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=10899+i)
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printVz(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=10999+i,FILE='vz.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+             //trim(atype),FORM="FORMATTED",&
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=10999+i, FMT = *) m,k,j &
+      ,vz(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=10999+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printCsound(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=11999+i,FILE='csound.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=11999+i, FMT = *) m,k,j &
+       ,csound(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=11999+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printVdiff(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vdiff
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=12099+i,FILE='vdiff.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+             //trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, ldimt1
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=12099+i, FMT = *) m,k,j, nn &
+       ,vdiff(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12099+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printVtrans(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include vdiff
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12199+i,FILE='vtrans.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, ldimt1
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=12199+i, FMT = *) m,k,j, nn &
+       ,vtrans(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12199+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printRes2(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN' 
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=12299+i,FILE='res2.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+             //trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, toteq
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=12299+i, FMT = *) m,k,j, nn &
+       ,res2(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12299+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printRes1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+!        geid = lglel(i)
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=12299+i,FILE='res1.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, toteq
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=12299+i, FMT = *) m,k,j, nn &
+       ,res1(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12299+i)
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printRes3(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=14299+i,FILE='res3.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+              trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, toteq
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=14299+i, FMT = *) m,k,j, nn &
+       ,res3(m, k, j, nn, i)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=14299+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printFatface(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN' 
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3, x4
+
+      fmt = '(I4.4)'
+
+      lfn = lx1*lz1*2*ldim*nelt !print changed from lelt to nelt
+      do j = 1, 3
+      do i = 1, nqq
+         write(x1, fmt) i !geid
+         write(x2, fmt) j !geid
+         write(x3, fmt) istep
+         write(x4, fmt) stage
+         OPEN(UNIT=12399+i,FILE='fatface.nqq.'//trim(x1)//'.iwp.' &
+             //trim(x2) &
+             //'.step.'//trim(x3)//'.stage.'//trim(x4)//'.'// &
+              trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, lfn
+          WRITE(UNIT=12399+i, FMT = *) nn &
+       ,flux((j-1)*nqq*lfn + (i-1)*lfn + nn)
+       !   WRITE(UNIT=12399+i, FMT = "(I10, ES30.13)") nn &
+       !,flux((j-1)*nqq*lfn + (i-1)*lfn + nn)
+         enddo
+         CLOSE(UNIT=12399+i)
+      enddo
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printFlx(atype) !flx is copied to flux for easier
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN' 
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3, x4
+      integer iflx, nxzd, e, f
+
+
+      fmt = '(I4.4)'
+      lfn = lx1*lz1*2*ldim*nelt !print changed from lelt to nelt
+      iflx = 2*nqq*lfn  != nqq*nfq in surface_fluxes_gpu.cuf
+      nxzd = lxd*lzd
+      do e = 1, nelt
+      do f = 1, 2*ldim
+         write(x1, fmt) f !geid
+         write(x2, fmt) e !geid
+         OPEN(UNIT=12399+i,FILE='flx.f.'//trim(x1)//'.e.' &
+             //trim(x2),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+             do j=1, 5 !toteq
+                do mm = 1, nxzd 
+                  WRITE(UNIT=12399+i, FMT = *) mm, j &
+       ,flux(iflx+mm + (f-1)*nxzd+ (e-1)*2*ldim*nxzd+ (j-1)*nxzd*2*ldim*nelt)
+                enddo
+             enddo
+         CLOSE(UNIT=12399+i)
+      enddo
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printNx(atype) !nx is copied to flux for easier
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN' 
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3, x4
+      integer iflx, nxzd, e, f
+
+
+      fmt = '(I4.4)'
+      lfn = lx1*lz1*2*ldim*nelt !print changed from lelt to nelt
+      iflx = 2*nqq*lfn  != nqq*nfq in surface_fluxes_gpu.cuf
+      nxzd = lxd*lzd
+      nxz = lx1*lz1
+      do e = 1, nelt
+      do f = 1, 2*ldim 
+         write(x1, fmt) f !geid
+         write(x2, fmt) e !geid
+         OPEN(UNIT=12399+i,FILE='nx.f.'//trim(x1)//'.e.' &
+             //trim(x2),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+                do mm = 1, nxzd 
+                  WRITE(UNIT=12399+i, FMT = *) mm &
+       ,flux(iflx+mm + (f-1)*nxzd+ (e-1)*2*ldim*nxzd)
+                enddo
+         CLOSE(UNIT=12399+i)
+      enddo
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printUnx(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' 
+      include 'GEOM' !include unx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12499+i,FILE='unx.'//trim(x1) &
+             //'.step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, 6
+         do j=1, lz1
+         do k=1, lx1
+          WRITE(UNIT=12499+i, FMT = *) k, j, nn &
+       , unx(k, j, nn, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12499+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printUnz(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' 
+      include 'GEOM' !include unz
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12699+i,FILE='unz.'//trim(x1) &
+             //'.step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, 6
+         do j=1, lz1
+         do k=1, lx1
+          WRITE(UNIT=12699+i, FMT = *) k, j, nn &
+       , unz(k, j, nn, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12699+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printUny(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' 
+      include 'GEOM' !include uny
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, &! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=12599+i,FILE='uny.'//trim(x1) &
+             //'.step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, 6
+         do j=1, lz1
+         do k=1, lx1
+          WRITE(UNIT=12599+i, FMT = *) k, j, nn &
+       , uny(k, j, nn, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=12599+i)
+      enddo
+      end
+
+
+
+!----------------------------------------------------------------------
+      subroutine printUsrf(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+      real   lpm_xerange(2,3,lelt)
+      common /lpm_elementrange/ lpm_xerange
+
+      integer isprint, i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+      isprint = 0
+         do i = 1, nelt
+            write(x1, fmt) i
+            write(x2, fmt) istep
+          OPEN(UNIT=9999+i,FILE='usrf.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+              do j=1, toteq
+                do k=1, lz1
+                   do n=1, ly1
+                       do m=1, lx1
+            WRITE(UNIT=9999+i, FMT=*) m, n, k, j, u(m,n,k,j,i)
+                       enddo
+                   enddo
+                enddo
+             enddo
+            CLOSE(UNIT=9999+i)
+        enddo
+      end
+
+
+!----------------------------------------------------------------------
+!---------------------------------------------------------------------
+      subroutine printBm1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' 
+      include 'MASS' !include bm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+         write(x1, fmt) i 
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13299+i,FILE='bm1.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=13299+i, FMT = *) m,k,j &
+       ,bm1(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13299+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printPhig(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'MASS' !include bm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13399+i,FILE='phig.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=13399+i, FMT = *) m,k,j &
+       ,phig(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13399+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printIfaceflux(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'DG' !include iface_flux
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+!     if(istep .eq. 2 .or.istep .eq. 1) then ! .and. isprint .eq. 1) then
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=14499+i,FILE='ifaceflux.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1*lx1*2*ldim
+          WRITE(UNIT=14499+i, FMT = *) j &
+       ,iface_flux(j, i)
+         enddo
+         CLOSE(UNIT=14499+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printArea(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include area
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13399+i,FILE='area.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+            trim(atype),FORM="FORMATTED", &
+            STATUS="REPLACE",ACTION="WRITE")
+         do j=1, 6
+         do k=1, lz1
+         do m=1, lx1
+          WRITE(UNIT=13399+i, FMT = *) m,k,j &
+      ,area(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13399+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printWghtc(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'DG' !include wghtc
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13499,FILE='wghtc.id.' & 
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+            trim(atype),FORM="FORMATTED", &
+            STATUS="REPLACE",ACTION="WRITE")
+         do k=1, lz1
+         do m=1, lx1
+          WRITE(UNIT=13499, FMT = *) m,k &
+      ,wghtc((k-1)*lx1+m)
+         enddo
+         enddo
+         do k=1, lzd
+         do m=1, lxd
+          WRITE(UNIT=13499, FMT = *) m,k &
+      ,wghtf((k-1)*lxd+m)
+         enddo
+         enddo
+         CLOSE(UNIT=13499)
+      end
+!---------------------------------------------------------------------
+      subroutine printTlag(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include tlag
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, j, k, m,tt, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13199+i,FILE='tlag.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+             //trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, ldimt1
+         do tt=1, lorder-1
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=13199+i, FMT = *) m,k,j, tt, nn &
+       ,tlag(m, k, j, i, tt, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13199+i)
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printTArray(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include t
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=14199+i,FILE='t.id.'//trim(x1)//'.'  & 
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+             //trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, ldimt
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=14199+i, FMT = *) m,k,j, nn &
+       ,t(m, k, j, i, nn)
+         enddo
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=14199+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printMeshh(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include meshh
+      include 'SOLN' !include t
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+      write(x2, fmt) istep
+      OPEN(UNIT=14299,FILE='meshh.' & 
+      //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+      STATUS="REPLACE",ACTION="WRITE")
+      do i = 1, nelt
+          WRITE(UNIT=14299, FMT = *) i  &
+       , meshh(i)
+      enddo
+      CLOSE(UNIT=14299)
+      end
+
+!---------------------------------------------------------------------
+      subroutine printXm1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include xm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=14199+i,FILE='xm1.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=14199+i, FMT = *) m,k,j &
+       ,xm1(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=14199+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printYm1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include xm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=14299+i,FILE='ym1.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=14299+i, FMT = *) m,k,j &
+       ,ym1(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=14299+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printZm1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include xm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=14199+i,FILE='zm1.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=14199+i, FMT = *) m,k,j &
+       ,zm1(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=14199+i)
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printGridh(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include gridh
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=14399+i,FILE='gridh.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=14399+i, FMT = *) m,k,j &
+       ,gridh(m+ (k-1)*lx1+(j-1)*lx1*ly1, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=14399+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printCbc(atype)
+      include 'SIZE'
+      include 'INPUT' !include cbc
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         OPEN(UNIT=14399+i,FILE='cbc.id.'//trim(x1)//'.' &
+             //'step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=0, ldimt1
+         do k=1, 6
+          WRITE(UNIT=14399+i, FMT = *) k,j &
+       , cbc(k, i, j)
+         enddo
+         enddo
+         CLOSE(UNIT=14399+i)
+      enddo
+      end
+
+!--------------------------------------------------------------------
+      subroutine printJglt(atype)
+      include 'SIZE'
+      !include 'INPUT'
+      !include 'PARALLEL'
+      !include 'CMTDATA'
+      !include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+      parameter (ldg=lxd**3,lwkd=4*lxd*lxd)
+      common /dgrad/ d(ldg),dt(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg) &
+                   , wkd(lwkd)
+      real jgl,jgt
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+         OPEN(UNIT=12599,FILE='jglt'           &
+             //'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do k=1, ldg
+          WRITE(UNIT=12599, FMT = *) k   &   
+       , jgl(k), jgt(k)
+         enddo
+         CLOSE(UNIT=12599)
+      end
+
+!---------------------------------------------------------------------
+      subroutine printGraduf(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, & ! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3, x4
+
+      fmt = '(I4.4)'
+      lfn = lx1*lz1*2*ldim*nelt
+      do j = 1, 3
+      do i = 1, toteq
+         write(x1, fmt) i !geid
+         write(x2, fmt) j !geid
+         write(x3, fmt) istep
+         write(x4, fmt) stage
+         OPEN(UNIT=12499+i,FILE='graduf.eq.'//trim(x1)//'.iwp.' &
+             //trim(x2) &
+             //'.step.'//trim(x3)//'.stage.'//trim(x4)//'.'// &
+              trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do nn=1, lfn
+          WRITE(UNIT=12499+i, FMT = *) nn &
+       ,graduf((j-1)*toteq*lfn + (i-1)*lfn + nn)
+!         WRITE(UNIT=12399+i, FMT = "(I10, ES30.13)") nn 
+!    > ,flux((j-1)*nqq*lfn + (i-1)*lfn + nn)
+         enddo
+         CLOSE(UNIT=12499+i)
+      enddo
+      enddo
+      end
+
+
+!---------------------------------------------------------------------
+      subroutine printGradu(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA' !include res2
+      include 'SOLN'
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer lfq,heresize,hdsize
+      parameter (lfq=lx1*lz1*2*ldim*lelt, &
+                        heresize=nqq*3*lfq, & ! guarantees transpose of Q+ fits
+                        hdsize=toteq*3*lfq) ! might not need ldim
+      common /CMTSURFLX/ flux(heresize),graduf(hdsize)
+      integer i, geid, pn, eq
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3, x4
+      common /KekeDebug/ gradu_copy(lx1*ly1*lz1, lelt, toteq, 3)
+      real gradu_copy
+
+      fmt = '(I4.4)'
+      lfn = lx1*lz1*2*ldim*nelt
+      nxyz1 = lx1*ly1*lz1
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         OPEN(UNIT=12599+i,FILE='gradu.id.'//trim(x1) &
+           //'.'//trim(atype) &
+          , FORM="FORMATTED", STATUS="REPLACE",ACTION="WRITE")
+         do j = 1, 3
+            do eq = 1,toteq 
+               do mm=1, nxyz1
+                  WRITE(UNIT=12599+i, FMT = *) mm, eq, j, &
+                    gradu_copy(mm, i, eq, j)
+               enddo
+            enddo
+         enddo
+         CLOSE(UNIT=12599+i)
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printDxm1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'DXYZ' !include dxm1 dxtm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+         write(x2, fmt) istep
+         OPEN(UNIT=12699+i,FILE='dxm1.' &
+             //'.step.'//trim(x2)//'.'//trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lx1
+         do k=1, lx1
+          WRITE(UNIT=12699+i, FMT = *) k, j &
+       , dxm1(k, j), dxtm1(k,j)
+         enddo
+         enddo
+         CLOSE(UNIT=12699+i)
+      end
+
+!---------------------------------------------------------------------
+      subroutine printRxm1(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include rxm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13499+i,FILE='rxm1.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz1
+         do k=1, ly1
+         do m=1, lx1
+          WRITE(UNIT=13499+i, FMT = *) m,k,j &
+       ,rxm1(m, k, j, i), rym1(m, k, j, i), rzm1(m, k, j, i) &
+       ,sxm1(m, k, j, i), sym1(m, k, j, i), szm1(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13499+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printJacmi(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include rxm1
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13599+i,FILE='jacmi.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lx1*ly1*lz1
+          WRITE(UNIT=13599+i, FMT = *) j   & 
+       ,jacmi(j, i)
+         enddo
+         CLOSE(UNIT=13599+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printVxyzd(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'DEALIAS' !include vxd, vyd, vzd
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13699+i,FILE='vxyzd.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lzd
+         do k=1, lyd
+         do m=1, lxd
+          WRITE(UNIT=13699+i, FMT = *) m,k,j &
+       ,vxd(m, k, j, i), vyd(m, k, j, i), vzd(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=13699+i)
+      enddo
+      end
+
+!---------------------------------------------------------------------
+      subroutine printRx(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include rx
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+      do i = 1, nelt
+         write(x1, fmt) i
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13699+i,FILE='rx.id.'//trim(x1)//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do k=1, ldim*ldim
+         do j=1, lxd*lyd*lzd
+          WRITE(UNIT=13699+i, FMT = *) j,k &
+       ,rx(j, k, i)
+         enddo
+         enddo
+         CLOSE(UNIT=13699+i)
+      enddo
+      end
+!---------------------------------------------------------------------
+      subroutine printDgDgt(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'GEOM' !include rx
+      include 'TSTEP'
+
+      parameter (ldd=lxd*lyd*lzd)
+      parameter (ldg=lxd**3,lwkd=2*ldg)
+      common /ctmp1/ ur(ldd),us(ldd),ut(ldd),ju(ldd),ud(ldd),tu(ldd)
+      real ju
+      common /dgrad/ d(ldg),dt1(ldg),dg(ldg),dgt(ldg),jgl(ldg),jgt(ldg) &
+                   , wkd(lwkd)
+      real jgl,jgt
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=13699+i,FILE='dgdgt'//'.' &
+              //'step.'//trim(x2)//'.stage.'//trim(x3)//'.'// &
+             trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, ldg
+          WRITE(UNIT=13699+i, FMT = *) j &
+       ,dg(j), dgt(j)
+         enddo
+         CLOSE(UNIT=13699+i)
+       end
+
+
+!---------------------------------------------------------------------
+      subroutine printPr(atype)
+      include 'SIZE'
+      include 'INPUT'
+      include 'PARALLEL'
+      include 'CMTDATA'
+      include 'SOLN' !include pr
+      include 'TSTEP'
+
+      character (len=*), intent(in):: atype
+
+      integer i, geid, pn
+      character (len=8):: fmt !format descriptor
+      character(5) x1, x2, x3
+
+      fmt = '(I4.4)'
+
+      do i = 1, nelt
+         write(x1, fmt) i !geid
+         write(x2, fmt) istep
+         write(x3, fmt) stage
+         OPEN(UNIT=16199+i,FILE='pr.id.'//trim(x1)//'.'  & 
+             //'step.'//trim(x2)//'.stage.'//trim(x3)//'.' &
+             //trim(atype),FORM="FORMATTED", &
+             STATUS="REPLACE",ACTION="WRITE")
+         do j=1, lz2
+         do k=1, ly2
+         do m=1, lx2
+          WRITE(UNIT=16199+i, FMT = *) m,k,j &
+       ,pr(m, k, j, i)
+         enddo
+         enddo
+         enddo
+         CLOSE(UNIT=16199+i)
+      enddo
+      end

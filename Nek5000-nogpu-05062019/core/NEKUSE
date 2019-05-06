@@ -1,0 +1,21 @@
+!c
+!c     Nekuse
+!c
+      real x,y,z,r,theta,ux,uy,uz,un,u1,u2,trx,try,trz,trn,tr1,tr2,pa
+      real p0,ffx,ffy,ffz,temp,flux,hc,hrad,tinf,qvol,udiff,utrans
+      real si2,si3,sigma,turbk,turbe,ps(ldimt)
+      common /nekuse/ x  ,y  ,z  ,r  ,theta
+      common /nekuse/  ux ,uy ,uz
+      common /nekuse/  un ,u1 ,u2
+      common /nekuse/  trx,try,trz
+      common /nekuse/ trn,tr1,tr2,pa,p0
+      common /nekuse/ ffx,ffy,ffz
+      common /nekuse/  temp,flux,hc,hrad,tinf,qvol
+      common /nekuse/  udiff,utrans
+      common /nekuse/  si2,si3,sigma
+      common /nekuse/  turbk,turbe
+     common /nekuse/   ps
+
+      character*3     cbu
+      common /nekusc/ cbu
+

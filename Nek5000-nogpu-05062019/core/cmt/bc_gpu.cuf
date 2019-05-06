@@ -1,0 +1,97 @@
+      subroutine InviscidBC_gpu(wminus,wbc,nstate)
+
+!      include 'SIZE'
+!      include 'INPUT' ! do we need this?
+!      include 'GEOM' ! for unx
+!      include 'CMTDATA' ! do we need this without outflsub?
+!     include 'TSTEP' ! for ifield?
+!      include 'DG'
+
+      use glbvariable_gpu
+
+! ==============================================================================
+! Arguments
+! ==============================================================================
+      integer nstate,nflux
+      real wminus(lx1*lz1,2*ldim,nelt,nstate),&
+          wbc(lx1*lz1,2*ldim,nelt,nstate)
+
+! ==============================================================================
+! Locals
+! ==============================================================================
+
+      integer e,f,fdim,i,k,nxz,nface
+      parameter (lfd=lxd*lzd)
+
+
+      real nTol
+      character*132 deathmessage
+      common /nekcb/ cb
+      character*3 cb
+
+      nTol = 1.0E-14
+
+      fdim=ldim-1
+      nface = 2*ldim
+      nxz   = lx1*lz1
+      nxzd  = lxd*lzd
+      ifield= 1 ! You need to figure out the best way of dealing with
+                ! this variable
+
+      print *,"bc_gpu.cuf InviscidBC_gpu start", nid
+
+      do e=1,nelt
+      do f=1,nface
+
+         cb=cbc(f,e,ifield)
+         if (cb.ne.'E  '.and.cb.ne.'P  ') then ! cbc bndy
+
+!-----------------------------------------------------------------------
+! compute flux for weakly-enforced boundary condition
+!-----------------------------------------------------------------------
+
+            do j=1,nstate
+               do i=1,nxz
+                  if (abs(wbc(i,f,e,j)) .gt. ntol) then
+                  write(6,*) nid,j,i,wbc(i,f,e,j),wminus(i,f,e,j),cb,&
+      nstate
+                  write(deathmessage,*)  'GS hit a bndy,f,e=',f,e,'$'
+! Make sure you are not abusing this error handler
+                  call exitti(deathmessage,f)
+                  endif
+               enddo
+            enddo
+        endif
+      enddo
+      enddo
+
+      print *,"bc_gpu.cuf InviscidBC_gpu before inviscidbc_gpu_wrapper", nid
+
+      call inviscidbc_gpu_wrapper(glbblockSize2,d_lglel,d_fatface,d_cbc,d_xm1,d_ym1,d_zm1,&
+       d_vx,d_vy,d_vz,d_t,d_pr,d_sii,d_siii,d_vdiff,d_vtrans,d_cb,d_u,d_phig,d_pres,&
+       d_csound,d_unx,d_uny,d_unz,molarmass,iwm,iwp,irho,iux,iuy,iuz,iph,ipr,isnd,ithm,&
+       icpf,icvf,iu1,iu2,iu3,iu4,iu5,lx1,lz1,toteq,ldim,nelt,lelt,p0th,ifield,icv,icp,&
+       imu,ilam,molmass,npscal,if3dgpu,outflsub,pinfty,ly1)
+
+      print *,"bc_gpu.cuf InviscidBC_gpu end", nid
+
+! JH060215 added SYM bc. Just use it as a slip wall hopefully.
+! JH021717 OK I just realized that this way doubles my userbc calls.
+!          not sure if face loop and if-block for cb is a better way
+!          to do it or not.
+!            if (cb.eq.'v  ' .or. cb .eq. 'V  ') then
+!              call inflow(nstate,f,e,wminus,wbc)
+!            elseif (cb.eq.'O  ') then
+!              call outflow(nstate,f,e,wminus,wbc)
+!            elseif (cb .eq. 'W  ' .or. cb .eq.'I  '.or.cb .eq.'SYM')then
+!              call wallbc_inviscid(nstate,f,e,wminus,wbc)
+!            endif 
+!
+!         endif
+!      enddo
+!      enddo
+
+      return
+      end
+
+!-----------------------------------------------------------------------

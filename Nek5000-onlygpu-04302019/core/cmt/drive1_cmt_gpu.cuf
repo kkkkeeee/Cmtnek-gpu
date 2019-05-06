@@ -1,0 +1,114 @@
+!C> @file drive1_cmt.f high-level driver for CMT-nek
+!C> \defgroup convhvol Volume integral for inviscid fluxes
+!C> \defgroup bcond Surface integrals due to boundary conditions
+!C> \defgroup diffhvol Volume integral for viscous fluxes
+!C> \defgroup vfjac Jacobians for viscous fluxes
+!C> \defgroup isurf Inviscid surface terms
+!C> \defgroup vsurf Viscous surface terms
+!C> \defgroup faceops utility functions for manipulating face data
+!C> Branch from subroutine nek_advance in core/drive1.f
+!C> Advance CMT-nek one time step within nek5000 time loop
+      subroutine cmt_nek_advance_gpu(d_xdrange,d_xerange,d_rpart,d_ipart)
+!     Solve the Euler equations
+
+      include 'SIZE'
+      include 'INPUT'
+      include 'MASS'
+      include 'TSTEP'
+      include 'SOLN'
+      include 'GEOM'
+      include 'CTIMER'
+      include 'CMTDATA'
+      include 'CMTTIMERS'
+      
+      integer e,eq,isGPU
+      character*32 dumchars
+
+      
+      real, device :: d_xdrange(2,3)
+      real, device :: d_xerange(2,3,lelt)
+      real, device :: d_rpart(lr,lpart)
+      integer, device :: d_ipart(li,lpart)
+      
+      ftime_dum = dnekclock()
+      nxyz1=lx1*ly1*lz1
+      n = nxyz1*lelt*toteq
+      nfldpart = ldim*npart
+      print *,"drive1_cmt.f,cmt_nek_advance,starting...",nid
+      if(istep.eq.1) then
+         call cmt_ics
+         if (ifrestart) then
+            time_cmt=time
+         else
+            time_cmt=0.0 !time !0.0 ! until we can get settime to behave
+         endif
+         call cmt_flow_ics
+         call init_cmt_timers
+         call userchk ! need more ifdefs
+         call compute_mesh_h(meshh,xm1,ym1,zm1)
+         call compute_grid_h(gridh,xm1,ym1,zm1)
+         call compute_primitive_vars ! get good mu
+         call entropy_viscosity      ! for high diffno
+         call compute_transport_props! at t=0
+
+         call usr_particles_init_gpu(d_xdrange,d_xerange,d_rpart,d_ipart)
+      endif
+
+      nstage = 3
+      do stage=1,nstage
+         if (stage.eq.1) call copy(res3(1,1,1,1,1),U(1,1,1,1,1),n)
+
+         rhst_dum = dnekclock()
+         call compute_rhs_and_dt
+         rhst = rhst + dnekclock() - rhst_dum
+!c particle equations of motion are solved (also includes forcing)
+!c In future this subroutine may compute the back effect of particles
+!c on the fluid and suitably modify the residue computed by 
+!c compute_rhs_dt for the 5 conserved variables
+         call usr_particles_solver
+
+! JH111815 soon....
+! JH082316 someday...maybe?
+!        do eq=1,toteq
+!           call fbinvert(res1(1,1,1,1,eq))
+!        enddo
+
+         do e=1,nelt
+            do eq=1,toteq
+            do i=1,nxyz1
+!c multiply u with bm1 as res has been multiplied by bm1 in compute_rhs
+               u(i,1,1,eq,e) = bm1(i,1,1,e)*tcoef(1,stage) &
+                          *res3(i,1,1,eq,e)+bm1(i,1,1,e)* &
+                          tcoef(2,stage)*u(i,1,1,eq,e)- &
+                          tcoef(3,stage)*res1(i,1,1,e,eq)
+!c              u(i,1,1,eq,e) = bm1(i,1,1,e)*u(i,1,1,eq,e) - DT *
+!c    >                        (c1*res1(i,1,1,e,eq) + c2*res2(i,1,1,e,eq)
+!c    >                       + c3*res3(i,1,1,e,eq))
+!c-----------------------------------------------------------------------
+! JH111815 in fact, I'd like to redo the time marching stuff above and
+!          have an fbinvert call for res1
+               u(i,1,1,eq,e) = u(i,1,1,eq,e)/bm1(i,1,1,e)
+!c-----------------------------------------------------------------------
+            enddo
+            enddo
+         enddo
+      enddo
+
+      call compute_primitive_vars ! for next time step? Not sure anymore
+      call copy(t(1,1,1,1,2),vtrans(1,1,1,1,irho),nxyz1*nelt)
+      ftime = ftime + dnekclock() - ftime_dum
+
+      if (mod(istep,iostep).eq.0.or.istep.eq.1)then
+         call out_fld_nek
+         call mass_balance(if3d)
+!c dump out particle information. 
+         call usr_particles_io(istep)
+      end if
+
+!     call print_cmt_timers ! NOT NOW
+
+ 101  format(4(2x,e18.9))
+      return
+      end
+
+!c-----------------------------------------------------------------------

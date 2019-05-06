@@ -1,0 +1,126 @@
+!C> @file driver3_cmt.f routines for primitive variables, usr-file interfaces
+!C> and properties
+
+!C> Compute primitive variables (velocity, thermodynamic state) from 
+!C> conserved unknowns U
+      subroutine compute_primitive_vars_gpu
+      use glbvariable_gpu
+#ifdef MTIME
+      include 'mpif.h'
+#endif
+
+      parameter (lxyz=lx1*ly1*lz1)
+      common /ctmp1/ energy(lx1,ly1,lz1),scr(lx1,ly1,lz1)
+      integer e, eq
+
+      nxyz= lx1*ly1*lz1
+      ntot=nxyz*nelt
+      ltot = nxyz*lelt
+!     need to copy device variables  by adeesha
+
+      !following code is for testing only. delete later.
+!      call copytocpu_gpu()
+!      tocpucopy_gas(2)=1
+!      call printUarray("before1")
+
+
+#ifdef MTIME
+      start = mpi_wtime()
+#endif
+      call compute_primitive_vars_gpu_wrapper(glbblockSize1,d_vx, d_vy, d_vz, d_u,nxyz, &
+      ntot,nelt,irpu,irpv,irpw,iret,irg,toteq,if3dgpu, d_vtrans, irho, d_phig, &
+      lx1,ly1, lz1, d_lglel,d_xm1, d_ym1, d_zm1,d_t,ldimt,npscal, d_pr, p0th, &
+      d_sii, d_siii, d_vdiff, ifield,d_cb, icv, icp, d_csound, imu, iknd, ilam, &
+      cpgref,cvgref,gmaref, rgasref,ltot) !added parameter iknd by Kk 04/26
+!     above wrapper  includes up to enddo for e
+#ifdef MTIME
+      end = mpi_wtime()
+      write(6,*) "Compute_primitive_vars_gpu_wrapper time", end - start
+      start = mpi_wtime()
+#endif
+
+! setup_convect has the desired effect
+! if IFPART=F
+! if IFCHAR=F
+! if IFCONS=T
+! if igeom .ne. 1
+! if param(99) .ge. 0
+!-----------------------------------------------------------------------
+!     call setup_convect(0)
+!-----------------------------------------------------------------------
+! to make life easier until we master this stuff and harmonize even better with nek,
+! I'm including 'DEALIAS' and calling set_convect_cons here
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!#ifdef DEBUG
+!testing only. delete later
+!      tocpucopy_gas(58)=1
+!      call copytocpu_gpu()
+!      call printCsound("before")
+!#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+!  need to paralleliz but set_convect_cons is not  easy. for now copy vx,vy,,vz back to cpu. talk with Dr.Tania. adeesha.
+
+      if (lxd.gt.lx1) then
+
+         if(istep .le. 2) then !when istep<=2, may need to call set_dealias_rx in set_convect_cons
+            !copy arrays to cpu
+            tocpucopy_gas(10)=1
+            tocpucopy_gas(11)=1
+            tocpucopy_gas(12)=1
+            call copytocpu_gpu()
+
+            call set_convect_cons (vxd,vyd,vzd,vx,vy,vz)
+         
+            ! remove  when above  function is done in gpu
+            togpucopy_gas(13)=1
+            togpucopy_gas(14)=1
+            togpucopy_gas(15)=1
+            call copytogpu_gpu()
+         else
+           call set_convect_cons_gpu_wrapper(d_vxd, d_vyd, d_vzd, d_vx, d_vy, d_vz, lx1, lxd, d_jgl, d_jgt, if3dgpu, ldim, nelt) 
+
+         endif
+
+      else
+         call double_copy_gpu_wrapper(glbblockSize2,d_vxd,0,d_vx,0,ntot)
+         call double_copy_gpu_wrapper(glbblockSize2,d_vyd,0,d_vy,0,ntot)
+         call double_copy_gpu_wrapper(glbblockSize2,d_vzd,0,d_vz,0,ntot)
+      endif
+#ifdef MTIME
+      end = mpi_wtime()
+      write(6,*) "set_convect_cons_gpu_wrapper time", end - start
+#endif
+
+      return
+      end
+!-----------------------------------------------------------------------
+
+      subroutine copy_t_vtrans_gpu
+      use glbvariable_gpu
+
+      parameter (lxyz=lx1*ly1*lz1)
+      common /ctmp1/ energy(lx1,ly1,lz1),scr(lx1,ly1,lz1)
+      integer e, eq
+
+      nxyz= lx1*ly1*lz1
+      ntot=nxyz*nelt
+      ltot = nxyz*lelt
+      call double_copy_gpu_wrapper(glbblockSize2,d_t,ltot,d_vtrans,(irho-1)*ltot,ntot)
+
+      !added by Kk 03/21
+      !copy u & tlag back to cpu for later out_fld_nek & prepost (ifoutfld,'his') output 
+      tocpucopy_gas(2)=1 !u
+      tocpucopy_gas(44)=1 !tlag
+      tocpucopy_gas(10)=1 !vx
+      tocpucopy_gas(11)=1 !vy
+      tocpucopy_gas(12)=1 !vz
+      tocpucopy_gas(45)=1 !pr
+      tocpucopy_gas(53)=1 !t
+      call copytocpu_gpu()
+      return
+      end
+

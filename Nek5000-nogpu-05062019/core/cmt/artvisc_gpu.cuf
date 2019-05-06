@@ -1,0 +1,283 @@
+       subroutine compute_entropy_gpu
+
+       use cudafor
+       use glbvariable_gpu
+
+
+      real ntol
+      integer e
+      icalld =0
+
+      t_n_a=lx1*ly1*lz1
+      ntot=t_n_a*nelt
+      ntol=1.0e-10
+      ltot = t_n_a*lelt
+
+      print *,"artvisc_gpu.cuf compute_entropy_gpu start", nid
+
+      if (icalld .eq. 0) then
+         icalld=1
+!uncomment later
+         call rzero_gpu_wrapper(glbblockSize2,d_tlag,0,ntot)
+         call rzero_gpu_wrapper(glbblockSize2,d_tlag,lx1*ly1*lz1*lelt*(lorder-1),ntot)
+         call rzero_gpu_wrapper(glbblockSize2,d_tlag,lx1*ly1*lz1*lelt,ntot)
+      endif
+
+      rgam=rgasref/(gmaref-1.0)
+
+      print *,"artvisc_gpu.cuf compute_entropy_gpu before compute_entropy_gpu_wrapper", nid,glbblockSize1,ntot,irho,ntol,rgam,gmaref,ltot
+
+      call compute_entropy_gpu_wrapper(glbblockSize1,d_tlag,d_pr,d_vtrans,ntot,irho,ntol,rgam,gmaref,ltot )
+
+      print *,"artvisc_gpu.cuf compute_entropy_gpu after compute_entropy_gpu_wrapper", nid
+
+
+!following is in the wrapper
+!      do i=1,ntot
+!         rho=max(vtrans(i,1,1,1,irho),ntol)
+!         tlag(i,1,1)=rgam*rho*log(pr(i,1,1,1)/(rho**gmaref))
+!      enddo
+
+      if (stage .eq. 1) then
+       call  double_copy_gpu_wrapper(glbblockSize2,d_tlag,lx1*ly1*lz1*lelt*(lorder-1),d_tlag,lx1*ly1*lz1*lelt,ntot)
+       call  double_copy_gpu_wrapper(glbblockSize2,d_tlag,lx1*ly1*lz1*lelt,d_tlag,0,ntot)
+      endif
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine entropy_viscosity_gpu
+      use cudafor
+      use glbvariable_gpu
+      parameter (lxyz=lx1*ly1*lz1)
+      common /scrns/ scrent(lxyz,lelt)
+      integer e
+      character*132 deathmessage
+
+      pi=4.0*atan(1.0)
+
+      n=lx1*ly1*lz1
+      ntot=n*nelt
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu start", nid
+
+
+
+! entropy at this and lorder prior steps
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before compute_entropy_gpu", nid
+
+      call compute_entropy_gpu
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after compute_entropy_gpu", nid
+
+! compute maxval(|S-<S>|)
+      savg  = glsc2(tlag,bm1,ntot)
+!      savg    = -savg/volvm1
+!      call gpu_cadd2_wrapper(d_scrent,0,d_tlag,0,savg,ntot) 
+      ! but then need to copy tlag back to the cpu.  talk with Dr.Tania. adeesha.
+!      call cadd2(scrent,tlag,savg,ntot)
+      maxdiff =     glamax(scrent,ntot)
+!      if (maxdiff.le.0.0) then
+!         write(deathmessage,*) 'zero maxdiff usually means NAN$'
+!         call exittr(deathmessage,maxdiff,istep)
+!     else
+!        if (nio .eq. 0) write (6,*) 'max(s-<s>)=',maxdiff, meshh(1)
+!      endif
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before entropy_residual_gpu", nid
+     
+      call entropy_residual_gpu ! fill res2
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after entropy_residual_gpu", nid
+      
+      call double_copy_gpu_wrapper(glbblockSize2,d_res2,lx1*ly1*lz1*lelt,d_res2,0,ntot)
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before wavevisc_gpu", nid
+
+      call wavevisc_gpu
+ 
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after wavevisc _gpu", nid
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before resvisc_gpu", nid
+
+      call resvisc_gpu ! overwrite res2
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after resvisc_gpu", nid
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before evmsmooth_gpu", nid
+
+      call evmsmooth_gpu(res2,t(1,1,1,1,3),.true.) ! endpoints=.false.
+                                               ! is intended to
+                                               ! preserve face states,
+                                               ! but this is easier to
+                                               ! test 1D
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after evmsmooth_gpu", nid
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu before dsavg", nid
+!     copy res2 back to cpu to do dsavg
+      call dsavg(res2) ! you DEFINITELY don't want a min here
+
+      print *,"artvisc_gpu.cuf entropy_viscosity_gpu after dsavg", nid
+
+
+      return
+      end
+
+!c-----------------------------------------------------------------------
+
+      subroutine entropy_residual_gpu
+      use glbvariable_gpu
+      integer e
+      real dsdtcoef(3) ! put this in /TIMESTEPCOEF/ someday
+      data dsdtcoef /1.0,1.0,0.5/
+      real s(lx1*ly1*lz1*lelt,lorder-1,ldimt) ! because it's really tlag
+
+      t_n_a=lx1*ly1*lz1
+      ntot=t_n_a*nelt
+      ltot = t_n_a * lelt
+      if (istep .eq. 1) return
+      rdt=1.0/(dsdtcoef(stage)*DT_cmt)
+
+      call entropy_residual_gpu_wrapper(glbblockSize1,d_tlag,d_res2,ntot,rdt,stage,lorder,ltot,lxd,lyd,lzd,d_vx, d_vy, d_vz, lx1,ly1, lz1, d_jacmi, d_rxm1, d_sxm1, d_txm1,d_rym1, d_sym1, d_tym1,d_rzm1,d_szm1, d_tzm1,if3dgpu,nelt,d_dxm1, d_dxtm1 )
+
+      return
+      end
+
+!c-----------------------------------------------------------------------
+
+      subroutine resvisc_gpu
+       use  glbvariable_gpu
+      
+      integer lfq,heresize,hdsize
+      parameter (lxyz=lx1*ly1*lz1)
+      real residual(lxyz,nelt)
+      integer e,f
+
+      nxyz =lx1*ly1*lz1
+      nxz  =lx1*lz1
+      nface=2*ldim
+      nxzf =nxz*nface
+      nfq  =nxzf*nelt
+
+
+      call resvisc_gpu_wrapper1(glbblockSize1,d_res2,nelt,lelt,lx1,ly1,lz1,d_meshh)
+
+!   need to end here because of dsavg using gs_op
+!   copy d_res2 back to cpu
+
+      print *,"artvisc_gpu.cuf resvisc_gpu before dsavg", nid
+
+      call dsavg(res2) ! signed, can cancel at faces. Hope it does
+      
+      print *,"artvisc_gpu.cuf resvisc_gpu after dsavg", nid
+
+!copy d_res2 back to gpu
+
+      call resvisc_gpu_wrapper2(glbblockSize1,d_res2,nelt,lelt,lx1,ly1,lz1,c_sub_e,maxdiff)
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine evmsmooth_gpu(resvisc,wavevisc,endpoints)
+!      include 'SIZE'
+!      include 'INPUT'
+      use glbvariable_gpu
+
+      real resvisc(lx1,ly1,lz1,nelt),wavevisc(lx1,ly1,lz1,nelt)
+      real rtmp
+      common /ctmp1/ rtmp(lx1,ly1,lz1)
+! are faces included in smoothing? if not (say they're fixed by dsavg) then
+! endpoints should be .false.
+      logical endpoints
+      integer e
+! clip residual viscosity and smooth it.
+! actually just smooth first and then clip it. Just average-with-my-neighbors for now
+! weight the neighbors according to GLL-spacing instead of uniform-grid
+! at a later date.
+
+      nxyz=lx1*ly1*lz1
+      kstart=1
+      kend=lz1
+      rldim=1.0/ldim
+
+      if (endpoints) then
+         istart=1
+         jstart=1
+         iend=lx1
+         jend=ly1
+      else
+         istart=2
+         jstart=2
+         iend=lx1-1
+         jend=ly1-1
+         if (if3d) then
+            kstart=2
+            kend=lz1-1
+         endif
+      endif
+
+      print *,"artvisc_gpu.cuf evnsmooth_gpu before evnsmooth_gpu_wrapper", nid,nelt,lelt,lx1,ly1,lz1,kstart,kend,jstart,jend,istart,iend,ldim
+
+      call evnsmooth_gpu_wrapper(glbblockSize1,d_res2,d_t,nelt,lelt,lx1,ly1,lz1,kstart,kend,jstart,jend,istart,iend,ldim ,rldim,if3dgpu)
+
+      print *,"artvisc_gpu.cuf evnsmooth_gpu after evnsmooth_gpu_wrapper", nid
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine wavevisc_gpu
+      use glbvariable_gpu
+      parameter (lxyz=lx1*ly1*lz1)
+      common /scrns/ wavespeed(lxyz)
+      real wavespeed
+      real maxeig
+      real numax(lxyz,nelt)
+      integer e
+
+      nxyz=lx1*ly1*lz1
+      ntot = nxyz * nelt
+      call wavevisc_gpu_wrapper(glbblockSize1,d_t, d_csound, d_vx, d_vy, &
+      d_vz, nelt,lelt, lx1,ly1,lz1,d_vtrans,c_max, d_meshh, irho)
+
+
+      call max_to_trilin_gpu(numax)
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine max_to_trilin_gpu
+! stupid subroutine to take a stupid uniform field and compute a trilinear
+! tent between maximum shared values at the vertices.
+!      include 'SIZE'
+!      include 'TOTAL'
+      use glbvariable_gpu
+      integer e
+
+      character*32 fname ! diagnostic
+
+      nxyz=lx1*ly1*lz1
+
+! get maxima on faces
+! need to transfer field ( t) back to cpu  . adeesha
+    
+      print *,"artvisc_gpu.cuf max_to_trilin_gpu before dsop", nid
+      call dsop(t(1,1,1,1,3),'MAX',lx1,ly1,lz1)
+
+      print *,"artvisc_gpu.cuf max_to_trilin_gpu after dsop", nid
+
+! need to transfer field (t) to gpu . adeesha
+
+      call max_to_trilin_gpu_wrapper(glbblockSize1,d_t,nelt,lelt, lx1,ly1,lz1,d_xm1,d_ym1,d_zm1, if3dgpu) 
+
+
+      return
+      end

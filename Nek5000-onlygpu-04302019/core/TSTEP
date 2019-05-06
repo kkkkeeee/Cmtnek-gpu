@@ -1,0 +1,50 @@
+! 
+!     Variables related to time integration
+!
+      real time,timef,fintim,timeio
+      real dt,dtlag(10),dtinit,dtinvm,courno,ctarg
+      real ab(10),bd(10),abmsh(10)
+      real avdiff(ldimt1),avtran(ldimt1),volfld(0:ldimt1)
+      real tolrel,tolabs,tolhdf,tolpdf,tolev,tolnl,prelax
+      real tolps,tolhs,tolhr,tolhv,tolht(ldimt1),tolhe
+      real vnrmh1,vnrmsm,vnrml2,vnrml8,vmean
+      real tnrmh1(ldimt),tnrmsm(ldimt),tnrml2(ldimt)
+      real tnrml8(ldimt),tmean(ldimt)
+      common /tstep1/ time,timef,fintim,timeio
+      common /tstep1/ dt,dtlag,dtinit,dtinvm,courno,ctarg
+      common /tstep1/ ab,bd,abmsh
+      common /tstep1/ avdiff,avtran,volfld
+      common /tstep1/ tolrel,tolabs,tolhdf,tolpdf,tolev,tolnl,prelax
+      common /tstep1/ tolps,tolhs,tolhr,tolhv,tolht,tolhe
+      common /tstep1/ vnrmh1,vnrmsm,vnrml2,vnrml8,vmean
+      common /tstep1/ tnrmh1,tnrmsm,tnrml2
+      common /tstep1/ tnrml8,tmean
+
+      integer ifield,imesh,istep,nsteps,iostep,lastep,iocomm
+      integer instep
+      integer nab,nabmsh,nbd,nbdinp,ntaubd 
+      integer nmxh,nmxp,nmxe,nmxnl,ninter
+      integer nelfld(0:ldimt1)
+      integer nconv,nconv_max
+      integer ioinfodmp
+      common /istep2/ ifield,imesh,istep,nsteps,iostep,lastep,iocomm
+      common /istep2/ instep
+      common /istep2/ nab,nabmsh,nbd,nbdinp,ntaubd 
+      common /istep2/ nmxh,nmxp,nmxe,nmxnl,ninter
+      common /istep2/ nelfld
+      common /istep2/ nconv,nconv_max
+      common /istep2/ ioinfodmp
+
+      real pi,betag,gtheta
+      common /tstep3/ pi,betag,gtheta
+      
+      logical ifprnt,if_full_pres,ifoutfld
+      common /tstep4/ ifprnt,if_full_pres,ifoutfld
+      
+      COMMON /TTIME/ TTIME_STP, INIT_TIME!, lb_time, reinit_step !added by keke to determine when to load balance
+      real TTIME_STP, INIT_TIME!, lb_time
+      !integer reinit_step
+
+
+      real lyap(3,lpert)
+      common /tstep5/ lyap  !  lyapunov simulation history

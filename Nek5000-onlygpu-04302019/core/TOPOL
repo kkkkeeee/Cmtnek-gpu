@@ -1,0 +1,24 @@
+!c
+!c     Arrays for direct stiffness summation
+!c
+      integer nomlis(2,3),nmlinv(6),group(6),skpdat(6,6),eface(6)
+      integer eface1(6)
+      common /cfaces/ nomlis,nmlinv,group,skpdat,eface,eface1
+
+      integer eskip(-12:12,3),nedg(3),ncmp
+      integer ixcn(8),noffst(3,0:ldimt1)
+      integer maxmlt,nspmax(0:ldimt1)
+      integer ngspcn(0:ldimt1),ngsped(3,0:ldimt1)
+      integer numscn(lelt,0:ldimt1),numsed(lelt,0:ldimt1)
+      integer gcnnum( 8,lelt,0:ldimt1),lcnnum( 8,lelt,0:ldimt1)
+      integer gednum(12,lelt,0:ldimt1),lednum(12,lelt,0:ldimt1)
+      integer gedtyp(12,lelt,0:ldimt1)
+      integer ngcomm(2,0:ldimt1)
+      common /cedges/ eskip,nedg,ncmp,ixcn,noffst,maxmlt,nspmax
+      common /cedges/ ngspcn,ngsped,numscn,numsed,gcnnum,lcnnum
+      common /cedges/ gednum,lednum,gedtyp,ngcomm
+
+      integer iedge(20),iedgef(2,4,6,0:1)
+      integer icedg(3,16),iedgfc(4,6),icface(4,10)
+      integer indx(8),invedg(27)
+      common /edges/ iedge,iedgef,icedg,iedgfc,icface,indx,invedg

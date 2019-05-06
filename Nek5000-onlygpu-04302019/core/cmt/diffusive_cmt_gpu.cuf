@@ -1,0 +1,402 @@
+
+!-----------------------------------------------------------------------
+
+      subroutine half_iku_cmt_gpu(res,diffh,e)
+      include 'SIZE'
+      include 'MASS'
+! diffh has D AgradU. half_iku_cmt applies D^T BM1 to it and increments
+! the residual res with the result
+      integer e ! lopsided. routine for one element must reference bm1
+      real res(lx1,ly1,lz1),diffh(lx1*ly1*lz1,ldim)
+
+      n=lx1*ly1*lz1
+
+      do j=1,ldim
+         call col2(diffh(1,j),bm1(1,1,1,e),n)
+!        call col2(diffh(1,j),phig(1,1,1,e),n) ! still no idea where phi goes
+      enddo
+
+!     const=-1.0 ! I0
+      const=1.0  ! *-1 in time march
+      call gradm11_t(res,diffh,const,e)
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+
+      subroutine compute_transport_props_gpu
+      use glbvariable_gpu
+      include 'NEKUSE'
+
+      integer   e
+      nxyz= lx1*ly1*lz1
+      ltot = nxyz*lelt
+
+
+
+
+      call compute_transport_props_gpu_wrapper(glbblockSize1,d_vx, d_vy, d_vz, d_u, &
+      nelt,irpu,irpv,irpw,iret,irg,toteq,if3dgpu, d_vtrans, irho, d_phig, &
+      lx1,ly1, lz1, d_lglel,d_xm1, d_ym1, d_zm1,d_t,ldimt,npscal, d_pr, p0th, &
+      d_sii, d_siii, d_vdiff, ifield,d_cb, icv, icp, d_csound, imu,ilam, &
+      cpgref,cvgref,gmaref, rgasref,d_gllel,d_res2,iknd,inus,lelt)
+
+
+       !following code is for testing only. delete later.
+!      tocpucopy_gas(20)=1
+!      tocpucopy_gas(46)=1
+!      call copytocpu_gpu()
+!      call printVtrans("before")
+!      call printRes2("before")
+
+
+      return
+      end
+
+!-----------------------------------------------------------------------
+! TRIAGE BELOW UNTIL I CAN FIX AGRADU_NS
+!-----------------------------------------------------------------------
+      subroutine a51kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU2x=dU(i,2,1)
+         dU3x=dU(i,3,1)
+         dU4x=dU(i,4,1)
+         dU5x=dU(i,5,1)
+         dU1y=dU(i,1,2)
+         dU2y=dU(i,2,2)
+         dU3y=dU(i,3,2)
+         dU4y=dU(i,4,2)
+         dU5y=dU(i,5,2)
+         dU1z=dU(i,1,3)
+         dU2z=dU(i,2,3)
+         dU3z=dU(i,3,3)
+         dU4z=dU(i,4,3)
+         dU5z=dU(i,5,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         cv    =vtrans(i,1,1,ie,icv)/rho
+         lambda=vdiff(i,1,1,ie,ilam)
+         mu    =vdiff(i,1,1,ie,imu)
+         K     =vdiff(i,1,1,ie,iknd)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         E     =U(i,1,1,toteq,ie)/rho
+         lambdamu=lambda+mu
+         kmcvmu=K-cv*mu
+         flux(i)= &
+      (K*dU5x+cv*lambda*u1*dU4z-kmcvmu*u3*dU4x+cv*lambda*u1*dU3y &
+        -kmcvmu*u2*dU3x+cv*mu*u3*dU2z+cv*mu*u2*dU2y+(cv*lambda- &
+        K+2*cv*mu)*u1*dU2x-cv*lambdamu*u1*u3*dU1z-cv*lambdamu &
+        *u1*u2*dU1y+(K*u3**2-cv*mu*u3**2+K*u2**2-cv*mu*u2**2-cv*la&
+        mbda*u1**2+K*u1**2-2*cv*mu*u1**2-E*K)*dU1x)/(cv*rho)
+      enddo
+      return
+      end
+
+      subroutine a52kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU2x=dU(i,2,1)
+         dU3x=dU(i,3,1)
+         dU4x=dU(i,4,1)
+         dU5x=dU(i,5,1)
+         dU1y=dU(i,1,2)
+         dU2y=dU(i,2,2)
+         dU3y=dU(i,3,2)
+         dU4y=dU(i,4,2)
+         dU5y=dU(i,5,2)
+         dU1z=dU(i,1,3)
+         dU2z=dU(i,2,3)
+         dU3z=dU(i,3,3)
+         dU4z=dU(i,4,3)
+         dU5z=dU(i,5,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         cv    =vtrans(i,1,1,ie,icv)/rho
+         lambda=vdiff(i,1,1,ie,ilam)
+         mu    =vdiff(i,1,1,ie,imu)
+         K     =vdiff(i,1,1,ie,iknd)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         E     =U(i,1,1,toteq,ie)/rho
+         lambdamu=lambda+mu
+         kmcvmu=K-cv*mu
+         flux(i)=&
+     (K*dU5y+cv*lambda*u2*dU4z-kmcvmu*u3*dU4y+cv*mu*u3*dU3z+(cv &
+        *lambda-K+2*cv*mu)*u2*dU3y+cv*mu*u1*dU3x-kmcvmu*u1*dU2y+ &
+        cv*lambda*u2*dU2x-cv*lambdamu*u2*u3*dU1z+(K*u3**2-cv*mu &
+        *u3**2-cv*lambda*u2**2+K*u2**2-2*cv*mu*u2**2+K*u1**2-cv*mu*&
+        u1**2-E*K)*dU1y-cv*lambdamu*u1*u2*dU1x)/(cv*rho)
+      enddo
+      return
+      end
+      subroutine a53kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU2x=dU(i,2,1)
+         dU3x=dU(i,3,1)
+         dU4x=dU(i,4,1)
+         dU5x=dU(i,5,1)
+         dU1y=dU(i,1,2)
+         dU2y=dU(i,2,2)
+         dU3y=dU(i,3,2)
+         dU4y=dU(i,4,2)
+         dU5y=dU(i,5,2)
+         dU1z=dU(i,1,3)
+         dU2z=dU(i,2,3)
+         dU3z=dU(i,3,3)
+         dU4z=dU(i,4,3)
+         dU5z=dU(i,5,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         cv    =vtrans(i,1,1,ie,icv)/rho
+         lambda=vdiff(i,1,1,ie,ilam)
+         mu    =vdiff(i,1,1,ie,imu)
+         K     =vdiff(i,1,1,ie,iknd)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         E     =U(i,1,1,toteq,ie)/rho
+         lambdamu=lambda+mu
+         kmcvmu=K-cv*mu
+         flux(i)= &
+      (K*(dU5z-E*dU1z)+cv*u3*(lambda*dU4z+2*mu*dU4z+lambda*dU3y+lambda &
+        *dU2x)-K*u3*dU4z+cv*mu*u2*(dU4y+dU3z)+cv*mu*u1*(dU4x+dU2z)- &
+        K*u2*dU3z-K*u1*dU2z-cv*(lambda+2*mu)*u3**2*dU1z+K*u3**2*dU1z+ &
+        K*u2**2*dU1z-cv*mu*u2**2*dU1z+K*u1**2*dU1z-cv*mu*u1**2*dU1z-c& 
+        v*(lambda+mu)*u2*u3*dU1y-cv*(lambda+mu)*u1*u3*dU1x)/(cv*rho)
+      enddo
+      return
+      end
+
+      subroutine A21kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU2x=dU(i,2,1)
+         dU1y=dU(i,1,2)
+         dU3y=dU(i,3,2)
+         dU1z=dU(i,1,3)
+         dU4z=dU(i,4,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         lambda=vdiff(i,1,1,ie,ilam)
+         mu    =vdiff(i,1,1,ie,imu)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         lambdamu=lambda+2.0*mu
+         flux(i)= &
+     (lambda*(dU4z+dU3y-u3*dU1z-u2*dU1y)+lambdamu*(dU2x-u1*dU1x))/rho
+      enddo
+      return
+      end
+      subroutine A22kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU3x=dU(i,3,1)
+         dU1y=dU(i,1,2)
+         dU2y=dU(i,2,2)
+         rho   =vtrans(i,1,1,ie,irho)
+         mu    =vdiff(i,1,1,ie,imu)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         flux(i)=mu*(dU3x+dU2y-u1*dU1y-u2*dU1x)/rho
+      enddo
+      return
+      end
+      subroutine A23kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU4x=dU(i,4,1)
+         dU1z=dU(i,1,3)
+         dU2z=dU(i,2,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         mu    =vdiff(i,1,1,ie,imu)
+         u1    =vx(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         flux(i)=mu*(dU4x+dU2z-u1*dU1z-u3*dU1x)/rho
+      enddo
+      return
+      end
+
+      subroutine A31kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU3x=dU(i,3,1)
+         dU1y=dU(i,1,2)
+         dU2y=dU(i,2,2)
+         rho   =vtrans(i,1,1,ie,irho)
+         mu    =vdiff(i,1,1,ie,imu)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         flux(i)=mu*(dU3x+dU2y-u1*dU1y-u2*dU1x)/rho
+      enddo
+      return
+      end
+      subroutine A32kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU2x=dU(i,2,1)
+         dU1y=dU(i,1,2)
+         dU3y=dU(i,3,2)
+         dU1z=dU(i,1,3)
+         dU4z=dU(i,4,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         lambda=vdiff(i,1,1,ie,ilam)
+         mu    =vdiff(i,1,1,ie,imu)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         lambdamu=lambda+2.0*mu
+         flux(i)=(lambda*(dU4z+dU2x-u3*dU1z-u1*dU1x)+&
+        lambdamu*(dU3y-u2*dU1y))/rho
+      enddo
+      return
+      end
+      subroutine A33kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1y=dU(i,1,2)
+         dU4y=dU(i,4,2)
+         dU1z=dU(i,1,3)
+         dU3z=dU(i,3,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         mu    =vdiff(i,1,1,ie,imu)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         flux(i)=mu*(dU4y+dU3z-u2*dU1z-u3*dU1y)/rho
+      enddo
+      return
+      end
+
+      subroutine A41kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU4x=dU(i,4,1)
+         dU1z=dU(i,1,3)
+         dU2z=dU(i,2,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         mu    =vdiff(i,1,1,ie,imu)
+         u1    =vx(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         flux(i)=mu*(dU4x+dU2z-u1*dU1z-u3*dU1x)/rho
+      enddo
+      return
+      end
+      subroutine A42kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1y=dU(i,1,2)
+         dU4y=dU(i,4,2)
+         dU1z=dU(i,1,3)
+         dU3z=dU(i,3,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         mu    =vdiff(i,1,1,ie,imu)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         flux(i)=mu*(dU4y+dU3z-u2*dU1z-u3*dU1y)/rho
+      enddo
+      return
+      end
+      subroutine A43kldUldxk_gpu(flux,dU,ie)
+      include 'SIZE'
+      include 'SOLN'
+      include 'CMTDATA' ! gradu lurks
+      real K,E,kmcvmu,lambdamu
+      real dU(lx1*ly1*lz1,toteq,3)
+      real flux(lx1*ly1*lz1)
+      npt=lx1*ly1*lz1
+      do i=1,npt
+         dU1x=dU(i,1,1)
+         dU2x=dU(i,2,1)
+         dU1y=dU(i,1,2)
+         dU3y=dU(i,3,2)
+         dU1z=dU(i,1,3)
+         dU4z=dU(i,4,3)
+         rho   =vtrans(i,1,1,ie,irho)
+         lambda=vdiff(i,1,1,ie,ilam)
+         mu    =vdiff(i,1,1,ie,imu)
+         u1    =vx(i,1,1,ie)
+         u2    =vy(i,1,1,ie)
+         u3    =vz(i,1,1,ie)
+         lambdamu=lambda+2.0*mu
+         flux(i)=(lambda*(dU3y+dU2x-u2*dU1y-u1*dU1x)+&
+     lambdamu*(dU4z-u3*dU1z))/rho
+      enddo
+      return
+      end

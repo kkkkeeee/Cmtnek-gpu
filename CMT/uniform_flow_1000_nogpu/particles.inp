@@ -1,0 +1,37 @@
+- - - - PARTICLE PHYSICAL PROPERTIES - - - - - - - - - - - - - - - - 
+100              ! total computational particles
+119E-6 119E-6    ! Dp   , [m]
+293.             ! Tp0  , [K]
+2.               ! rho_p, [kg/m^3]
+840.0            ! C_p,p, [J/kg K]
+- - - - PARTICLE FORCE MODELS - - - - - - - - - - - - - - - - - - - -
+2                ! quasi-steady force
+1                ! undisturbed force
+0                ! added-mass force
+0                ! quasi-steady heat transfer
+0                ! undisturbed heat transfer
+- - - - USER OPTIONS - - - - - - - - - - - - - - - - - - - - - - - - 
+1                ! time integration method
+2                ! coupling method (1, 2, or 4)
+0                ! interpolation method
+1                ! particle io method
+0                ! particle injection rate step
+0                ! particle delay time step
+1                ! random number seed
+- - - - PROJECTION OPTIONS - - - - - - - - - - - - - - - - - - - - - 
+2                ! projection method
+0                ! super particle pre-iterations
+1.               ! super particle loading
+0.6              ! filter width/grid spacing
+1E-2             ! gaussian decay percent
+- - - - BOUNDARY TREATMENT - - - - - - - - - - - - - - - - - - - - - 
+2                ! assume rectangular domain
+0 0              ! xL_rect, xR_rect (0 = periodic, 1 = outflow, -1 = wall)
+0 0              ! yL_rect, yR_rect
+0 0              ! zL_rect, zR_rect
+- - - - RESTARTING - - - - - - - - - - - - - - - - - - - - - - - - - 
+5000             ! particle restart output step
+0                ! particle restart read last step
+- - - - DEM - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+1E3              ! ksp
+0.3              ! coeffecient of restitution

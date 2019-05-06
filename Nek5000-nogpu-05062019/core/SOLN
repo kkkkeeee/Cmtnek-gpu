@@ -1,0 +1,146 @@
+!
+!     Main storage of simulation variables
+!
+      integer lvt1,lvt2,lbt1,lbt2,lptmsk,lptsol,lorder2
+      integer nwl1,newline2,newline3,newline4
+      parameter (lvt1  = lx1*ly1*lz1*lelv)
+      parameter (lvt2  = lx2*ly2*lz2*lelv)
+      parameter (lbt1  = lbx1*lby1*lbz1*lbelv)
+      parameter (lbt2  = lbx2*lby2*lbz2*lbelv)
+
+      parameter (lptmsk = lvt1*(5+2*ldimt) + 4*lbt1)
+      
+      parameter (nwl1=lvt1*(12+4*ldimt+2*ldimt1+(3+ldimt)*(lorder-1)))
+      parameter (newline2 = lvt2*(lorder-1))
+      parameter (newline3 = lbt1*(12 + 3*(lorder-1)))
+      parameter (newline4 = lbt2*(lorder-1) )
+
+
+      parameter (lptsol = nwl1 + newline2 + newline3 + newline4)
+!    $         + lptmsk )
+
+      parameter (lorder2 = max(1,lorder-2) )
+!
+!     Solution and data
+!
+      real bq(lx1,ly1,lz1,lelt,ldimt)
+      common /bqcb/ bq
+
+!     Can be used for post-processing runs (SIZE .gt. 10+3*LDIMT flds)
+      real vxlag  (lx1,ly1,lz1,lelv,2)
+      real vylag  (lx1,ly1,lz1,lelv,2)
+      real vzlag  (lx1,ly1,lz1,lelv,2)
+      real tlag   (lx1,ly1,lz1,lelt,lorder-1,ldimt)
+      real vgradt1(lx1,ly1,lz1,lelt,ldimt)
+      real vgradt2(lx1,ly1,lz1,lelt,ldimt)
+      real abx1   (lx1,ly1,lz1,lelv)
+      real aby1   (lx1,ly1,lz1,lelv)
+      real abz1   (lx1,ly1,lz1,lelv)
+      real abx2   (lx1,ly1,lz1,lelv)
+      real aby2   (lx1,ly1,lz1,lelv)
+      real abz2   (lx1,ly1,lz1,lelv)
+      real vdiff_e(lx1,ly1,lz1,lelt)
+!     Solution data
+      real vx     (lx1,ly1,lz1,lelv)
+      real vy     (lx1,ly1,lz1,lelv)
+      real vz     (lx1,ly1,lz1,lelv)
+      real vx_e   (lx1*ly1*lz1*lelv)
+      real vy_e   (lx1,ly1,lz1,lelv)
+      real vz_e   (lx1,ly1,lz1,lelv)
+      real t      (lx1,ly1,lz1,lelt,ldimt)
+      real vtrans (lx1,ly1,lz1,lelt,ldimt1)
+      real vdiff  (lx1,ly1,lz1,lelt,ldimt1)
+      real bfx    (lx1,ly1,lz1,lelv)
+      real bfy    (lx1,ly1,lz1,lelv)
+      real bfz    (lx1,ly1,lz1,lelv)
+      real cflf   (lx1,ly1,lz1,lelv)
+      real bmnv   (lx1*ly1*lz1*lelv*ldim,lorder+1) ! binv*mask
+      real bmass  (lx1*ly1*lz1*lelv*ldim,lorder+1) ! bmass
+      real bdivw  (lx1*ly1*lz1*lelv*ldim,lorder+1) ! bdivw*mask
+      real c_vx   (lxd*lyd*lzd*lelv*ldim,lorder+1) ! characteristics
+      real fw     (2*ldim,lelt)                    ! face weights for DG
+!     Solution data for magnetic field
+      real bx     (lbx1,lby1,lbz1,lbelv)
+      real by     (lbx1,lby1,lbz1,lbelv)
+      real bz     (lbx1,lby1,lbz1,lbelv)
+      real pm     (lbx2,lby2,lbz2,lbelv)
+      real bmx    (lbx1,lby1,lbz1,lbelv)  ! magnetic field rhs
+      real bmy    (lbx1,lby1,lbz1,lbelv)
+      real bmz    (lbx1,lby1,lbz1,lbelv)
+      real bbx1   (lbx1,lby1,lbz1,lbelv) ! extrapolation terms for
+      real bby1   (lbx1,lby1,lbz1,lbelv) ! magnetic field rhs
+      real bbz1   (lbx1,lby1,lbz1,lbelv)
+      real bbx2   (lbx1,lby1,lbz1,lbelv)
+      real bby2   (lbx1,lby1,lbz1,lbelv)
+      real bbz2   (lbx1,lby1,lbz1,lbelv)
+      real bxlag  (lbx1*lby1*lbz1*lbelv,lorder-1)
+      real bylag  (lbx1*lby1*lbz1*lbelv,lorder-1)
+      real bzlag  (lbx1*lby1*lbz1*lbelv,lorder-1)
+      real pmlag  (lbx2*lby2*lbz2*lbelv,lorder2)
+
+      common /vptsol/ vxlag, vylag, vzlag, tlag, vgradt1, vgradt2
+      common /vptsol/ abx1, aby1, abz1, abx2, aby2, abz2, vdiff_e
+      common /vptsol/ vx, vy, vz, t, vtrans, vdiff, bfx, bfy, bfz, cflf, c_vx,fw
+      common /vptsol/ bmnv, bmass, bdivw, bx, by, bz, pm, bmx, bmy, bmz
+      common /vptsol/ vx_e,vy_e,vz_e     
+      common /vptsol/ bbx1, bby1, bbz1, bbx2, bby2, bbz2, bxlag, bylag, bzlag
+      common /vptsol/ pmlag
+
+      real nu_star
+      common /expvis/ nu_star
+
+      real pr(lx2,ly2,lz2,lelv), prlag(lx2,ly2,lz2,lelv,lorder2)
+      common /cbm2/ pr, prlag
+
+      real qtl(lx2,ly2,lz2,lelt), usrdiv(lx2,ly2,lz2,lelt)
+      common /diverg/ qtl, usrdiv
+
+      real p0th, dp0thdt, gamma0
+      common /p0therm/ p0th, dp0thdt, gamma0
+
+      real  v1mask (lx1,ly1,lz1,lelv)
+      real  v2mask (lx1,ly1,lz1,lelv)
+      real  v3mask (lx1,ly1,lz1,lelv)
+      real  pmask  (lx1,ly1,lz1,lelv)
+      real  tmask  (lx1,ly1,lz1,lelt,ldimt)
+      real  omask  (lx1,ly1,lz1,lelt)
+      real  vmult  (lx1,ly1,lz1,lelv)
+      real  tmult  (lx1,ly1,lz1,lelt,ldimt)
+      real  b1mask (lbx1,lby1,lbz1,lbelv)  ! masks for mag. field
+      real  b2mask (lbx1,lby1,lbz1,lbelv)
+      real  b3mask (lbx1,lby1,lbz1,lbelv)
+      real  bpmask (lbx1,lby1,lbz1,lbelv)  ! magnetic pressure
+      common /vptmsk/ v1mask,v2mask,v3mask,pmask,tmask,omask,vmult
+      common /vptmsk/ tmult,b1mask,b2mask,b3mask,bpmask
+!
+!     Solution and data for perturbation fields
+!
+      real vxp    (lpx1*lpy1*lpz1*lpelv,lpert)
+      real vyp    (lpx1*lpy1*lpz1*lpelv,lpert)
+      real vzp    (lpx1*lpy1*lpz1*lpelv,lpert)
+      real prp    (lpx2*lpy2*lpz2*lpelv,lpert)
+      real tp     (lpx1*lpy1*lpz1*lpelt,ldimt,lpert)
+      real bqp    (lpx1*lpy1*lpz1*lpelt,ldimt,lpert)
+      real bfxp   (lpx1*lpy1*lpz1*lpelv,lpert)  ! perturbation field rhs
+      real bfyp   (lpx1*lpy1*lpz1*lpelv,lpert)
+      real bfzp   (lpx1*lpy1*lpz1*lpelv,lpert)
+      real vxlagp (lpx1*lpy1*lpz1*lpelv,lorder-1,lpert)
+      real vylagp (lpx1*lpy1*lpz1*lpelv,lorder-1,lpert)
+      real vzlagp (lpx1*lpy1*lpz1*lpelv,lorder-1,lpert)
+      real prlagp (lpx2*lpy2*lpz2*lpelv,lorder2,lpert)
+      real tlagp  (lpx1*lpy1*lpz1*lpelt,ldimt,lorder-1,lpert)
+      real exx1p  (lpx1*lpy1*lpz1*lpelv,lpert) ! extrapolation terms for
+      real exy1p  (lpx1*lpy1*lpz1*lpelv,lpert) ! perturbation field rhs
+      real exz1p  (lpx1*lpy1*lpz1*lpelv,lpert)
+      real exx2p  (lpx1*lpy1*lpz1*lpelv,lpert)
+      real exy2p  (lpx1*lpy1*lpz1*lpelv,lpert)
+      real exz2p  (lpx1*lpy1*lpz1*lpelv,lpert)
+      real vgradt1p(lpx1*lpy1*lpz1*lpelt,ldimt,lpert)
+      real vgradt2p(lpx1*lpy1*lpz1*lpelt,ldimt,lpert)
+      common /pvptsl/ vxp, vyp, vzp, prp, tp, bqp, bfxp, bfyp, bfzp
+      common /pvptsl/    vxlagp, vylagp, vzlagp, prlagp, tlagp
+      common /pvptsl/   exx1p, exy1p, exz1p, exx2p, exy2p, exz2p
+      common /pvptsl/  vgradt1p, vgradt2p
+
+      integer jp
+      common /ppointr/ jp

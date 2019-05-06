@@ -1,0 +1,26 @@
+!c
+!c     Turbo variables
+!c   
+      real vturb (lx1m,ly1m,lz1m,lelv)
+      real  turbl (lx1m,ly1m,lz1m,lelv)
+      real  uwall (lx1m,lz1m,6,lelv)
+      real  zwall (lx1m,lz1m,6,lelv)
+      real  twx   (lx1m,lz1m,6,lelv)
+      real  twy   (lx1m,lz1m,6,lelv)
+      real  twz   (lx1m,lz1m,6,lelv)
+      common /turbr/ vturb,turbl,uwall,zwall,twx,twy,twz
+!c
+      real           cmu,cmt,sgk,sge,ce1,ce2,vkc,bta,sgt
+      real            beta1,beta2
+      real            cmi,ski,sei,vki,bti,sti
+      real            zpldat,zpudat,zpvdat,tlmax,tlimul
+      common /turbc/ cmu,cmt,sgk,sge,ce1,ce2,vkc,bta,sgt
+      common /turbc/ beta1,beta2
+      common /turbc/ cmi,ski,sei,vki,bti,sti
+      common /turbc/ zpldat,zpudat,zpvdat,tlmax,tlimul
+!c
+      integer        ifldk,ifldtk,iflde,ifldte
+      common /turbi/ ifldk,ifldtk,iflde,ifldte
+!c
+      logical        ifswall,iftwsh(6,lelv),ifcwuz
+      common /turbl/ ifswall,iftwsh        ,ifcwuz
