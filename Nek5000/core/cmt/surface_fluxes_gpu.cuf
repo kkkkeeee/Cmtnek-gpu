@@ -81,7 +81,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "fluxes_full_field_gpu_wrapper time", end - start
+     write(6,*) "GPU fluxes_full_field_gpu_wrapper time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -101,7 +101,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "face_state_commo_gpu time", end - start
+     write(6,*) "GPU face_state_commo_gpu time", end - start
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -125,7 +125,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "inviscidbc_gpu_wrapper time", end - start
+     write(6,*) "GPU inviscidbc_gpu_wrapper time", end - start
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
@@ -184,7 +184,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "inviscidflux_gpu_wrapper time", end - start
+     write(6,*) "GPU inviscidflux_gpu_wrapper time", end - start
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -221,7 +221,7 @@
       real*8 start, end
 #endif
 
-      ntot=nf*nstate
+      ntot=nf*nstate !lx1*lz1*2*ldim*nelt*nstate
 
 #ifdef MTIME
       start = mpi_wtime()
@@ -231,30 +231,33 @@
 
 
 !     for now copy fatface(iwp) to fatface(iwp+nf*nstate) to yours array to get gs_op_fielsds
-      istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*nelt,cudaMemcpyDeviceToHost) !lelt->nelt by Kk 04/11/19 for performance
+      !istate = cudaMemcpy(fatface,d_flux,nqq*3*lx1*lz1*2*ldim*nelt,cudaMemcpyDeviceToHost) !lelt->nelt by Kk 04/11/19 for performance
+      istate = cudaMemcpy(fatface(iwp),d_flux(iwp), ntot, cudaMemcpyDeviceToHost) 
+      !just copy yours part(i.e., iwm-1) to save some time, by Kk 04/29
 !      print *,"istate state_commo", cudaGetErrorString(istate)
 
 
 #ifdef MTIME
       end = mpi_wtime()
-      print *, "face_state_commo copy1 time", end-start
+      print *, "GPU face_state_commo copy1 time", end-start
       call nekgsync()
       start = mpi_wtime()
 #endif
       call gs_op_fields(handle,yours,nf,nstate,1,1,0)
 #ifdef MTIME
       end = mpi_wtime()
-      print *, "gs_op_fields time", end-start
+      print *, "GPU face_state_commo gs_op_fields time", end-start
       start = mpi_wtime()
 #endif
 !     copy yours back to fatface(iwp)
-      istate = cudaMemcpy(d_flux,fatface,nqq*3*lx1*lz1*2*ldim*nelt,cudaMemcpyHostToDevice) !lelt->nelt by Kk 04/11/19 for performance
+      !istate = cudaMemcpy(d_flux,fatface,nqq*3*lx1*lz1*2*ldim*nelt,cudaMemcpyHostToDevice) !lelt->nelt by Kk 04/11/19 for performance
+      istate = cudaMemcpy(d_flux(iwp), fatface(iwp), ntot, cudaMemcpyHostToDevice) !just copy yours part(i.e., iwm-1) to save some time, by Kk 04/29
 !      print *,"istate state_commo gpu back", cudaGetErrorString(istate)
 
       call double_sub2_gpu_wrapper(glbblockSize2,d_flux,iwp-1,d_flux,iwm-1,ntot );
 #ifdef MTIME
       end = mpi_wtime()
-      print *, "face_state_commo copy2 time", end-start
+      print *, "GPU face_state_commo copy2 time", end-start
 #endif
 
 
@@ -479,7 +482,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "igu_cmt_gpu_wrapper1 time", end - start
+     write(6,*) "GPU igu_cmt_gpu_wrapper1 time", end - start
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -489,7 +492,8 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "igu_cmt cudaMemcpy1  time", end - start
+     write(6,*) "GPU igu_cmt cudaMemcpy1 time", end - start
+     call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -498,7 +502,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "igu_cmt gs_op_fields time", end - start
+     write(6,*) "GPU igu_cmt gs_op_fields time", end - start
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -507,7 +511,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "igu_cmt cudaMemcpy2 time", end - start
+     write(6,*) "GPU igu_cmt cudaMemcpy2 time", end - start
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -517,7 +521,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "igu_cmt_gpu_wrapper2 time", end - start
+     write(6,*) "GPU igu_cmt_gpu_wrapper2 time", end - start
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

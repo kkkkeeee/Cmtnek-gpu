@@ -80,7 +80,7 @@
 !#endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "compute_entropy_gpu time", end - start
+     write(6,*) "GPU compute_entropy time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -122,7 +122,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "entropy_viscosity_gpu comm1 time", end - start
+     write(6,*) "GPU entropy_viscosity_gpu comm1 time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -142,7 +142,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "entropy_residual_gpu time", end - start
+     write(6,*) "GPU entropy_residual_gpu time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -174,7 +174,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "entropy_viscosity_gpu double_copy time", end - start
+     write(6,*) "GPU entropy_viscosity_gpu double_copy time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -192,7 +192,7 @@
 !#endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "wavevisc_gpu time", end - start
+     write(6,*) "GPU wavevisc_gpu time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -213,7 +213,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "resvisc_gpu time", end - start
+     write(6,*) "GPU resvisc_gpu time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -237,7 +237,7 @@
 #endif
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "evmsmooth_gpu time", end - start
+     write(6,*) "GPU evmsmooth_gpu time", end - start
      call nekgsync()
      start = mpi_wtime() !dnekclock()
 #endif
@@ -258,7 +258,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "dsavg time", end - start
+     write(6,*) "GPU dsavg time", end - start
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

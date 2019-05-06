@@ -38,6 +38,74 @@ c     uniformally assign element
 
       end subroutine
 c-----------------------------------------------------------------------
+      subroutine assign_gllnid2(gllnid,iunsort,nelgt,nelgv,np) 
+      ! this is got from CMTHybrid/CMTHybrid_orig/
+c
+      include 'SIZE'
+      include 'INPUT'
+      !integer num_sh, num_cores, shArray(2, lelt*6)
+      !common /shareddata/ num_sh, num_cores, shArray
+
+      integer gllnid(1),iunsort(1),nelgt,np
+      integer e,eg,k,g,n
+
+      real    percentCPULoad
+      integer nelgpu(1000)
+
+      num_cores = 16 !param(70)
+      percentCPULoad = 0.9375 !0.75 !1-param(71)
+      !num_cores = cpu2gpu
+      !percentCPULoad = 1-gpuload
+      if(nid .eq. 0) then
+         print *, "cores", num_cores, "cpuload", percentCPULoad
+      endif
+      numgpu = np /num_cores  ! np is the total number of MPI ranks
+      nel = nelgt / numgpu   ! number of elements per node if the node has 1 GPU
+      nmod  = mod (nelgt, numgpu)   ! bounded between 1..numgpu - 1
+      npp = np - nmod               ! how many partitions of size numgpu
+
+! assign nelgpu which is total elements per gpu assuming cpu does not share any load
+      do i=1, numgpu
+          if (i .gt. npp) then
+              nelgpu(i) = nel + 1
+          else
+              nelgpu(i) = nel
+          endif
+      enddo
+
+! setup partitions of size nelgpu
+
+      call isort(gllnid,iunsort,nelgt)
+
+      k = 0
+      g = 1
+      n = 0
+      do ip = 0, np-1
+          nelcpu = nelgpu(g) * percentCPULoad / (num_cores - 1)  ! number of elements per CPU core, excluding the host core
+          if (mod(ip+1, num_cores) .eq. 0) then   !This is a host core
+              n = n+nelgpu(g)
+              do e = k+1, n
+                  gllnid(e) = ip
+                  k = k+1
+              enddo
+              g = g + 1
+          else
+              do e = 1, nelcpu
+                  k = k + 1
+                  gllnid(k) = ip
+              enddo
+          endif
+      enddo
+
+      ! undo sorting to restore initial ordering by
+      ! global element number
+      call iswapt_ip(gllnid,iunsort,nelgt)
+      return
+      end
+
+
+
+c-----------------------------------------------------------------------
       subroutine assign_partitions_hybrid
 c     This subroutine is used for update gllnid for cpu and gpu           
       include 'SIZE'
@@ -52,7 +120,7 @@ c     This subroutine is used for update gllnid for cpu and gpu
       
       call izero(pload, lelg)
       
-      nelgt_cpu = nelgt * 0.9375 !0.8 !0.9375
+      nelgt_cpu = nelgt * 0.75 !0.8 !0.9375
       
 c     uniformally assign element
       nel = nelgt_cpu/(np-1)

@@ -202,6 +202,13 @@ C> Store it in res1
       else
          call set_alias_rx(istep)
       endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !     call set_dealias_rx ! done in set_convect_cons,
 ! JH113015                ! now called from compute_primitive_variables
@@ -214,6 +221,15 @@ C> Store it in res1
       !only for testing. delete later.
 
       call compute_primitive_vars
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Compute_primitive_vars time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 !-----------------------------------------------------------------------
@@ -224,12 +240,39 @@ C> Store it in res1
          call setdtcmt
          call set_tstep_coef
       endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Setdtcmt time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       call entropy_viscosity ! accessed through uservp. computes
                              ! entropy residual and max wave speed
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Entropy_viscosity time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       call compute_transport_props ! everything inside rk stage
 !     call smoothing(vdiff(1,1,1,1,imu)) ! still done in usr file
 ! you have GOT to figure out where phig goes!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Compute_transport_props time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ntot = lx1*ly1*lz1*lelt*toteq
       call rzero(res1,ntot)
@@ -248,6 +291,15 @@ C> Restrict via \f$\mathbf{E}\f$ to get primitive and conserved variables
 C> on interior faces \f$\mathbf{U}^-\f$ and neighbor faces
 C> \f$\mathbf{U}^+\f$; store in CMTSURFLX
       call fluxes_full_field
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Fluxes_full_field time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 C> res1+=\f$\oint \mathbf{H}^{c\ast}\cdot\mathbf{n}dA\f$ on face points
       nstate=nqq
@@ -261,6 +313,15 @@ C> res1+=\f$\oint \mathbf{H}^{c\ast}\cdot\mathbf{n}dA\f$ on face points
       enddo
       dumchars='after_inviscid'
 !     call dumpresidue(dumchars,999)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Surface_integral_full time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                !                   -
       iuj=iflx ! overwritten with U -{{U}}
@@ -278,10 +339,37 @@ C> res1+=\f$\int_{\Gamma} \{\{\mathbf{A}^{\intercal}\nabla v\}\} \cdot \left[\ma
       ium=(iu1-1)*nfq+iwm
       iup=(iu1-1)*nfq+iwp
       call   imqqtu(flux(iuj),flux(ium),flux(iup))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Imqqtu time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       call   imqqtu_dirichlet(flux(iuj),flux(iwm),flux(iwp))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Imqqtu_dirichlet time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       call igtu_cmt(flux(iwm),flux(iuj),graduf) ! [[u]].{{gradv}}
       dumchars='after_igtu'
 !     call dumpresidue(dumchars,999)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Igtu_cmt time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 C> res1+=\f$\int \left(\nabla v\right) \cdot \left(\mathbf{H}^c+\mathbf{H}^d\right)dV\f$ 
 C> for each equation (inner), one element at a time (outer)
@@ -314,9 +402,27 @@ C> for each equation (inner), one element at a time (outer)
       enddo
       dumchars='after_elm'
 !     call dumpresidue(dumchars,999)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Compute_forcing total time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 C> res1+=\f$\int_{\Gamma} \{\{\mathbf{A}\nabla \mathbf{U}\}\} \cdot \left[v\right] dA\f$
       call igu_cmt(flux(iwp),graduf,flux(iwm))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Igu_cmt time", end1 - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       do eq=1,toteq
          ieq=(eq-1)*ndg_face+iwp
 !Finally add viscous surface flux functions of derivatives to res1.
@@ -324,6 +430,16 @@ C> res1+=\f$\int_{\Gamma} \{\{\mathbf{A}\nabla \mathbf{U}\}\} \cdot \left[v\righ
       enddo
       dumchars='end_of_rhs'
 !     call dumpresidue(dumchars,999)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         end1 = dnekclock()
+         write(6,*) "CPU Surface_integral_full second time", end1 -start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       return
       end

@@ -888,7 +888,7 @@
 
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "Setdtcmt time", end - start
+     write(6,*) "GPU Setdtcmt time", end - start
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1231,7 +1231,7 @@
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
      write(6,*) "Compute_forcing_gpu_wrapper time", end - start
-     write(6,*) "Compute_forcing total time", end - start1
+     write(6,*) "GPU Compute_forcing total time", end - start1
      start = mpi_wtime() !dnekclock()
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1293,7 +1293,7 @@
 
 #ifdef MTIME
      end = mpi_wtime() !dnekclock()
-     write(6,*) "Surface_integral_full_gpu_wrapper time", end - start
+     write(6,*) "Surface_integral_full_gpu_wrapper second time", end - start
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

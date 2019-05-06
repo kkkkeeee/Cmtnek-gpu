@@ -1867,14 +1867,15 @@ c-----------------------------------------------------------------------
 c     Distribute and assign partitions
       if (.not.ifgfdm) then             ! gllnid is already assigned for gfdm
         if ( gfirst .eq. 1) then
-           if (nid .eq. 0) then
-               !call assign_partitions 
-               call assign_partitions_hybrid 
-               !keke add, assign gllnid according to the elements load balance
-           endif
+c           if (nid .eq. 0) then
+c               !call assign_partitions 
+c               call assign_partitions_hybrid 
+c               !keke add, assign gllnid according to the elements load balance
+c           endif
             lng = isize*neli
             call bcast(gllnid,lng)
 c           call assign_gllnid(gllnid,gllel,nelgt,nelgv,np) ! gllel is used as scratch
+            call assign_gllnid2(gllnid,gllel,nelgt,nelgv,np) ! gllel is used as scratch
          else
             starttime = dnekclock_sync()
             distrib = param(80)

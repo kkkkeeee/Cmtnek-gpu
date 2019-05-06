@@ -84,9 +84,9 @@ c     print *,"artvisc.f entropy_viscosity_gpu start", nid
 ! compute maxval(|S-<S>|)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "compute_entropy time", end - start
+      write(6,*) "CPU compute_entropy time", end - start
       endif
       start = dnekclock_sync()
 #endif
@@ -132,9 +132,9 @@ c      print *, '$$$savg ', savg
       endif
 #endif
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "entropy_viscosity comm1 time", end - start
+      write(6,*) "CPU entropy_viscosity comm1 time", end - start
       endif
       start = dnekclock_sync()
 #endif
@@ -149,9 +149,9 @@ c      print *, '$$$savg ', savg
       endif
 #endif
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "entropy_residual time", end - start
+      write(6,*) "CPU entropy_residual time", end - start
       endif
       start = dnekclock_sync()
 #endif
@@ -171,9 +171,9 @@ c     print *,"artvisc.f entropy_visc_gpu after entropy_residual", nid
       endif
 #endif
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "entropy_viscosity double_copy time", end - start
+      write(6,*) "CPU entropy_viscosity double_copy time", end - start
       endif
       start = dnekclock_sync()
 #endif
@@ -187,9 +187,9 @@ c         call printTArray("afterWavevisc")
 c      endif
 c#endif
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "wavevisc time", end - start
+      write(6,*) "CPU wavevisc time", end - start
       endif
       start = dnekclock_sync()
 #endif
@@ -202,9 +202,9 @@ c     print *,"artvisc.f entropy_visc_gpu after resvisc", nid
       endif
 #endif
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "resvisc time", end - start
+      write(6,*) "CPU resvisc time", end - start
       endif
       start = dnekclock_sync()
 #endif
@@ -223,9 +223,9 @@ c     print *,"artvisc.f entropy_visc_gpu after resvisc", nid
       endif
 #endif
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "evmsmooth time", end - start
+      write(6,*) "CPU evmsmooth time", end - start
       endif
       start = dnekclock_sync()
 #endif
@@ -236,9 +236,9 @@ c     print *,"artvisc.f entropy_visc_gpu after evmsmooth", nid
 c     print *,"artvisc.f entropy_visc_gpu after dsavg", nid
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef MTIME
-      if(nid.eq.15) then
+      if(nid.eq.1) then
       end = dnekclock()
-      write(6,*) "dsavg time", end - start
+      write(6,*) "CPU dsavg time", end - start
       endif
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

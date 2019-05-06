@@ -28,12 +28,22 @@ C> \f$\oint \mathbf{H}^{c\ast}\cdot\mathbf{n}dA\f$ on face points
       real fatface,notyet
       integer eq
       character*32 cname
+#ifdef MTIME
+      real*8 start, end
+#endif
       nfq=lx1*lz1*2*ldim*nelt
       nstate = nqq
 ! where different things live
       iwm =1
       iwp =iwm+nstate*nfq
       iflx=iwp+nstate*nfq
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       call fillq(irho,vtrans,fatface(iwm),fatface(iwp))
       call fillq(iux, vx,    fatface(iwm),fatface(iwp))
@@ -59,12 +69,38 @@ C> \f$\oint \mathbf{H}^{c\ast}\cdot\mathbf{n}dA\f$ on face points
       enddo
 
 #ifdef MTIME 
+      if(nid.eq. 1 ) then
+         end = dnekclock()
+         write(6,*) "CPU fillq+faceu time", end - start
+      endif
       call nekgsync()
+      if(nid.eq. 1 ) then
+         start = dnekclock()
+      endif
 #endif
       call face_state_commo(fatface(iwm),fatface(iwp),nfq,nstate
      >                     ,dg_hndl)
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq. 1 ) then
+         end = dnekclock()
+         write(6,*) "CPU face_state_commo time", end - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       call InviscidBC(fatface(iwm),fatface(iwp),nstate)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq. 1 ) then
+         end = dnekclock()
+         write(6,*) "CPU inviscidbc time", end - start
+         start = dnekclock() 
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       call InviscidFlux(fatface(iwm),fatface(iwp),fatface(iflx)
      >                 ,nstate,toteq)
@@ -73,6 +109,15 @@ C> \f$\oint \mathbf{H}^{c\ast}\cdot\mathbf{n}dA\f$ on face points
 !    >                     flux_hndl) ! for non-symmetric gs_op someday
 
 C> @}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq. 1 ) then
+         end = dnekclock()
+         write(6,*) "CPU inviscidflux time", end - start
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       return
       end
@@ -123,6 +168,7 @@ C> @}
 !-----------------------------------------------------------------------
 
       subroutine face_state_commo(mine,yours,nf,nstate,handle)
+      include 'SIZE' !for output gs_op time on CPU
 
 ! JH060414 if we ever want to be more intelligent about who gets what,
 !          who gives what and who does what, this is the place where all
@@ -150,7 +196,7 @@ C> @}
       call gs_op_fields(handle,yours,nf,nstate,1,1,0)
 #ifdef MTIME
       end = dnekclock()
-      if(nid.eq.0) print *, "CPU gs_op time", end-start
+      if(nid.eq.0) print *, "CPU face_state_commo gs_op time", end-start
 #endif
       call sub2 (yours,mine,ntot)
       return
@@ -424,6 +470,9 @@ C> @}
       real wminus(lx1*lz1,2*ldim,nelt,nqq)
       real const
       integer e,eq,f
+#ifdef MTIME
+      real*8 start, end
+#endif
 
       nxz = lx1*lz1
       nfaces=2*ldim
@@ -431,14 +480,42 @@ C> @}
       nfq =lx1*lz1*nfaces*nelt
       ntot=nfq*toteq
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef MTIME
+      if(nid.eq.1) then
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       call copy (flxscr,gdudxk,ntot) ! save AgradU.n
       const = 0.5
       call cmult(gdudxk,const,ntot)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+#ifdef MTIME
+      if(nid.eq.1) then
+         end = dnekclock()
+         write(6,*) "CPU igu_cmt_cp+cmult time", end - start
+      endif
+      call nekgsync()
+      if(nid.eq.1) then
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !-----------------------------------------------------------------------
 ! supa huge gs_op to get {{AgradU}}
 ! operation flag is second-to-last arg, an integer
 !                                                   1 ==> +
       call gs_op_fields(dg_hndl,gdudxk,nfq,toteq,1,1,0)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+#ifdef MTIME
+      if(nid.eq.1) then
+         end = dnekclock()
+         write(6,*) "CPU igu_cmt gs_op_fields time", end - start
+         start = dnekclock()
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !-----------------------------------------------------------------------
       call sub2  (flxscr,gdudxk,ntot) ! overwrite flxscr with
                                       !           -
@@ -449,6 +526,15 @@ C> @}
 ! 2. (Fbc.n)- on Neumann boundaries
       call bcflux(flxscr,gdudxk,wminus)
       call chsign(flxscr,ntot) ! needs to change with sign changes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+#ifdef MTIME
+      if(nid.eq.1) then
+         end = dnekclock()
+         write(6,*) "CPU igu_cmt last time", end - start
+      endif
+#endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
       return
       end

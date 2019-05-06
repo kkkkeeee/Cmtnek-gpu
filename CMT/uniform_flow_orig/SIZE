@@ -10,7 +10,7 @@
       integer maxobj,maxmbr,lpert,nsessmax,nmaxl,nfldmax,nmaxcom
 
       ! GENERAL
-      parameter (if3dgpu=1)        ! if3d is true for gpu version
+      parameter (if3dgpu=0)        ! if3d is true for gpu version
       parameter (ldim=3)        ! domain dimension
       parameter (lx1=6)        ! polynomial order; in 2D set lz1=1
       parameter (lxd=12)        ! polynomial order for over-integration 

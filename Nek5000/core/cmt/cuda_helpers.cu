@@ -481,12 +481,18 @@ void gpu_specmpn(cublasHandle_t &handle, double *d_b, int nb, double *d_a, int n
 	const double *alpha = &alf;
 	const double *beta = &bet;
 
-	if(second_eq){// this is idir==0 case in intp_rstd function
+	//if(second_eq){// this is idir==0 case in intp_rstd function
+        /*comment out the if(second_eq)... else{...} part since the if part code is the same with the else part code, by Kk 04/29/2019*/
 		if(if3d){
 			int nab = na*nb;
 			int nbb = nb*nb;
 
-			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na*na , na, alpha,d_ba, nb,0, d_a,na,na*na*na*intermediatestride, beta,d_w ,nb,nb*na*na,nel);
+                        if(intermediatestride == 1){
+                           cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb, na*na*nel, na, alpha, d_ba, nb, d_a,na, beta,d_w ,nb);
+                        }
+                        else{
+			   cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na*na , na, alpha,d_ba, nb,0, d_a,na,na*na*na*intermediatestride, beta,d_w ,nb,nb*na*na,nel);
+                        }
 
 #ifdef DEBUGPRINT
 			cudaDeviceSynchronize();
@@ -535,25 +541,31 @@ void gpu_specmpn(cublasHandle_t &handle, double *d_b, int nb, double *d_a, int n
 
 		}
 
-	}
+	/*}
 	else{//idir = 1 in intp_rstd function
 		if(if3d){
 			int nab = na*nb;
 			int nbb = nb*nb;
 
-			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na*na , na, alpha,d_ba, nb,0, d_a,na,na*na*na*intermediatestride, beta,d_w ,nb,nb*na*na,nel);
+                        if(intermediatestride == 1){
+                           cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb, na*na*nel, na, alpha, d_ba, nb, d_a,na, beta,d_w ,nb);
+                        }
+                        else{
+                           cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na*na , na, alpha,d_ba, nb,0, d_a,na,na*na*na*intermediatestride, beta,d_w ,nb,nb*na*na,nel);
+                       }
+			//cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,na*na , na, alpha,d_ba, nb,0, d_a,na,na*na*na*intermediatestride, beta,d_w ,nb,nb*na*na,nel);
 
 #ifdef DEBUGPRINT
 			cudaDeviceSynchronize();
 			cudaError_t code4 = cudaPeekAtLastError();
 			printf("CUDA: Start gpu_specmpn cuda status after Dgemmstride1 idir=1, if3d = 1: %s\n",cudaGetErrorString(code4));
 
-                        /*double *cpu_dw;
-                        cpu_dw= (double*)malloc((nel*nb*na*na+nel*nb*nb*na)*sizeof(double));
-                        cudaMemcpy(cpu_dw,d_w, nel*nb*na*na*sizeof(double) , cudaMemcpyDeviceToHost);
-                        for(int i=0;i<  nel*nb*na*na;i++){
-                            printf("debug 2d_w %d %d %d %.30lf \n ",i/(nb*na*na),i%(nb*na*na),eq,cpu_dw[i]);
-                        }*/
+                        //double *cpu_dw;
+                        //cpu_dw= (double*)malloc((nel*nb*na*na+nel*nb*nb*na)*sizeof(double));
+                        //cudaMemcpy(cpu_dw,d_w, nel*nb*na*na*sizeof(double) , cudaMemcpyDeviceToHost);
+                        //for(int i=0;i<  nel*nb*na*na;i++){
+                            //printf("debug 2d_w %d %d %d %.30lf \n ",i/(nb*na*na),i%(nb*na*na),eq,cpu_dw[i]);
+                        //}
 #endif
 
 			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,na*nb , d_ab,na,0, beta,d_w+na*na*nb*nel ,nb,nb*nb,na*nel);
@@ -583,12 +595,12 @@ void gpu_specmpn(cublasHandle_t &handle, double *d_b, int nb, double *d_a, int n
 			cudaDeviceSynchronize();
 			cudaError_t code7 = cudaPeekAtLastError();
 			printf("CUDA: Start gpu_specmpn cuda status after Dgemmstride1 idir=1, if3d = 0: %s\n",cudaGetErrorString(code7));
-			/*double *cpu_db;
-                        cpu_db= (double*)malloc((nel*nb*na)*sizeof(double));
-                        cudaMemcpy(cpu_db,d_w, nel*nb*na*sizeof(double) , cudaMemcpyDeviceToHost);
-                        for(int i=0;i<  nel*nb*na;i++){
-                              printf("debug w %2d %2d %3d %25.17E \n ",i/(nb*na)+1,eq, i%(nb*na)+1, cpu_db[i]);
-                        }*/
+			//double *cpu_db;
+                        //cpu_db= (double*)malloc((nel*nb*na)*sizeof(double));
+                        //cudaMemcpy(cpu_db,d_w, nel*nb*na*sizeof(double) , cudaMemcpyDeviceToHost);
+                        //for(int i=0;i<  nel*nb*na;i++){
+                         //     printf("debug w %2d %2d %3d %25.17E \n ",i/(nb*na)+1,eq, i%(nb*na)+1, cpu_db[i]);
+                        //}
 #endif
 
 			cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, nb,nb,na, alpha,d_w, nb,nb*na , d_ab,na,0, beta,d_b,nb,nb*nb,nel);
@@ -599,7 +611,7 @@ void gpu_specmpn(cublasHandle_t &handle, double *d_b, int nb, double *d_a, int n
 			printf("CUDA: Start gpu_specmpn cuda status after Dgemmstride2 idir=1, if3d = 0: %s\n",cudaGetErrorString(code8));
 #endif
 		}
-	}
+	}*/
         //cublasDestroy(handle);
 
 #ifdef DEBUGPRINT
